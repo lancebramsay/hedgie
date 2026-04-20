@@ -1,0 +1,23 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Backups (personal data — never commit these)
+hedgie-*.json
+*.json.bak
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node (if anyone adds a dev server)
+node_modules/
+npm-debug.log*

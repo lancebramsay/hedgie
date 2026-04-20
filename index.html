@@ -1,0 +1,2111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Hedgie — Hedge Your Spending</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#fdf8f2;--warm-white:#fff9f3;--parchment:#f5ede0;--tan:#e8d5bc;
+  --brown-light:#c9a882;--brown:#8b6340;--brown-dark:#5c3d1e;--spine:#3d2a10;
+  --green:#3a6b4a;--green-bg:#edf7ef;--red:#b94040;--red-light:#fbeaea;
+  --amber:#b87820;--amber-light:#fdf0d5;--blue:#3a6ea8;--blue-light:#deeaf7;
+  --purple:#6b4fa0;--purple-light:#ede8f8;
+  --border:#d9c4a8;--border-light:#ece0cc;
+  --text:#2d1f0e;--text-mid:#6b4c2a;--text-soft:#9b7a54;--text-faint:#c4a882;
+  --shadow:rgba(61,42,16,0.07);
+  --radius-sm:8px;--radius-md:12px;--radius-lg:16px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--cream);color:var(--text);min-height:100vh;font-size:15px;line-height:1.5}
+.tab-bar{position:sticky;top:0;z-index:100;background:var(--warm-white);border-bottom:1.5px solid var(--border);display:flex;align-items:stretch;padding:0 1rem}
+.tab-logo{display:flex;align-items:center;gap:8px;padding:8px 14px 8px 0;border-right:1px solid var(--border-light);margin-right:4px;flex-shrink:0}
+.tab-logo-text{font-size:15px;font-weight:700;color:var(--brown-dark);letter-spacing:-0.3px}
+.tab-logo-sub{font-size:10px;color:var(--text-soft);letter-spacing:0.2px;margin-top:-1px}
+.tab-nav{display:flex;flex:1}
+.tab-btn{display:flex;align-items:center;gap:6px;padding:12px 16px;background:transparent;border:none;border-bottom:2.5px solid transparent;color:var(--text-soft);font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all 0.15s;margin-bottom:-1.5px}
+.tab-btn:hover{color:var(--brown)}.tab-btn.active{color:var(--brown-dark);border-bottom-color:var(--brown)}
+.panel{display:none;padding:1.25rem 1rem 5rem;max-width:860px;margin:0 auto}.panel.active{display:block}
+.card{background:var(--warm-white);border:1px solid var(--border-light);border-radius:var(--radius-md);padding:1rem 1.25rem;margin-bottom:1rem;box-shadow:0 1px 3px var(--shadow)}
+.card-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px;flex-wrap:wrap}
+.card-title{font-size:14px;font-weight:600;color:var(--brown-dark)}.card-sub{font-size:12px;color:var(--text-soft);white-space:nowrap}
+.metrics-row{display:flex;gap:10px;margin-bottom:1rem;flex-wrap:wrap}
+.metric{background:var(--parchment);border:1px solid var(--border-light);border-radius:var(--radius-sm);padding:0.85rem;flex:1;min-width:110px}
+.metric-label{font-size:11px;color:var(--text-soft);margin-bottom:3px;font-weight:500}
+.metric-val{font-size:20px;font-weight:600;color:var(--text)}
+.metric-val.pos{color:var(--green)}.metric-val.neg{color:var(--red)}.metric-val.warn{color:var(--amber)}
+.progress-wrap{height:8px;border-radius:4px;background:var(--parchment);overflow:hidden;margin-top:5px}
+.progress-fill{height:100%;border-radius:4px;background:var(--green);transition:width 0.4s}
+.progress-fill.warn{background:var(--amber)}.progress-fill.over{background:var(--red)}
+.btn{font-size:13px;padding:7px 14px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--warm-white);color:var(--text-mid);cursor:pointer;white-space:nowrap;font-family:inherit;font-weight:500;transition:all 0.15s}
+.btn:hover{background:var(--parchment);border-color:var(--brown-light)}
+.btn.primary{background:var(--brown);color:var(--warm-white);border-color:var(--brown)}.btn.primary:hover{background:var(--brown-dark)}
+.btn.success{background:var(--green);color:#fff;border-color:var(--green)}.btn.success:hover{background:#2e5439}
+.btn.danger{color:var(--red);border-color:var(--red)}.btn.danger:hover{background:var(--red-light)}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+input[type=text],input[type=number],input[type=date],select,textarea{font-family:inherit;font-size:13px;padding:6px 10px;height:36px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--warm-white);color:var(--text);outline:none;transition:border-color 0.15s;width:100%}
+input[type=text]:focus,input[type=number]:focus,input[type=date]:focus,select:focus{border-color:var(--brown-light);box-shadow:0 0 0 2px rgba(139,99,64,0.12)}
+input[type=number]{text-align:right}
+select{cursor:pointer}
+.quick-log{background:var(--brown-dark);border-radius:var(--radius-lg);padding:1.25rem;margin-bottom:1rem}
+.quick-log-title{font-size:15px;font-weight:600;margin-bottom:14px;color:var(--warm-white);display:flex;align-items:center;gap:8px}
+.quick-form{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.quick-form label{font-size:11px;color:rgba(255,255,255,0.65);display:block;margin-bottom:4px;font-weight:500}
+.quick-form input,.quick-form select{background:rgba(255,255,255,0.13);border-color:rgba(255,255,255,0.25);color:var(--warm-white);height:38px}
+.quick-form input::placeholder{color:rgba(255,255,255,0.4)}
+.quick-form input:focus,.quick-form select:focus{border-color:rgba(255,255,255,0.65);box-shadow:0 0 0 2px rgba(255,255,255,0.12)}
+.quick-form select option{background:var(--brown-dark);color:var(--warm-white)}
+.quick-form .full{grid-column:1/-1}
+.vendor-wrap{position:relative}
+.vendor-dropdown{position:absolute;top:100%;left:0;right:0;background:var(--brown);border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius-sm);z-index:200;max-height:180px;overflow-y:auto;display:none;margin-top:2px}
+.vendor-item{padding:8px 12px;font-size:13px;color:var(--warm-white);cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.vendor-item:hover{background:rgba(255,255,255,0.15)}
+.vendor-item-cat{font-size:11px;opacity:0.6}
+.vendor-clear-btn{font-size:11px;color:rgba(255,255,255,0.5);background:none;border:none;cursor:pointer;padding:6px 12px;border-top:1px solid rgba(255,255,255,0.1);width:100%;text-align:left;font-family:inherit}
+.vendor-clear-btn:hover{color:rgba(255,255,255,0.85)}
+.receipt-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border-light)}
+.receipt-row:last-child{border-bottom:none}
+.cat-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.receipt-info{flex:1;min-width:0}
+.receipt-store{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.receipt-meta{font-size:11px;color:var(--text-soft);margin-top:1px}
+.receipt-note{font-size:11px;color:var(--text-soft);font-style:italic;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.receipt-amt{font-size:14px;font-weight:600;white-space:nowrap;flex-shrink:0}
+.receipt-del{background:none;border:none;color:var(--text-faint);cursor:pointer;font-size:17px;padding:2px 4px;flex-shrink:0;line-height:1}
+.receipt-del:hover{color:var(--red)}
+.receipt-by{font-size:10px;color:var(--text-faint);white-space:nowrap}
+.pills{display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-bottom:1rem}
+.pill-label{font-size:11px;color:var(--text-soft);white-space:nowrap;font-weight:500}
+.pill{font-size:12px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text-soft);cursor:pointer;white-space:nowrap;font-family:inherit;font-weight:500;transition:all 0.15s}
+.pill:hover{border-color:var(--brown-light);color:var(--brown)}.pill.on{background:var(--brown);color:var(--warm-white);border-color:var(--brown)}
+.rpt-cat-row{margin-bottom:14px}
+.rpt-cat-hdr{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;gap:8px;flex-wrap:wrap}
+.rpt-cat-name{font-size:13px;font-weight:600}
+.rpt-cat-nums{font-size:12px;color:var(--text-soft)}
+.rpt-under{color:var(--green);font-weight:600}.rpt-over{color:var(--red);font-weight:600}.rpt-warn{color:var(--amber);font-weight:600}
+/* hibernation view */
+.hiber-header{background:linear-gradient(135deg,#1a1a2e 0%,#2d1f5e 50%,#1a2e1a 100%);border-radius:var(--radius-lg);padding:1.25rem;margin-bottom:1rem;color:#e8d5bc;position:relative;overflow:hidden}
+.hiber-stars{position:absolute;inset:0;pointer-events:none}
+.hiber-title{font-size:18px;font-weight:700;margin-bottom:2px}
+.hiber-sub{font-size:12px;opacity:0.65}
+
+.month-bars{display:flex;gap:3px;align-items:flex-end;height:60px;margin-top:8px}
+.month-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px}
+.month-bar{width:100%;border-radius:2px 2px 0 0;min-height:2px;transition:height 0.4s}
+.month-bar-lbl{font-size:9px;color:var(--text-faint);text-align:center}
+.hiber-cat-section{margin-bottom:1.25rem}
+.hiber-cat-title{font-size:13px;font-weight:600;margin-bottom:8px;display:flex;justify-content:space-between;align-items:baseline}
+.hiber-cat-annual{font-size:12px;color:var(--text-soft)}
+/* user breakdown */
+.user-breakdown{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.user-chip{display:flex;align-items:center;gap:6px;background:var(--parchment);border:1px solid var(--border-light);border-radius:20px;padding:4px 10px;font-size:12px}
+.user-chip-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.user-chip-name{font-weight:500;color:var(--text-mid)}
+.user-chip-amt{color:var(--text-soft)}
+/* view toggle */
+.view-toggle{display:flex;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;height:32px;flex-shrink:0}
+.view-toggle button{flex:1;font-size:12px;border:none;background:transparent;color:var(--text-soft);cursor:pointer;padding:0 12px;white-space:nowrap;font-family:inherit;font-weight:500;transition:all 0.15s}
+.view-toggle button.on{background:var(--brown-dark);color:var(--warm-white)}
+/* autosave indicator */
+
+.autosave-label{font-size:11px;color:var(--text-faint);margin-left:2px;vertical-align:middle}
+/* planner */
+.exp-grid{display:grid;grid-template-columns:1fr 88px 76px 64px 80px 26px;gap:6px;align-items:center}
+.exp-inp-name{font-size:13px;padding:3px 6px;height:28px;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--parchment);color:var(--text);width:100%;outline:none;font-family:inherit}
+.exp-inp-amt{font-size:13px;padding:3px 6px;height:28px;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--parchment);color:var(--text);width:100%;text-align:right;outline:none;font-family:inherit}
+.exp-sel{font-size:12px;padding:2px 4px;height:28px;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--parchment);color:var(--text-mid);width:100%;outline:none;font-family:inherit}
+.freq-tog{display:flex;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;height:28px}
+.freq-tog button{flex:1;font-size:12px;border:none;background:transparent;color:var(--text-soft);cursor:pointer;padding:0 5px;white-space:nowrap;font-family:inherit;min-width:30px}
+.freq-tog button.on{background:var(--brown);color:var(--warm-white)}
+.del-btn{width:24px;height:24px;border-radius:50%;border:1px solid var(--border-light);background:transparent;color:var(--text-faint);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:inherit;transition:all 0.15s}
+.del-btn:hover{border-color:var(--red);color:var(--red)}
+.add-exp-btn{font-size:12px;color:var(--brown);background:transparent;border:none;cursor:pointer;padding:4px 0;margin-top:6px;font-family:inherit;font-weight:500}
+.add-exp-btn:hover{text-decoration:underline}
+.col-hdr{font-size:11px;color:var(--text-faint);font-weight:500}.col-hdr.r{text-align:right}.col-hdr.c{text-align:center}
+
+.flow-bar-wrap{background:var(--warm-white);border:1px solid var(--border-light);border-radius:var(--radius-md);padding:0.75rem 1.25rem;margin-bottom:1rem;box-shadow:0 1px 3px var(--shadow)}
+.yr-note{font-size:12px;color:var(--blue);text-align:right}
+.empty-state{text-align:center;padding:2rem 1rem;color:var(--text-soft)}
+.hint{font-size:11px;color:var(--text-faint);text-align:center;padding-top:6px}
+/* gear */
+.gear-btn{position:fixed;bottom:20px;right:20px;z-index:300;width:44px;height:44px;border-radius:50%;background:var(--brown-dark);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(61,42,16,0.35);transition:background 0.15s}
+.gear-btn:hover{background:var(--spine)}
+.gear-dot{position:absolute;top:8px;right:8px;width:9px;height:9px;border-radius:50%;background:var(--amber);border:1.5px solid var(--brown-dark);display:none}
+.gear-dot.show{display:block}
+/* drawer */
+.drawer-overlay{position:fixed;inset:0;z-index:400;background:rgba(45,31,14,0.35);opacity:0;pointer-events:none;transition:opacity 0.25s}
+.drawer-overlay.open{opacity:1;pointer-events:all}
+.drawer{position:fixed;bottom:0;left:0;right:0;z-index:401;background:var(--warm-white);border-radius:var(--radius-lg) var(--radius-lg) 0 0;border-top:1.5px solid var(--border);box-shadow:0 -4px 24px rgba(61,42,16,0.15);transform:translateY(100%);transition:transform 0.3s cubic-bezier(0.32,0.72,0,1);max-height:90vh;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom,16px)}
+.drawer.open{transform:translateY(0)}
+.drawer-handle{width:36px;height:4px;border-radius:2px;background:var(--tan);margin:12px auto 0}
+.drawer-hdr{padding:12px 1.25rem 0;display:flex;justify-content:space-between;align-items:center}
+.drawer-title{font-size:16px;font-weight:700;color:var(--brown-dark)}
+.drawer-close{background:none;border:none;font-size:20px;color:var(--text-soft);cursor:pointer;padding:4px;line-height:1}
+.drawer-body{padding:1rem 1.25rem 1.5rem}
+
+.drawer-field{margin-bottom:10px}
+.drawer-field label{font-size:12px;color:var(--text-mid);display:block;margin-bottom:4px;font-weight:500}
+.sync-status{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-soft);padding:8px 0}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--text-faint);flex-shrink:0}
+.sync-dot.ok{background:var(--green)}.sync-dot.err{background:var(--red)}.sync-dot.busy{background:var(--amber)}
+.provider-fields{margin-top:10px;padding-top:10px;border-top:1px solid var(--border-light)}
+.provider-note{font-size:11px;color:var(--text-soft);margin-bottom:8px;line-height:1.5}
+/* key section */
+.key-display{font-family:monospace;font-size:12px;background:var(--parchment);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;word-break:break-all;color:var(--text-mid);margin-bottom:8px;user-select:all}
+.key-actions{display:flex;gap:6px;flex-wrap:wrap}
+/* conflict modal */
+.modal-overlay{position:fixed;inset:0;z-index:500;background:rgba(45,31,14,0.45);display:none;align-items:center;justify-content:center;padding:1rem}
+.modal-overlay.open{display:flex}
+.modal{background:var(--warm-white);border-radius:var(--radius-lg);border:1px solid var(--border);max-width:480px;width:100%;box-shadow:0 8px 32px rgba(61,42,16,0.2)}
+.modal-hdr{padding:1.25rem 1.25rem 0;border-bottom:1px solid var(--border-light);padding-bottom:1rem}
+.modal-title{font-size:16px;font-weight:700;color:var(--brown-dark);display:flex;align-items:center;gap:8px}
+.modal-body{padding:1rem 1.25rem}
+.modal-footer{padding:0 1.25rem 1.25rem;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.conflict-detail{font-size:12px;background:var(--parchment);border:1px solid var(--border-light);border-radius:var(--radius-sm);padding:10px;margin-top:10px;line-height:1.7}
+/* welcome */
+.welcome-overlay{position:fixed;inset:0;z-index:600;background:rgba(45,31,14,0.55);display:none;align-items:center;justify-content:center;padding:1rem}
+.welcome-overlay.open{display:flex}
+.welcome-card{background:var(--warm-white);border-radius:var(--radius-lg);border:1px solid var(--border);max-width:380px;width:100%;padding:2rem;text-align:center;box-shadow:0 8px 32px rgba(61,42,16,0.2)}
+.welcome-card h2{font-size:20px;font-weight:700;color:var(--brown-dark);margin:1rem 0 0.5rem}
+.welcome-card p{font-size:13px;color:var(--text-soft);margin-bottom:1.5rem;line-height:1.6}
+/* sync banner */
+
+/* recurring */
+.recur-badge{font-size:10px;background:var(--purple-light);color:var(--purple);border-radius:8px;padding:1px 6px;font-weight:600;flex-shrink:0}
+.recur-toggle{display:flex;border:1px solid rgba(255,255,255,0.25);border-radius:var(--radius-sm);overflow:hidden;height:38px;flex-shrink:0}
+.recur-toggle button{flex:1;font-size:12px;border:none;background:transparent;color:rgba(255,255,255,0.6);cursor:pointer;padding:0 8px;font-family:inherit;white-space:nowrap;transition:all 0.15s}
+.recur-toggle button.on{background:var(--purple);color:#fff}
+/* buffer cards */
+.buf-card{background:var(--parchment);border:1px solid var(--border-light);border-radius:var(--radius-sm);padding:10px 12px;display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.buf-card:last-child{margin-bottom:0}
+.buf-card-bar{flex:1;height:6px;border-radius:3px;background:var(--border-light);overflow:hidden}
+.buf-card-fill{height:100%;border-radius:3px;transition:width 0.4s}
+.buf-pri-badge{font-size:10px;padding:2px 7px;border-radius:8px;font-weight:600;white-space:nowrap;flex-shrink:0}
+.buf-pri-H{background:var(--red-light);color:var(--red)}
+.buf-pri-M{background:var(--amber-light);color:var(--amber)}
+.buf-pri-L{background:var(--green-bg);color:var(--green)}
+/* drawer accordion */
+.drawer-acc-hdr{display:flex;justify-content:space-between;align-items:center;cursor:pointer;padding:10px 0;border-bottom:1px solid var(--border-light);user-select:none}
+.drawer-acc-hdr:last-of-type{border-bottom:none}
+.drawer-acc-title{font-size:12px;font-weight:600;color:var(--text-mid);letter-spacing:0.3px}
+.drawer-acc-arrow{font-size:12px;color:var(--text-faint);transition:transform 0.2s}
+.drawer-acc-arrow.open{transform:rotate(90deg)}
+.drawer-acc-body{overflow:hidden;max-height:0;transition:max-height 0.3s ease}
+.drawer-acc-body.open{max-height:600px}
+.drawer-acc-inner{padding:12px 0 4px}
+/* hiber ref line */
+.hiber-bar-wrap{position:relative}
+.hiber-ref-line{position:absolute;left:0;right:0;border-top:1.5px dashed rgba(255,255,255,0.35);pointer-events:none}
+
+/* notifications */
+.notif-btn{position:relative;background:none;border:none;cursor:pointer;padding:6px;display:flex;align-items:center;color:var(--text-soft);transition:color 0.15s;margin-left:auto;flex-shrink:0}
+.notif-btn:hover{color:var(--brown)}
+.notif-badge{position:absolute;top:2px;right:2px;min-width:16px;height:16px;border-radius:8px;background:var(--red);color:#fff;font-size:10px;font-weight:700;display:none;align-items:center;justify-content:center;padding:0 3px;border:1.5px solid var(--warm-white)}
+.notif-badge.show{display:flex}
+.notif-panel{position:absolute;top:calc(100% + 6px);right:0;width:320px;background:var(--warm-white);border:1px solid var(--border);border-radius:var(--radius-md);box-shadow:0 4px 20px var(--shadow);z-index:200;display:none;max-height:400px;overflow-y:auto}
+.notif-panel.open{display:block}
+.notif-panel-hdr{padding:10px 14px 8px;border-bottom:1px solid var(--border-light);display:flex;justify-content:space-between;align-items:center}
+.notif-panel-title{font-size:13px;font-weight:600;color:var(--brown-dark)}
+.notif-clear-btn{font-size:11px;color:var(--text-soft);background:none;border:none;cursor:pointer;font-family:inherit}
+.notif-clear-btn:hover{color:var(--red)}
+.notif-item{display:flex;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border-light);align-items:flex-start}
+.notif-item:last-child{border-bottom:none}
+.notif-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.notif-body{flex:1;min-width:0}
+.notif-title{font-size:12px;font-weight:600;color:var(--text);line-height:1.3}
+.notif-desc{font-size:11px;color:var(--text-soft);margin-top:2px;line-height:1.4}
+.notif-dismiss{background:none;border:none;color:var(--text-faint);cursor:pointer;font-size:14px;padding:0 2px;flex-shrink:0;line-height:1}
+.notif-dismiss:hover{color:var(--red)}
+.notif-empty{padding:20px 14px;text-align:center;font-size:12px;color:var(--text-faint)}
+.notif-section-label{font-size:10px;font-weight:600;color:var(--text-faint);letter-spacing:0.5px;padding:8px 14px 2px;background:var(--parchment)}
+.notif-wrap{position:relative}
+@media(max-width:580px){
+  .exp-grid{grid-template-columns:1fr 80px 68px 54px 0 24px}.yr-col{display:none}
+  .quick-form{grid-template-columns:1fr}
+  .quick-form input[type=date]{width:100%;font-size:12px}
+  .tab-btn .tab-lbl{display:none}.tab-btn{padding:12px 12px}
+}
+</style>
+</head>
+<body>
+
+<div class="tab-bar">
+  <div class="tab-logo">
+    <svg width="28" height="28" viewBox="0 0 60 60" fill="none">
+      <ellipse cx="28" cy="37" rx="18" ry="13" fill="#c9a882"/>
+      <ellipse cx="28" cy="25" rx="16" ry="13" fill="#5c3d1e"/>
+      <ellipse cx="36" cy="23" rx="12" ry="11" fill="#5c3d1e"/>
+      <ellipse cx="19" cy="27" rx="10" ry="9" fill="#5c3d1e"/>
+      <ellipse cx="28" cy="24" rx="11" ry="8" fill="#8b6340"/>
+      <ellipse cx="36" cy="22" rx="8" ry="7" fill="#8b6340"/>
+      <ellipse cx="40" cy="37" rx="9" ry="8" fill="#e8d5bc"/>
+      <ellipse cx="46" cy="38" rx="3" ry="2" fill="#5c3d1e"/>
+      <circle cx="43" cy="34" r="2" fill="#2d1f0e"/>
+      <circle cx="43.7" cy="33.3" r="0.7" fill="#fff"/>
+      <ellipse cx="40" cy="30" rx="3" ry="2.5" fill="#e8d5bc"/>
+      <ellipse cx="20" cy="48" rx="5" ry="3" fill="#c9a882"/>
+      <ellipse cx="32" cy="49" rx="5" ry="3" fill="#c9a882"/>
+    </svg>
+    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">hedge your spending</div></div>
+  </div>
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('log')" id="tab-log">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+      <span class="tab-lbl">Log receipt</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('report')" id="tab-report">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span class="tab-lbl">Monthly report</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('planner')" id="tab-planner">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span class="tab-lbl">Budget planner</span>
+    </button>
+  </div>
+  <div class="notif-wrap" style="display:flex;align-items:center;align-self:center;margin-right:4px">
+    <button class="notif-btn" onclick="toggleNotifPanel()" title="Notifications" id="notif-btn" style="margin-bottom:0">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <div class="notif-badge" id="notif-badge"></div>
+    </button>
+    <div class="notif-panel" id="notif-panel">
+      <div class="notif-panel-hdr">
+        <span class="notif-panel-title">Notifications</span>
+        <button class="notif-clear-btn" onclick="dismissAllNotifs()">Dismiss all</button>
+      </div>
+      <div id="notif-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- GLOBAL STATUS BAR -->
+<div id="global-status-bar" style="height:28px;background:var(--parchment);border-bottom:1px solid var(--border-light);display:flex;align-items:center;padding:0 0.75rem;gap:8px;transition:background 0.4s">
+  <div id="gsb-dot" style="width:7px;height:7px;border-radius:50%;background:var(--text-faint);flex-shrink:0;transition:background 0.4s"></div>
+  <span id="gsb-label" style="font-size:11px;color:var(--text-soft);flex:1;transition:color 0.4s"></span>
+  <span id="gsb-right" style="font-size:11px;color:var(--text-faint);margin-right:6px"></span>
+  <button id="gsb-sync-btn" onclick="quickSync()" title="Sync with cloud" style="display:none;align-items:center;gap:4px;background:transparent;border:1px solid var(--border);border-radius:6px;padding:2px 8px;font-size:11px;color:var(--text-mid);cursor:pointer;font-family:inherit;height:20px;white-space:nowrap">
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+    Sync
+  </button>
+</div>
+
+<!-- ═══ TAB 1 — LOG ═══ -->
+<div class="panel active" id="panel-log">
+  <div class="quick-log">
+    <div class="quick-log-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+      Log a purchase
+    </div>
+    <div class="quick-form">
+      <div>
+        <label>Category</label>
+        <select id="log-cat"><option value="Home">Home</option><option value="Transportation">Transportation</option><option value="Food" selected>Food</option><option value="Services">Services</option><option value="Debts">Debts</option><option value="Savings">Savings</option></select>
+      </div>
+      <div>
+        <label>Amount ($)</label>
+        <input type="number" id="log-amt" placeholder="0.00" min="0" step="0.01">
+      </div>
+      <div class="full vendor-wrap">
+        <label>Vendor / store <span style="opacity:0.5;font-weight:400">(remembered automatically)</span></label>
+        <input type="text" id="log-vendor" placeholder="e.g. Fred Meyer" autocomplete="off" oninput="showVendorDD()" onfocus="showVendorDD()" onblur="hideVendorDD()">
+        <div class="vendor-dropdown" id="vendor-dd"></div>
+      </div>
+      <div class="full">
+        <label>Note <span style="opacity:0.5;font-weight:400">(optional)</span></label>
+        <input type="text" id="log-note" placeholder="e.g. weekly grocery run">
+      </div>
+      <div style="display:flex;gap:10px;align-items:flex-end;grid-column:1/-1">
+        <div style="flex:0 0 auto">
+          <label>Date</label>
+          <input type="date" id="log-date" style="color-scheme:dark;width:150px;font-size:13px">
+        </div>
+        <div style="flex:1">
+          <label>Recurring</label>
+          <div class="recur-toggle">
+            <button class="on" id="rt-none" onclick="setRecurring('none')">One-time</button>
+            <button id="rt-monthly" onclick="setRecurring('monthly')">Monthly</button>
+          </div>
+        </div>
+      </div>
+      <div class="full" id="recur-day-row" style="display:none">
+        <label>Day of month (bill due date)</label>
+        <input type="number" id="log-recur-day" placeholder="e.g. 1" min="1" max="31" step="1" style="text-align:left">
+      </div>
+      <div class="full" style="display:flex;justify-content:flex-end;gap:8px;margin-top:4px">
+        <button class="btn primary" style="height:40px;min-width:140px;font-size:14px" onclick="addReceipt()">Add to log</button>
+      </div>
+    </div>
+  </div>
+  <div class="metrics-row" id="log-metrics"></div>
+  <div class="card">
+    <div class="card-hdr">
+      <span class="card-title">This month's receipts</span>
+      <div class="btn-row">
+        <select id="log-month-sel" style="width:auto;height:30px;font-size:12px" onchange="renderLogMetrics();renderReceiptList()"></select>
+        <button class="btn" style="font-size:12px;padding:5px 10px" onclick="exportReceiptsCSV()">Export CSV</button>
+      </div>
+    </div>
+    <div class="pills" id="rcpt-filters">
+      <span class="pill-label">Filter:</span>
+      <button class="pill on" data-rc="all" onclick="setRcptFilter('all',this)">All</button>
+      <button class="pill" data-rc="Home" onclick="setRcptFilter('Home',this)">Home</button>
+      <button class="pill" data-rc="Transportation" onclick="setRcptFilter('Transportation',this)">Transportation</button>
+      <button class="pill" data-rc="Food" onclick="setRcptFilter('Food',this)">Food</button>
+      <button class="pill" data-rc="Services" onclick="setRcptFilter('Services',this)">Services</button>
+      <button class="pill" data-rc="Debts" onclick="setRcptFilter('Debts',this)">Debts</button>
+      <button class="pill" data-rc="Savings" onclick="setRcptFilter('Savings',this)">Savings</button>
+    </div>
+    <div id="receipt-limit-warn" style="display:none;font-size:12px;color:var(--amber);background:var(--amber-light);padding:7px 10px;border-radius:var(--radius-sm);margin-bottom:8px"></div>
+    <div id="receipt-list"></div>
+  </div>
+</div>
+
+<!-- ═══ TAB 2 — REPORT ═══ -->
+<div class="panel" id="panel-report">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
+    <div>
+      <div style="font-size:18px;font-weight:700;color:var(--brown-dark)" id="rpt-main-title">Monthly report</div>
+      <div style="font-size:12px;color:var(--text-soft)" id="rpt-main-sub">Budget vs. actual spending</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <div class="view-toggle">
+        <button class="on" id="vt-monthly" onclick="setReportView('monthly')">Active</button>
+        <button id="vt-yearly" onclick="setReportView('yearly')">&#x1F4A4; Hibernate</button>
+      </div>
+      <select id="rpt-month-sel" style="width:auto;height:32px;font-size:12px" onchange="renderReport()"></select>
+      <select id="rpt-year-sel" style="width:auto;height:32px;font-size:12px;display:none" onchange="renderReport()"></select>
+    </div>
+  </div>
+  <div id="report-body"></div>
+</div>
+
+<!-- ═══ TAB 3 — PLANNER ═══ -->
+<div class="panel" id="panel-planner">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem;gap:12px;flex-wrap:wrap">
+    <div>
+      <div style="font-size:18px;font-weight:700;color:var(--brown-dark)">Budget planner</div>
+      <div style="font-size:12px;color:var(--text-soft)">Monthly targets · yearly items shown as monthly equivalent</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn success" onclick="saveJSON()">Save local</button>
+      <button class="btn" onclick="document.getElementById('restore-inp').click()">Restore local</button>
+      <input type="file" id="restore-inp" accept=".json" style="display:none" onchange="restoreJSON(this)">
+      <button class="btn" onclick="exportCSV()">Export CSV</button>
+      <button class="btn" id="copy-btn" onclick="copySheets()">Copy for Sheets</button>
+    </div>
+  </div>
+  <div class="metrics-row" id="pl-metrics"></div>
+  <div class="flow-bar-wrap">
+    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-soft);margin-bottom:6px">
+      <span>Expenses as % of income</span><span id="pl-pct-lbl" style="font-weight:600">0%</span>
+    </div>
+    <div class="progress-wrap" style="height:10px"><div class="progress-fill" id="pl-flow-fill" style="width:0%"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-hdr"><span class="card-title">Income sources</span><button class="add-exp-btn" onclick="addIncome()">+ Add source</button></div>
+    <div id="income-list"></div>
+  </div>
+  <!-- Category manager (collapsible) -->
+  <div class="card" style="margin-bottom:0.75rem">
+    <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleCatManager()">
+      <span class="card-title">Manage categories</span>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span style="font-size:11px;color:var(--text-faint)" id="cat-count-lbl"></span>
+        <span style="font-size:12px;color:var(--text-soft)" id="cat-mgr-arrow">&#9656;</span>
+      </div>
+    </div>
+    <div id="cat-manager-body" style="display:none;margin-top:10px">
+      <div id="cat-manager-rows"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:8px;border-top:1px solid var(--border-light)">
+        <button class="add-exp-btn" onclick="addCategory()">+ Add category</button>
+        <button class="btn" style="font-size:11px;padding:4px 10px;color:var(--text-soft)" onclick="resetCatsToDefault()">Reset to defaults</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="pills" id="plan-pills">
+    <span class="pill-label">Category:</span>
+    <button class="pill on" data-f="all" onclick="setPlanFilter('cat','all',this)">All</button>
+    <button class="pill" data-f="Home" onclick="setPlanFilter('cat','Home',this)">Home</button>
+    <button class="pill" data-f="Transportation" onclick="setPlanFilter('cat','Transportation',this)">Transportation</button>
+    <button class="pill" data-f="Food" onclick="setPlanFilter('cat','Food',this)">Food</button>
+    <button class="pill" data-f="Services" onclick="setPlanFilter('cat','Services',this)">Services</button>
+    <button class="pill" data-f="Debts" onclick="setPlanFilter('cat','Debts',this)">Debts</button>
+    <button class="pill" data-f="Savings" onclick="setPlanFilter('cat','Savings',this)">Savings</button>
+    <span class="pill-label" style="margin-left:4px">Priority:</span>
+    <button class="pill" data-fp="H" onclick="setPlanFilter('pri','H',this)">High</button>
+    <button class="pill" data-fp="M" onclick="setPlanFilter('pri','M',this)">Medium</button>
+    <button class="pill" data-fp="L" onclick="setPlanFilter('pri','L',this)">Low</button>
+  </div>
+  <div id="expense-sections"></div>
+  <div class="card">
+    <div class="card-hdr">
+      <div>
+        <span class="card-title">Rainy day buffer</span>
+        <div style="font-size:11px;color:var(--text-soft);margin-top:2px">Monthly surplus earmarked per category — weighted by the cost of High/Medium/Low expenses in each. Think of it as a per-category rainy day reserve funded by your leftover income.</div>
+      </div>
+      <span class="card-sub" id="buf-avail">Surplus: $0</span>
+    </div>
+    <div id="buffer-list"></div>
+    <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border-light);display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:13px;color:var(--text-soft)">Total buffer allocated</span>
+      <span style="font-size:13px;font-weight:600;color:var(--green)" id="buf-total-amt">$0</span>
+    </div>
+  </div>
+  <div class="hint">Use the gear icon &#x2699; to configure cloud sync, shared keys, and user settings</div>
+</div>
+
+<!-- GEAR -->
+<button class="gear-btn" onclick="openDrawer()" title="Settings">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+  </svg>
+  <div class="gear-dot" id="gear-dot"></div>
+</button>
+
+<!-- DRAWER -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-handle"></div>
+  <div class="drawer-hdr">
+    <span class="drawer-title">Settings</span>
+    <button class="drawer-close" onclick="closeDrawer()">&#215;</button>
+  </div>
+  <div class="drawer-body" style="padding:0 1.25rem 1.5rem">
+
+    <!-- IDENTITY -->
+    <div class="drawer-acc-hdr" onclick="toggleAcc('acc-identity')">
+      <span class="drawer-acc-title">&#128100; Identity</span>
+      <span class="drawer-acc-arrow open" id="arr-acc-identity">&#9656;</span>
+    </div>
+    <div class="drawer-acc-body open" id="acc-identity">
+      <div class="drawer-acc-inner">
+        <div class="drawer-field">
+          <label>Display name <span style="color:var(--text-faint);font-weight:400">(stamps your receipts)</span></label>
+          <input type="text" id="cfg-username" placeholder="e.g. Lance" oninput="settings.username=this.value;saveSettings()">
+        </div>
+
+        <div class="drawer-field">
+          <label>Shared secret key <span style="color:var(--text-faint);font-weight:400">(signs sync payloads)</span></label>
+          <div class="key-display" id="key-display">No key generated</div>
+          <div class="key-actions">
+            <button class="btn" style="font-size:12px;padding:5px 10px" onclick="generateKey()">Generate</button>
+            <button class="btn" style="font-size:12px;padding:5px 10px" onclick="copyKey()">Copy</button>
+            <button class="btn" style="font-size:12px;padding:5px 10px" onclick="pasteKey()">Paste</button>
+          </div>
+          <div style="font-size:11px;color:var(--text-faint);margin-top:5px" id="key-status"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CLOUD -->
+    <div class="drawer-acc-hdr" onclick="toggleAcc('acc-cloud')">
+      <span class="drawer-acc-title">&#9729; Cloud sync</span>
+      <span class="drawer-acc-arrow" id="arr-acc-cloud">&#9656;</span>
+    </div>
+    <div class="drawer-acc-body" id="acc-cloud">
+      <div class="drawer-acc-inner">
+        <div class="sync-status" id="sync-status-row">
+          <div class="sync-dot" id="sync-dot"></div>
+          <span id="sync-status-txt">Not configured</span>
+        </div>
+        <div class="drawer-field">
+          <label>Sync provider</label>
+          <select id="cfg-provider" onchange="onProviderChange()">
+            <option value="none">None (local only)</option>
+            <option value="jsonbin">JSONBin.io</option>
+            <option value="gist">GitHub Gist (private)</option>
+            <option value="self">Self-hosted endpoint</option>
+            <option value="dropbox">Dropbox</option>
+          </select>
+        </div>
+        <div id="provider-fields"></div>
+        <div class="btn-row" style="margin-top:12px">
+          <button class="btn" onclick="cloudPull()">&#8595; Pull</button>
+          <button class="btn primary" onclick="cloudPush()">&#8593; Push</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTIFICATIONS -->
+    <div class="drawer-acc-hdr" onclick="toggleAcc('acc-notifs')">
+      <span class="drawer-acc-title">&#128276; Notifications</span>
+      <span class="drawer-acc-arrow" id="arr-acc-notifs">&#9656;</span>
+    </div>
+    <div class="drawer-acc-body" id="acc-notifs">
+      <div class="drawer-acc-inner">
+        <div style="font-size:11px;color:var(--text-soft);margin-bottom:10px;line-height:1.5">Choose which notifications appear in the bell menu.</div>
+        <div id="notif-toggles"></div>
+        <div class="drawer-field" style="margin-top:10px">
+          <label>Bill reminder window</label>
+          <select id="cfg-reminder-days-2" onchange="settings.reminderDays=parseInt(this.value);saveSettings();buildNotifications()">
+            <option value="7">1 week out</option>
+            <option value="14">2 weeks out</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- DATA -->
+    <div class="drawer-acc-hdr" onclick="toggleAcc('acc-data')">
+      <span class="drawer-acc-title">&#128202; Data</span>
+      <span class="drawer-acc-arrow" id="arr-acc-data">&#9656;</span>
+    </div>
+    <div class="drawer-acc-body" id="acc-data">
+      <div class="drawer-acc-inner">
+        <div id="health-panel"></div>
+        <div class="btn-row" style="margin-top:10px;flex-wrap:wrap">
+          <button class="btn" style="font-size:12px" onclick="exportArchiveCSV()">Export archived receipts</button>
+          <button class="btn danger" style="font-size:12px" onclick="resetAll()">Reset all data</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- CONFLICT MODAL -->
+<div class="modal-overlay" id="conflict-modal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Sync conflict detected
+      </div>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--text-mid);line-height:1.6">The cloud has changes you haven't seen. Receipts will be merged automatically. The budget plan has differences — choose how to handle them:</p>
+      <div class="conflict-detail" id="conflict-detail"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="resolveConflict('theirs')">Take cloud version</button>
+      <button class="btn" onclick="resolveConflict('mine')">Keep my budget</button>
+      <button class="btn primary" onclick="resolveConflict('merge')">Merge receipts, keep my budget</button>
+    </div>
+  </div>
+</div>
+
+<!-- WELCOME MODAL -->
+<div class="welcome-overlay" id="welcome-overlay">
+  <div class="welcome-card">
+    <svg width="56" height="56" viewBox="0 0 60 60" fill="none">
+      <ellipse cx="28" cy="37" rx="18" ry="13" fill="#c9a882"/>
+      <ellipse cx="28" cy="25" rx="16" ry="13" fill="#5c3d1e"/>
+      <ellipse cx="36" cy="23" rx="12" ry="11" fill="#5c3d1e"/>
+      <ellipse cx="19" cy="27" rx="10" ry="9" fill="#5c3d1e"/>
+      <ellipse cx="28" cy="24" rx="11" ry="8" fill="#8b6340"/>
+      <ellipse cx="36" cy="22" rx="8" ry="7" fill="#8b6340"/>
+      <ellipse cx="40" cy="37" rx="9" ry="8" fill="#e8d5bc"/>
+      <ellipse cx="46" cy="38" rx="3" ry="2" fill="#5c3d1e"/>
+      <circle cx="43" cy="34" r="2" fill="#2d1f0e"/>
+      <circle cx="43.7" cy="33.3" r="0.7" fill="#fff"/>
+    </svg>
+    <h2>Welcome to Hedgie</h2>
+    <p>Set your display name to get started. This stamps your receipts and sync activity so your household knows who made each change.</p>
+    <input type="text" id="welcome-name" placeholder="Your first name" style="margin-bottom:12px;text-align:center">
+    <button class="btn primary" style="width:100%;height:40px;font-size:14px" onclick="completeWelcome()">Get started</button>
+  </div>
+</div>
+
+<script>
+const PRIS={H:'High',M:'Medium',L:'Low'};
+const DEFAULT_CATS=[
+  {name:'Home',color:'#8b6340'},
+  {name:'Transportation',color:'#3a6ea8'},
+  {name:'Food',color:'#4a7c59'},
+  {name:'Services',color:'#7c5a8b'},
+  {name:'Debts',color:'#b94040'},
+  {name:'Savings',color:'#b87820'}
+];
+let categories=DEFAULT_CATS.map(c=>({...c})); // mutable, persisted
+// Derived helpers — always read from categories array
+const CATS=()=>categories.map(c=>c.name);
+const catColor=name=>{const c=categories.find(x=>x.name===name);return c?c.color:'#888888';};
+const MONTH_NAMES=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const USER_COLORS=['#3a6ea8','#b94040','#4a7c59','#7c5a8b','#b87820','#8b6340'];
+
+const LIMITS={receipts:1000,vendors:200,expPerCat:25,warnAt:0.8,payloadKB:80};
+
+const DEF={
+  Home:[{n:'Mortgage',a:0,p:'H',f:'M'},{n:'HELOC',a:0,p:'H',f:'M'},{n:'Home insurance',a:0,p:'H',f:'M'},{n:'Property tax',a:0,p:'H',f:'Y'},{n:'Electric / gas',a:0,p:'M',f:'M'},{n:'Water / sewer',a:0,p:'M',f:'M'},{n:'Internet',a:0,p:'M',f:'M'},{n:'Home maintenance',a:0,p:'L',f:'Y'}],
+  Transportation:[{n:'Car payment',a:0,p:'M',f:'M'},{n:'Car insurance',a:0,p:'M',f:'M'},{n:'Gas',a:0,p:'M',f:'M'},{n:'Car tabs / registration',a:0,p:'L',f:'Y'},{n:'Maintenance',a:0,p:'L',f:'Y'}],
+  Food:[{n:'Groceries',a:0,p:'H',f:'M'},{n:'Dining out',a:0,p:'L',f:'M'},{n:'Coffee / snacks',a:0,p:'L',f:'M'}],
+  Services:[{n:'Apple One',a:0,p:'L',f:'M'},{n:'Netflix',a:0,p:'L',f:'M'},{n:'Phone plan',a:0,p:'M',f:'M'},{n:'Kaiser (healthcare)',a:0,p:'H',f:'M'},{n:'Willamette Dental',a:0,p:'M',f:'M'},{n:'Prescriptions',a:0,p:'H',f:'M'},{n:'Vision',a:0,p:'M',f:'Y'},{n:'Cloud storage',a:0,p:'L',f:'M'}],
+  Debts:[{n:'Student loan',a:0,p:'H',f:'M'},{n:'Credit card minimum',a:0,p:'H',f:'M'},{n:'Personal loan',a:0,p:'M',f:'M'}],
+  Savings:[{n:'Emergency fund',a:0,p:'H',f:'M'},{n:'Retirement (401k/IRA)',a:0,p:'M',f:'M'},{n:'General savings',a:0,p:'L',f:'M'}]
+};
+
+let income=[{n:'Primary salary',a:0},{n:'Side income',a:0}];
+let expenses={}; // keyed by category name, initialized below
+function initExpenses(){
+  // For each category, keep existing expenses or default to DEF or []
+  const newExp={};
+  CATS().forEach(name=>{
+    newExp[name]=expenses[name]||(DEF[name]?JSON.parse(JSON.stringify(DEF[name])):[]);
+  });
+  expenses=newExp;
+}
+initExpenses();
+let bufferPct={}; // populated dynamically from categories
+let receipts=[];
+let vendors={};
+let syncMeta={version:0,lastEditedBy:'',lastEditedAt:'',lastPulledVersion:0};
+let archives={};
+let recurringBills=[];
+let currentRecurring='none';
+let settings={username:'',provider:'none',jsonbinId:'',jsonbinKey:'',gistId:'',gistToken:'',selfUrl:'',selfToken:'',dropboxToken:'',sharedKey:'',reminderDays:7,notifs:{bills:true,budget:true,yearly:true,sync:true,nudge:true}};
+let planFilterCat='all',planFilterPri='all',rcptFilterCat='all';
+let reportView='monthly';
+let pendingCloudData=null;
+let autosaveTimer=null;
+let knownUsers={};
+
+// ── HELPERS ──────────────────────────────────
+const fmt=n=>'$'+Math.round(Math.abs(n)).toLocaleString();
+const fmtDec=n=>'$'+Math.abs(n).toFixed(2);
+const moAmt=r=>r.f==='Y'?(parseFloat(r.a)||0)/12:(parseFloat(r.a)||0);
+const totalIncome=()=>income.reduce((s,r)=>s+(parseFloat(r.a)||0),0);
+const totalExpMo=()=>{let t=0;CATS().forEach(c=>expenses[c].forEach(r=>t+=moAmt(r)));return t;};
+const catMo=c=>expenses[c].reduce((s,r)=>s+moAmt(r),0);
+const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2);
+const todayStr=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+const monthKey=s=>(s||todayStr()).slice(0,7);
+const currentMonth=()=>todayStr().slice(0,7);
+const currentYear=()=>new Date().getFullYear().toString();
+const monthLabel=ym=>{const[y,m]=ym.split('-');return MONTH_NAMES[parseInt(m)-1]+' '+y;};
+const fmtDate=d=>{if(!d)return'';const[,m,dy]=d.split('-');return MONTH_NAMES[parseInt(m)-1]+' '+parseInt(dy);};
+const receiptsForMonth=ym=>receipts.filter(r=>monthKey(r.date)===ym);
+const receiptsForYear=yr=>receipts.filter(r=>r.date&&r.date.startsWith(yr));
+
+function allMonths(){
+  const keys=new Set(receipts.map(r=>monthKey(r.date)));
+  keys.add(currentMonth());
+  return Array.from(keys).sort().reverse();
+}
+function allYears(){
+  const keys=new Set(receipts.map(r=>r.date?r.date.slice(0,4):''));
+  keys.add(currentYear());
+  return Array.from(keys).filter(Boolean).sort().reverse();
+}
+function populateMonthSelects(){
+  const months=allMonths();
+  const el=document.getElementById('log-month-sel');
+  if(el){const cur=el.value||currentMonth();el.innerHTML=months.map(m=>`<option value="${m}"${m===cur?' selected':''}>${monthLabel(m)}</option>`).join('');}
+  const rel=document.getElementById('rpt-month-sel');
+  if(rel){const cur=rel.value||currentMonth();rel.innerHTML=months.map(m=>`<option value="${m}"${m===cur?' selected':''}>${monthLabel(m)}</option>`).join('');}
+  const yel=document.getElementById('rpt-year-sel');
+  if(yel){const cur=yel.value||currentYear();yel.innerHTML=allYears().map(y=>`<option value="${y}"${y===cur?' selected':''}>${y}</option>`).join('');}
+}
+
+// ── AUTO-ARCHIVE ─────────────────────────────
+function runAutoArchive(){
+  const cutoff=(new Date().getFullYear()-1).toString(); // keep current + prior year active
+  const toArchive=receipts.filter(r=>r.date&&r.date.slice(0,4)<cutoff);
+  if(!toArchive.length)return;
+  toArchive.forEach(r=>{
+    const yr=r.date.slice(0,4);
+    if(!archives[yr])archives[yr]=[];
+    if(!archives[yr].find(a=>a.id===r.id))archives[yr].push(r);
+  });
+  receipts=receipts.filter(r=>!r.date||r.date.slice(0,4)>=cutoff);
+}
+
+// ── HMAC KEY SYSTEM ──────────────────────────
+function generateKey(){
+  let key;
+  if(window.crypto&&window.crypto.getRandomValues){
+    const arr=new Uint8Array(24);crypto.getRandomValues(arr);
+    key=Array.from(arr).map(b=>b.toString(36).padStart(2,'0')).join('').slice(0,32).toUpperCase();
+  }else{
+    // Fallback for non-secure contexts
+    key=Array.from({length:32},()=>Math.random().toString(36)[2]||'X').join('').toUpperCase();
+  }
+  settings.sharedKey=key;saveSettings();renderKeyDisplay();
+  document.getElementById('key-status').textContent='New key generated — share with your household before next push.';
+}
+function copyKey(){
+  if(!settings.sharedKey){alert('Generate a key first.');return;}
+  navigator.clipboard.writeText(settings.sharedKey).then(()=>{
+    document.getElementById('key-status').textContent='Key copied to clipboard — share via AirDrop or iMessage.';
+  });
+}
+async function pasteKey(){
+  try{const t=await navigator.clipboard.readText();const k=t.trim().toUpperCase();
+    if(k.length<16){alert('That doesn\'t look like a valid Hedgie key.');return;}
+    settings.sharedKey=k;saveSettings();renderKeyDisplay();
+    document.getElementById('key-status').textContent='Key saved. Make sure both users have the same key before syncing.';
+  }catch(e){
+    const k=prompt('Paste the shared key:');if(!k)return;
+    settings.sharedKey=k.trim().toUpperCase();saveSettings();renderKeyDisplay();
+    document.getElementById('key-status').textContent='Key saved.';
+  }
+}
+function renderKeyDisplay(){
+  const el=document.getElementById('key-display');
+  if(!el)return;
+  el.textContent=settings.sharedKey?formatKey(settings.sharedKey):'No key — generate one below';
+}
+function formatKey(k){return k.match(/.{1,4}/g).join('-');}
+
+async function signPayload(payload){
+  if(!settings.sharedKey)return null;
+  if(!window.crypto||!window.crypto.subtle){
+return null;}
+  const encoder=new TextEncoder();
+  const data=JSON.stringify(payload.data)+payload.version+payload.lastEditedAt;
+  try{
+    const keyMat=await crypto.subtle.importKey('raw',encoder.encode(settings.sharedKey),{name:'HMAC',hash:'SHA-256'},false,['sign']);
+    const sig=await crypto.subtle.sign('HMAC',keyMat,encoder.encode(data));
+    return Array.from(new Uint8Array(sig)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  }catch(e){
+return null;}
+}
+
+async function verifyPayload(payload){
+  // No local key — always accept
+  if(!settings.sharedKey) return {ok:true, unsigned:false};
+  // No crypto API (non-HTTPS) — accept but warn
+  if(!window.crypto||!window.crypto.subtle){
+return {ok:true, unsigned:true};}
+  // Key configured but payload has no signature — accept but flag
+  if(!payload.signature) return {ok:true, unsigned:true};
+  const encoder=new TextEncoder();
+  const data=JSON.stringify(payload.data)+payload.version+payload.lastEditedAt;
+  try{
+    const keyMat=await crypto.subtle.importKey('raw',encoder.encode(settings.sharedKey),{name:'HMAC',hash:'SHA-256'},false,['verify']);
+    const sigBytes=Uint8Array.from(payload.signature.match(/.{2}/g).map(b=>parseInt(b,16)));
+    const ok=await crypto.subtle.verify('HMAC',keyMat,sigBytes,encoder.encode(data));
+    return {ok, unsigned:false};
+  }catch(e){
+return {ok:true, unsigned:true};}
+}
+
+// ── LIMITS & HEALTH ──────────────────────────
+function estimatePayloadKB(){
+  const state={categories,income,expenses,receipts,vendors,archives,recurringBills};
+  return Math.round(JSON.stringify(state).length/1024);
+}
+
+function getLimitWarnings(){
+  const warns=[];
+  const rc=receipts.length,rl=LIMITS.receipts;
+  if(rc>=rl)warns.push({sev:'err',msg:`Active receipts at limit (${rc}/${rl}) — archive will run on next restart`});
+  else if(rc>=rl*LIMITS.warnAt)warns.push({sev:'warn',msg:`Active receipts approaching limit (${rc}/${rl})`});
+  const vc=Object.keys(vendors).length,vl=LIMITS.vendors;
+  if(vc>=vl)warns.push({sev:'err',msg:`Vendor memory full (${vc}/${vl}) — oldest vendors no longer saved`});
+  else if(vc>=vl*LIMITS.warnAt)warns.push({sev:'warn',msg:`Vendor memory filling up (${vc}/${vl})`});
+  CATS().forEach(c=>{const len=expenses[c].length;if(len>=LIMITS.expPerCat)warns.push({sev:'warn',msg:`${c} has ${len} expense lines (limit ${LIMITS.expPerCat})`});});
+  const kb=estimatePayloadKB();
+  if(kb>=LIMITS.payloadKB)warns.push({sev:'err',msg:`Payload is ${kb}KB — approaching sync provider limit (${LIMITS.payloadKB}KB)`});
+  else if(kb>=LIMITS.payloadKB*LIMITS.warnAt)warns.push({sev:'warn',msg:`Payload is ${kb}KB — nearing sync limit (${LIMITS.payloadKB}KB)`});
+  return warns;
+}
+
+function renderHealthPanel(){
+  const warns=getLimitWarnings();
+  const kb=estimatePayloadKB();
+  const rc=receipts.length,arc=Object.values(archives).reduce((s,a)=>s+a.length,0);
+  const pct=Math.min(100,Math.round(kb/LIMITS.payloadKB*100));
+  const barColor=pct>80?'var(--red)':pct>60?'var(--amber)':'var(--green)';
+  let html=`<div style="margin-bottom:10px">
+    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-soft);margin-bottom:4px">
+      <span>Payload size</span><span style="font-weight:600">${kb}KB / ${LIMITS.payloadKB}KB</span>
+    </div>
+    <div class="progress-wrap"><div style="height:100%;border-radius:4px;background:${barColor};width:${pct}%;transition:width 0.4s"></div></div>
+  </div>
+  <div style="font-size:12px;color:var(--text-soft);display:flex;gap:16px;flex-wrap:wrap;margin-bottom:10px">
+    <span>Active receipts: <strong style="color:var(--text)">${rc}</strong></span>
+    <span>Archived: <strong style="color:var(--text)">${arc}</strong></span>
+    <span>Vendors: <strong style="color:var(--text)">${Object.keys(vendors).length}</strong></span>
+  </div>`;
+  if(warns.length){
+    html+=warns.map(w=>`<div style="font-size:12px;padding:6px 10px;border-radius:var(--radius-sm);margin-bottom:5px;background:${w.sev==='err'?'var(--red-light)':'var(--amber-light)'};color:${w.sev==='err'?'var(--red)':'var(--amber)'}">${w.msg}</div>`).join('');
+  }else{
+    html+=`<div style="font-size:12px;color:var(--green);padding:6px 0">&#10003; All limits healthy</div>`;
+  }
+  const el=document.getElementById('health-panel');
+  if(el)el.innerHTML=html;
+}
+
+function enforceVendorLimit(){
+  const keys=Object.keys(vendors);
+  if(keys.length>LIMITS.vendors){
+    // prune least-used vendors beyond limit
+    keys.sort((a,b)=>vendors[a].count-vendors[b].count).slice(0,keys.length-LIMITS.vendors).forEach(k=>delete vendors[k]);
+  }
+}
+
+// ── DRAWER ACCORDION ─────────────────────────
+function toggleAcc(id){
+  const body=document.getElementById(id);
+  const arrow=document.getElementById('arr-'+id);
+  if(!body)return;
+  body.classList.toggle('open');
+  if(arrow)arrow.classList.toggle('open');
+}
+
+
+// ── SYNC META PERSISTENCE ────────────────────
+function saveSyncMeta(){
+  localStorage.setItem('hedgie_syncmeta',JSON.stringify(syncMeta));
+}
+function loadSyncMeta(){
+  try{
+    const saved=localStorage.getItem('hedgie_syncmeta');
+    if(saved)syncMeta={...syncMeta,...JSON.parse(saved)};
+  }catch(e){}
+}
+
+// ── WELCOME ───────────────────────────────────
+function checkWelcome(){
+  const saved=localStorage.getItem('hedgie_settings');
+  if(saved){try{settings={...settings,...JSON.parse(saved)};}catch(e){}}
+  if(!settings.username){
+    document.getElementById('welcome-overlay').classList.add('open');
+  }else{
+    document.getElementById('cfg-username').value=settings.username;
+    document.getElementById('cfg-provider').value=settings.provider||'none';
+    if(!settings.notifs)settings.notifs={bills:true,budget:true,yearly:true,sync:true,nudge:true};
+    onProviderChange(true);renderKeyDisplay();updateSyncStatus('idle');
+    const providerNames={none:'Local only',jsonbin:'JSONBin',gist:'GitHub Gist',self:'Self-hosted',dropbox:'Dropbox'};
+    document.getElementById('gsb-right').textContent=providerNames[settings.provider||'none']||'';
+    updateSyncButton();
+  }
+}
+function completeWelcome(){
+  const name=document.getElementById('welcome-name').value.trim();
+  if(!name){document.getElementById('welcome-name').focus();return;}
+  settings.username=name;saveSettings();
+  document.getElementById('welcome-overlay').classList.remove('open');
+  document.getElementById('cfg-username').value=name;
+  if(!settings.sharedKey)generateKey();
+  updateSyncStatus('idle');
+  buildNotifications();
+}
+function saveSettings(){localStorage.setItem('hedgie_settings',JSON.stringify(settings));}
+
+// ── DRAWER ────────────────────────────────────
+function openDrawer(){document.getElementById('drawer').classList.add('open');document.getElementById('drawer-overlay').classList.add('open');renderHealthPanel();renderNotifToggles();}
+function closeDrawer(){document.getElementById('drawer').classList.remove('open');document.getElementById('drawer-overlay').classList.remove('open');}
+
+function onProviderChange(silent){
+  const p=document.getElementById('cfg-provider').value;
+  settings.provider=p;if(!silent)saveSettings();
+  updateSyncButton();
+  const el=document.getElementById('provider-fields');
+  const notes={
+    none:'',
+    jsonbin:'<p class="provider-note">Free at <strong>jsonbin.io</strong> — create an account, make a new Bin, copy the Bin ID and Master Key below. Both users enter the same credentials plus the shared key above.</p>',
+    gist:'<p class="provider-note">Free with GitHub. Create a <strong>private Gist</strong> with a file named <code>hedgie.json</code>, generate a Personal Access Token with <code>gist</code> scope.</p>',
+    self:'<p class="provider-note">Any endpoint that accepts <strong>GET</strong> (returns JSON) and <strong>PUT</strong> (saves JSON). Works great on a homelab. Add a bearer token for auth.</p>',
+    dropbox:'<p class="provider-note">Generate a long-lived access token from the Dropbox App Console. The file saves as <code>/hedgie/data.json</code> in your Dropbox.</p>'
+  };
+  const fields={
+    none:'',
+    jsonbin:`<div class="drawer-field"><label>Bin ID</label><input type="text" placeholder="67a3b..." value="${esc(settings.jsonbinId)}" oninput="settings.jsonbinId=this.value;saveSettings()"></div>
+             <div class="drawer-field"><label>Master Key</label><input type="text" placeholder="$2a$10$..." value="${esc(settings.jsonbinKey)}" oninput="settings.jsonbinKey=this.value;saveSettings()"></div>`,
+    gist:`<div class="drawer-field"><label>Gist ID</label><input type="text" placeholder="abc123..." value="${esc(settings.gistId)}" oninput="settings.gistId=this.value;saveSettings()"></div>
+          <div class="drawer-field"><label>Personal Access Token</label><input type="text" placeholder="ghp_..." value="${esc(settings.gistToken)}" oninput="settings.gistToken=this.value;saveSettings()"></div>`,
+    self:`<div class="drawer-field"><label>Endpoint URL</label><input type="text" placeholder="https://myserver.local/hedgie/data" value="${esc(settings.selfUrl)}" oninput="settings.selfUrl=this.value;saveSettings()"></div>
+          <div class="drawer-field"><label>Bearer Token (optional)</label><input type="text" placeholder="optional secret" value="${esc(settings.selfToken)}" oninput="settings.selfToken=this.value;saveSettings()"></div>`,
+    dropbox:`<div class="drawer-field"><label>Access Token</label><input type="text" placeholder="sl...." value="${esc(settings.dropboxToken)}" oninput="settings.dropboxToken=this.value;saveSettings()"></div>`
+  };
+  el.innerHTML=p==='none'?'':`<div class="provider-fields">${notes[p]||''}${fields[p]||''}</div>`;
+}
+
+// ── SYNC STATUS ───────────────────────────────
+function updateSyncStatus(state,msg){
+  const dot=document.getElementById('sync-dot'),txt=document.getElementById('sync-status-txt'),gdot=document.getElementById('gear-dot');
+  const map={idle:['',settings.provider==='none'?'Not configured — local only':'Ready · use Push to sync'],busy:['busy','Syncing\u2026'],ok:['ok',msg||'Sync successful'],err:['err',msg||'Sync failed'],conflict:['err','Conflict — action required']};
+  const[cls,label]=map[state]||map.idle;
+  dot.className='sync-dot'+(cls?' '+cls:'');
+  txt.textContent=label+(syncMeta.lastEditedAt?' · Last push '+fmtAgo(syncMeta.lastEditedAt)+(syncMeta.lastEditedBy?' by '+syncMeta.lastEditedBy:''):'');
+  gdot.classList.toggle('show',state==='conflict'||state==='err');
+}
+function fmtAgo(iso){const d=(Date.now()-new Date(iso).getTime())/1000;if(d<60)return'just now';if(d<3600)return Math.round(d/60)+'m ago';if(d<86400)return Math.round(d/3600)+'h ago';return Math.round(d/86400)+'d ago';}
+
+function showBanner(id,type,msg,autohide=true){
+  const el=document.getElementById(id);if(!el)return;
+  el.className='sync-banner show '+type;el.textContent=msg;
+  if(autohide&&(type==='ok'||type==='info'))setTimeout(()=>{el.className='sync-banner';},4000);
+}
+
+// ── QUICK SYNC ────────────────────────────────
+async function quickSync(){
+  if(settings.provider==='none'){setGSB('warn','No sync provider configured — open Settings','',false);return;}
+  const btn=document.getElementById('gsb-sync-btn');
+  if(btn){btn.style.opacity='0.5';btn.style.pointerEvents='none';}
+  setGSB('saving','Syncing…','');
+  try{
+    // Step 1 — fetch cloud
+    let cloud=null;
+    try{cloud=await fetchFromCloud();}catch(e){
+      setGSB('err','Could not reach cloud: '+e.message,'',false);
+      if(btn){btn.style.opacity='1';btn.style.pointerEvents='';}
+      return;
+    }
+    if(!cloud||!cloud._hedgie){
+      setGSB('err','Invalid payload from cloud — open console for details','',false);
+      if(btn){btn.style.opacity='1';btn.style.pointerEvents='';}return;
+    }
+
+    // Step 2 — verify signature
+    const vr=await verifyPayload(cloud);
+    if(!vr.ok){setGSB('err','Signature mismatch — check shared key in Settings','',true);if(btn){btn.style.opacity='1';btn.style.pointerEvents='';}return;}
+
+    // Step 3 — build local snapshot
+    const localPayload={version:syncMeta.version,lastEditedBy:settings.username,lastEditedAt:new Date().toISOString(),data:{categories,income,expenses,receipts,vendors,archives,recurringBills}};
+    const isFirstSync=syncMeta.lastPulledVersion===0&&syncMeta.version===0;
+    const cloudAhead=(cloud.version||0)>(syncMeta.lastPulledVersion||0);
+
+    let resolved;
+    if(isFirstSync){
+      // First sync — just apply cloud data, no push needed
+
+      applyPayload(cloud);
+      syncMeta.lastPulledVersion=cloud.version||0;
+      updateSyncStatus('ok','First sync complete');
+      setGSB('cloud','First sync complete','v'+cloud.version+' by '+(cloud.lastEditedBy||'cloud'));
+      if(btn){btn.style.opacity='1';btn.style.pointerEvents='';}
+      return;
+    } else if(cloudAhead&&budgetChanged(localPayload,cloud)){
+      // Budget conflict — need user input before we can push
+      pendingCloudData=cloud;
+      showConflictModal(cloud);
+      updateSyncStatus('conflict');
+      if(btn){btn.style.opacity='1';btn.style.pointerEvents='';}
+      return;
+    } else if(cloudAhead){
+      // Cloud ahead, no budget conflict — merge receipts
+      resolved=mergePayloads(localPayload,cloud);
+    } else {
+      // Local is same or ahead — just push local
+      resolved=await buildPayload();
+    }
+
+    // Step 4 — sign and push
+    resolved.signature=await signPayload(resolved);
+    await pushToCloud(resolved);
+    applyPayload(resolved);
+    syncMeta.version=resolved.version;
+    syncMeta.lastEditedBy=resolved.lastEditedBy;
+    syncMeta.lastEditedAt=resolved.lastEditedAt;
+    syncMeta.lastPulledVersion=resolved.version;
+    updateSyncStatus('ok','Synced');
+    setGSB('cloud',isFirstSync?'First sync complete':'Synced ↑↓','just now');
+  } catch(e){
+    setGSB('err','Sync failed: '+e.message,'',false);
+  }
+  if(btn){btn.style.opacity='1';btn.style.pointerEvents='';}
+}
+
+function updateSyncButton(){
+  const btn=document.getElementById('gsb-sync-btn');
+  if(!btn)return;
+  btn.style.display=settings.provider!=='none'?'flex':'none';
+}
+
+// ── GLOBAL STATUS BAR ────────────────────────
+let gsbTimer=null;
+const GSB_STATES={
+  idle:   {dot:'var(--text-faint)', bg:'var(--parchment)',       label:'',                   color:'var(--text-soft)'},
+  saving: {dot:'var(--amber)',      bg:'var(--amber-light)',      label:'Saving…',        color:'var(--amber)'},
+  saved:  {dot:'var(--green)',      bg:'var(--green-bg)',         label:'Saved',              color:'var(--green)'},
+  cloud:  {dot:'var(--green)',      bg:'var(--green-bg)',         label:'Synced to cloud',    color:'var(--green)'},
+  warn:   {dot:'var(--amber)',      bg:'var(--amber-light)',      label:'',                   color:'var(--amber)'},
+  err:    {dot:'var(--red)',        bg:'var(--red-light)',        label:'',                   color:'var(--red)'},
+  info:   {dot:'var(--blue)',       bg:'var(--blue-light)',       label:'',                   color:'var(--blue)'}
+};
+
+function setGSB(state, msg, rightText, persist){
+  clearTimeout(gsbTimer);
+  const s=GSB_STATES[state]||GSB_STATES.idle;
+  const bar=document.getElementById('global-status-bar');
+  const dot=document.getElementById('gsb-dot');
+  const lbl=document.getElementById('gsb-label');
+  const rgt=document.getElementById('gsb-right');
+  if(!bar)return;
+  bar.style.background=s.bg;
+  dot.style.background=s.dot;
+  lbl.style.color=s.color;
+  lbl.textContent=msg||s.label;
+  rgt.textContent=rightText||'';
+  if(!persist&&state!=='idle'){
+    gsbTimer=setTimeout(()=>setGSB('idle'),state==='saving'?8000:4000);
+  }
+}
+
+// ── AUTOSAVE ──────────────────────────────────
+function triggerAutosave(source){
+  clearTimeout(autosaveTimer);
+  autosaveTimer=setTimeout(async()=>{
+    setGSB('saving','Saving…','');
+    if(settings.provider!=='none'){
+      try{
+        await cloudPushSilent();
+        setGSB('cloud','Synced to cloud','just now');saveSyncMeta();buildNotifications();
+      }catch(e){
+        setGSB('warn','Saved locally only — cloud unreachable','');
+      }
+    }else{
+      setGSB('saved','Saved locally','');
+    }
+  },2000);
+}
+
+// ── CLOUD PAYLOAD ─────────────────────────────
+async function buildPayload(){
+  const p={_hedgie:true,version:(syncMeta.version||0)+1,lastEditedBy:settings.username||'Unknown',lastEditedAt:new Date().toISOString(),data:{categories,income,expenses,receipts,vendors,archives,recurringBills}};
+  p.signature=await signPayload(p);
+  return p;
+}
+
+function applyPayload(payload){
+  const d=payload.data||payload;
+  // Handle old schema — if no categories key, keep current categories
+  if(d.categories&&d.categories.length){
+    // Merge: keep locked defaults with potentially updated colors, append custom cats
+    const locked=DEFAULT_CATS.map(dc=>{
+      const saved=d.categories.find(sc=>sc.name===dc.name);
+      return saved||dc;
+    });
+    const custom=d.categories.filter(sc=>!LOCKED_CATS.includes(sc.name));
+    categories=[...locked,...custom];
+  }
+  if(d.income)income=d.income;
+  if(d.expenses){
+    // Migrate old schema expenses — ensure all current categories have an entry
+    expenses=d.expenses;
+    initExpenses();
+  }else{
+    initExpenses();
+  }
+  if(d.receipts)receipts=d.receipts;
+  if(d.vendors)vendors=d.vendors;
+  if(d.archives)archives=d.archives;
+  if(d.recurringBills)recurringBills=d.recurringBills;
+  syncMeta.version=payload.version||0;
+  syncMeta.lastEditedBy=payload.lastEditedBy||'';
+  syncMeta.lastEditedAt=payload.lastEditedAt||'';
+  syncMeta.lastPulledVersion=payload.version||0;
+  saveSyncMeta();
+  refreshAll();
+}
+
+function mergePayloads(local,cloud){
+  const allIds=new Set([...local.data.receipts.map(r=>r.id),...cloud.data.receipts.map(r=>r.id)]);
+  const cb=Object.fromEntries(cloud.data.receipts.map(r=>[r.id,r]));
+  const lb=Object.fromEntries(local.data.receipts.map(r=>[r.id,r]));
+  const merged=Array.from(allIds).map(id=>cb[id]||lb[id]);
+  merged.sort((a,b)=>b.date.localeCompare(a.date));
+  // merge archives
+  const mergedArc={...((local.data&&local.data.archives)||{}),...((cloud.data&&cloud.data.archives)||{})};
+  const mergedCats=(cloud.data&&cloud.data.categories)||local.data.categories||DEFAULT_CATS;
+  return {...local,version:Math.max(local.version,cloud.version)+1,lastEditedBy:settings.username||'Unknown',lastEditedAt:new Date().toISOString(),data:{...local.data,receipts:merged,vendors:{...cloud.data.vendors,...local.data.vendors},archives:mergedArc,categories:mergedCats}};
+}
+
+function budgetChanged(local,cloud){
+  return JSON.stringify({i:local.data.income,e:local.data.expenses,cat:local.data.categories})!==JSON.stringify({i:cloud.data.income,e:cloud.data.expenses,cat:cloud.data.categories});
+}
+
+// ── CLOUD ADAPTERS ────────────────────────────
+async function fetchFromCloud(){
+  const p=settings.provider;
+  if(p==='jsonbin'){const r=await fetch(`https://api.jsonbin.io/v3/b/${settings.jsonbinId}/latest`,{headers:{'X-Master-Key':settings.jsonbinKey}});if(!r.ok)throw new Error('JSONBin '+r.status);const j=await r.json();return j.record;}
+  if(p==='gist'){const r=await fetch(`https://api.github.com/gists/${settings.gistId}`,{headers:{'Authorization':'token '+settings.gistToken,'Accept':'application/vnd.github.v3+json'}});if(!r.ok)throw new Error('Gist '+r.status);const j=await r.json();return JSON.parse(j.files['hedgie.json'].content);}
+  if(p==='self'){const h={'Content-Type':'application/json'};if(settings.selfToken)h['Authorization']='Bearer '+settings.selfToken;const r=await fetch(settings.selfUrl,{headers:h});if(!r.ok)throw new Error('Endpoint '+r.status);return r.json();}
+  if(p==='dropbox'){const r=await fetch('https://content.dropboxapi.com/2/files/download',{method:'POST',headers:{'Authorization':'Bearer '+settings.dropboxToken,'Dropbox-API-Arg':JSON.stringify({path:'/hedgie/data.json'})}});if(!r.ok)throw new Error('Dropbox '+r.status);return r.json();}
+  throw new Error('No provider');
+}
+
+async function pushToCloud(payload){
+  const p=settings.provider,body=JSON.stringify(payload);
+  if(p==='jsonbin'){const r=await fetch(`https://api.jsonbin.io/v3/b/${settings.jsonbinId}`,{method:'PUT',headers:{'Content-Type':'application/json','X-Master-Key':settings.jsonbinKey},body});if(!r.ok)throw new Error('JSONBin push '+r.status);return;}
+  if(p==='gist'){const r=await fetch(`https://api.github.com/gists/${settings.gistId}`,{method:'PATCH',headers:{'Authorization':'token '+settings.gistToken,'Content-Type':'application/json'},body:JSON.stringify({files:{'hedgie.json':{content:body}}})});if(!r.ok)throw new Error('Gist push '+r.status);return;}
+  if(p==='self'){const h={'Content-Type':'application/json'};if(settings.selfToken)h['Authorization']='Bearer '+settings.selfToken;const r=await fetch(settings.selfUrl,{method:'PUT',headers:h,body});if(!r.ok)throw new Error('Endpoint push '+r.status);return;}
+  if(p==='dropbox'){const r=await fetch('https://content.dropboxapi.com/2/files/upload',{method:'POST',headers:{'Authorization':'Bearer '+settings.dropboxToken,'Content-Type':'application/octet-stream','Dropbox-API-Arg':JSON.stringify({path:'/hedgie/data.json',mode:'overwrite'})},body});if(!r.ok)throw new Error('Dropbox push '+r.status);return;}
+  throw new Error('No provider');
+}
+
+async function cloudPushSilent(){
+  // Safety check — if cloud is ahead of what we last pulled, don't silently overwrite
+  if(syncMeta.lastPulledVersion===0&&syncMeta.version===0){
+    // Never synced this session — skip autosave push to avoid overwriting real cloud data
+    throw new Error('No pull yet this session — use manual Push after reviewing data');
+  }
+  const payload=await buildPayload();
+  await pushToCloud(payload);
+  syncMeta.version=payload.version;syncMeta.lastEditedBy=payload.lastEditedBy;syncMeta.lastEditedAt=payload.lastEditedAt;syncMeta.lastPulledVersion=payload.version;
+  saveSyncMeta();
+}
+
+async function cloudPull(){
+  if(settings.provider==='none'){alert('No sync provider configured.');return;}
+  updateSyncStatus('busy');
+  try{
+    const cloud=await fetchFromCloud();
+    if(!cloud||!cloud._hedgie){
+      updateSyncStatus('err','Invalid payload');return;
+    }
+    const vr=await verifyPayload(cloud);
+    if(!vr.ok){updateSyncStatus('err','Signature mismatch — wrong shared key?');setGSB('err','Signature invalid — check shared key in Settings','',true);return;}
+    if(vr.unsigned&&settings.sharedKey){setGSB('warn','Cloud payload has no signature — push to sign it','');}
+    const localPayload={version:syncMeta.version,data:{categories,income,expenses,receipts,vendors,archives,recurringBills}};
+    const cloudVer=cloud.version||0;
+    const isFirstSync=syncMeta.lastPulledVersion===0&&syncMeta.version===0;
+    if(cloudVer>(syncMeta.lastPulledVersion||0)){
+      if(isFirstSync){
+        // First ever sync — just take cloud, no conflict needed
+        applyPayload(cloud);
+        updateSyncStatus('ok','First sync complete · '+fmtAgo(cloud.lastEditedAt));
+        setGSB('cloud','First sync complete','by '+(cloud.lastEditedBy||'someone'));
+      } else if(budgetChanged(localPayload,cloud)){
+        pendingCloudData=cloud;showConflictModal(cloud);updateSyncStatus('conflict');
+      }else{
+        const merged=mergePayloads(localPayload,cloud);
+        applyPayload(merged);updateSyncStatus('ok','Merged · '+fmtAgo(cloud.lastEditedAt)+' by '+(cloud.lastEditedBy||'someone'));
+        setGSB('cloud','Receipts merged from cloud','by '+(cloud.lastEditedBy||'someone'));
+      }
+    }else{updateSyncStatus('ok','Already up to date');setGSB('saved','Already up to date','');}
+  }catch(e){updateSyncStatus('err',e.message);setGSB('err','Sync failed: '+e.message,'');}
+}
+
+async function cloudPush(){
+  if(settings.provider==='none'){alert('No sync provider configured.');return;}
+  updateSyncStatus('busy');
+  try{
+    let cloud=null;try{cloud=await fetchFromCloud();}catch(e){}
+    if(cloud&&cloud._hedgie){
+      const vr=await verifyPayload(cloud);
+      if(!vr.ok){updateSyncStatus('err','Remote signature mismatch — wrong shared key?');setGSB('err','Remote signature invalid — check shared key','',true);return;}
+      if(vr.unsigned&&settings.sharedKey){setGSB('warn','Remote payload unsigned — will be signed on push','');}
+      if((cloud.version||0)>syncMeta.lastPulledVersion){
+        const localPayload={version:syncMeta.version,data:{categories,income,expenses,receipts,vendors,archives,recurringBills}};
+        if(budgetChanged(localPayload,cloud)){pendingCloudData=cloud;showConflictModal(cloud);updateSyncStatus('conflict');return;}
+        const merged=mergePayloads(localPayload,cloud);
+        await pushToCloud(merged);applyPayload(merged);updateSyncStatus('ok','Merged and pushed');setGSB('cloud','Synced to cloud — receipts merged','');return;
+      }
+    }
+    const payload=await buildPayload();
+    await pushToCloud(payload);
+    syncMeta.version=payload.version;syncMeta.lastEditedBy=payload.lastEditedBy;syncMeta.lastEditedAt=payload.lastEditedAt;syncMeta.lastPulledVersion=payload.version;
+    updateSyncStatus('ok','Pushed · just now');setGSB('cloud','Pushed to cloud','just now by '+(settings.username||''));saveSyncMeta();
+  }catch(e){updateSyncStatus('err',e.message);setGSB('err','Push failed: '+e.message,'');}
+}
+
+// ── CONFLICT MODAL ────────────────────────────
+function showConflictModal(cloud){
+  document.getElementById('conflict-detail').innerHTML=`<strong>Cloud:</strong> v${cloud.version} · ${fmtAgo(cloud.lastEditedAt)} by <strong>${esc(cloud.lastEditedBy||'someone')}</strong><br><strong>Yours:</strong> v${syncMeta.version} · last pushed ${syncMeta.lastEditedAt?fmtAgo(syncMeta.lastEditedAt):'never'}<br><strong>Receipts:</strong> Cloud ${cloud.data.receipts.length}, you ${receipts.length} — will merge automatically<br><strong>Budget plan:</strong> Differences detected`;
+  document.getElementById('conflict-modal').classList.add('open');
+}
+async function resolveConflict(choice){
+  document.getElementById('conflict-modal').classList.remove('open');
+  const cloud=pendingCloudData;if(!cloud)return;
+  const local={version:syncMeta.version,lastEditedBy:settings.username,lastEditedAt:new Date().toISOString(),data:{categories,income,expenses,receipts,vendors,archives,recurringBills}};
+  let resolved=mergePayloads(local,cloud);
+  if(choice==='theirs'){resolved.data.income=cloud.data.income;resolved.data.expenses=cloud.data.expenses;resolved.data.bufferPct=cloud.data.bufferPct;}
+  resolved.signature=await signPayload(resolved);
+  applyPayload(resolved);
+  try{await pushToCloud(resolved);updateSyncStatus('ok','Conflict resolved');setGSB('cloud','Conflict resolved — synced ↑↓','just now');}
+  catch(e){updateSyncStatus('err','Resolved locally, push failed: '+e.message);setGSB('err','Resolved locally — push failed','');}
+  pendingCloudData=null;
+}
+
+// ── CATEGORY MANAGEMENT ──────────────────────
+function getCatColor(name){return catColor(name);}
+
+function resetCatsToDefault(){
+  if(!confirm('Remove all custom categories and restore default colors? Your income, expenses, and receipts are untouched.'))return;
+  const defaultNames=DEFAULT_CATS.map(c=>c.name);
+  receipts.forEach(r=>{if(!defaultNames.includes(r.cat))r.cat='Other';});
+  // Restore locked cats to default colors, remove extras
+  categories=DEFAULT_CATS.map(c=>({...c}));
+  expenses={};
+  CATS().forEach(name=>{expenses[name]=DEF[name]?JSON.parse(JSON.stringify(DEF[name])):[];});
+  if(!defaultNames.includes(planFilterCat))planFilterCat='all';
+  if(!defaultNames.includes(rcptFilterCat))rcptFilterCat='all';
+  rebuildCatUI();
+  renderCatManager();
+  document.getElementById('cat-count-lbl')&&(document.getElementById('cat-count-lbl').textContent=CATS().length+' categories');
+  updatePlanner();
+  refreshAll();
+  triggerAutosave('pl');
+}
+
+
+function renderNotifToggles(){
+  const el=document.getElementById('notif-toggles');
+  if(!el)return;
+  if(!settings.notifs)settings.notifs={bills:true,budget:true,yearly:true,sync:true,nudge:true};
+  const types=[
+    {key:'bills',label:'Upcoming recurring bills',icon:'&#128197;'},
+    {key:'budget',label:'Budget warnings (80%+ spent)',icon:'&#128308;'},
+    {key:'yearly',label:'Yearly expenses approaching',icon:'&#128346;'},
+    {key:'sync',label:'Cloud sync staleness',icon:'&#9729;'},
+    {key:'nudge',label:'Monthly logging reminder',icon:'&#9997;'},
+  ];
+  el.innerHTML=types.map(t=>`
+    <label style="display:flex;align-items:center;gap:10px;padding:6px 0;cursor:pointer;border-bottom:1px solid var(--border-light)">
+      <span style="font-size:14px">${t.icon}</span>
+      <span style="flex:1;font-size:13px;color:var(--text)">${t.label}</span>
+      <input type="checkbox" ${settings.notifs[t.key]!==false?'checked':''} 
+        onchange="settings.notifs['${t.key}']=this.checked;saveSettings();buildNotifications()"
+        style="width:16px;height:16px;cursor:pointer;accent-color:var(--brown)">
+    </label>`).join('');
+  // Also sync reminder days dropdown
+  const rd=document.getElementById('cfg-reminder-days-2');
+  if(rd)rd.value=settings.reminderDays||7;
+}
+
+function toggleCatManager(){
+  const body=document.getElementById('cat-manager-body');
+  const arrow=document.getElementById('cat-mgr-arrow');
+  if(!body)return;
+  const open=body.style.display!=='none';
+  body.style.display=open?'none':'block';
+  if(arrow)arrow.textContent=open?'▶':'▼';
+  if(!open)renderCatManager();
+}
+
+function rebuildCatUI(){
+  // Rebuild log-cat dropdown
+  const logCat=document.getElementById('log-cat');
+  if(logCat){
+    const cur=logCat.value;
+    logCat.innerHTML=CATS().map(n=>`<option value="${esc(n)}"${n===cur?' selected':''}>${esc(n)}</option>`).join('');
+  }
+  // Rebuild receipt filter pills
+  const rf=document.getElementById('rcpt-filters');
+  if(rf){
+    rf.innerHTML='<span class="pill-label">Filter:</span>'
+      +'<button class="pill on" data-rc="all" onclick="setRcptFilter(\'all\',this)">All</button>'
+      +CATS().map(n=>`<button class="pill" data-rc="${esc(n)}" onclick="setRcptFilter('${esc(n)}',this)">${esc(n)}</button>`).join('');
+  }
+  // Rebuild planner filter pills
+  const pp=document.getElementById('plan-pills');
+  if(pp){
+    const curF=planFilterCat;const curFP=planFilterPri;
+    pp.innerHTML='<span class="pill-label">Category:</span>'
+      +`<button class="pill${curF==='all'?' on':''}" data-f="all" onclick="setPlanFilter('cat','all',this)">All</button>`
+      +CATS().map(n=>`<button class="pill${curF===n?' on':''}" data-f="${esc(n)}" onclick="setPlanFilter('cat','${esc(n)}',this)">${esc(n)}</button>`).join('')
+      +'<span class="pill-label" style="margin-left:4px">Priority:</span>'
+      +`<button class="pill${planFilterPri==='H'?' on':''}" data-fp="H" onclick="setPlanFilter('pri','H',this)">High</button>`
+      +`<button class="pill${planFilterPri==='M'?' on':''}" data-fp="M" onclick="setPlanFilter('pri','M',this)">Medium</button>`
+      +`<button class="pill${planFilterPri==='L'?' on':''}" data-fp="L" onclick="setPlanFilter('pri','L',this)">Low</button>`;
+  }
+}
+
+function addCategory(){
+  const name=prompt('New category name:');
+  if(!name||!name.trim())return;
+  const trimmed=name.trim();
+  if(CATS().includes(trimmed)){alert('A category with that name already exists.');return;}
+  categories.push({name:trimmed,color:'#888888'});
+  expenses[trimmed]=[];
+  initExpenses();
+  rebuildCatUI();
+  updatePlanner();
+  triggerAutosave('pl');
+}
+
+function removeCategory(name){
+  const hasExpenses=expenses[name]&&expenses[name].length>0;
+  const hasReceipts=receipts.some(r=>r.cat===name);
+  let msg=`Remove category "${name}"?`;
+  if(hasExpenses||hasReceipts){
+    msg+=`
+
+Note: ${hasExpenses?expenses[name].length+' expense line(s) will be deleted. ':''}${hasReceipts?'Receipts logged under this category will be moved to "Other".':''}`;
+  }
+  if(!confirm(msg))return;
+  // Move orphaned receipts
+  receipts.forEach(r=>{if(r.cat===name)r.cat='Other';});
+  // Remove from categories and expenses
+  categories=categories.filter(c=>c.name!==name);
+  delete expenses[name];
+  // Reset filter if it was on this cat
+  if(planFilterCat===name)planFilterCat='all';
+  if(rcptFilterCat===name)rcptFilterCat='all';
+  rebuildCatUI();
+  updatePlanner();
+  refreshAll();
+  triggerAutosave('pl');
+}
+
+function moveCat(name,dir){
+  if(isLocked(name))return;
+  const extras=categories.filter(c=>!isLocked(c.name));
+  const lockedCount=categories.length-extras.length;
+  const extIdx=extras.findIndex(c=>c.name===name);
+  if(extIdx<0)return;
+  const newExtIdx=extIdx+dir;
+  if(newExtIdx<0||newExtIdx>=extras.length)return;
+  const tmp=extras[extIdx];extras[extIdx]=extras[newExtIdx];extras[newExtIdx]=tmp;
+  // Rebuild categories: locked first, then extras in new order
+  categories=[...categories.filter(c=>isLocked(c.name)),...extras];
+  rebuildCatUI();
+  renderCatManager();
+  updatePlanner();
+  triggerAutosave('pl');
+}
+
+function updateCatColor(name,color){
+  const cat=categories.find(c=>c.name===name);
+  if(cat)cat.color=color;
+  rebuildCatUI();
+  renderCatManager();
+  renderExpenses();
+  triggerAutosave('pl');
+}
+
+function updateCatName(oldName,newName){
+  newName=newName.trim();
+  if(!newName||newName===oldName)return;
+  if(isLocked(oldName)){renderCatManager();return;}
+  if(CATS().includes(newName)){alert('That name is already in use.');return;}
+  const cat=categories.find(c=>c.name===oldName);
+  if(cat)cat.name=newName;
+  // Update expenses key
+  if(expenses[oldName]){expenses[newName]=expenses[oldName];delete expenses[oldName];}
+  // Update receipts
+  receipts.forEach(r=>{if(r.cat===oldName)r.cat=newName;});
+  // Update filters
+  if(planFilterCat===oldName)planFilterCat=newName;
+  if(rcptFilterCat===oldName)rcptFilterCat=newName;
+  rebuildCatUI();
+  renderCatManager();
+  updatePlanner();
+  triggerAutosave('pl');
+}
+
+const LOCKED_CATS=DEFAULT_CATS.map(c=>c.name);
+function isLocked(name){return LOCKED_CATS.includes(name);}
+
+function renderCatManager(){
+  const el=document.getElementById('cat-manager-rows');
+  if(!el)return;
+  const extras=categories.filter(c=>!isLocked(c.name));
+  const locked=categories.filter(c=>isLocked(c.name));
+  let html='';
+  // Locked section
+  html+=`<div style="font-size:11px;font-weight:600;color:var(--text-faint);letter-spacing:0.4px;margin-bottom:4px">Default categories</div>`;
+  html+=locked.map(cat=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border-light)">
+      <input type="color" value="${cat.color}" title="Pick color"
+        style="width:26px;height:26px;padding:1px;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;background:transparent;flex-shrink:0"
+        onchange="updateCatColor('${esc(cat.name)}',this.value)">
+      <span style="flex:1;font-size:13px;color:var(--text-mid);font-weight:500">${esc(cat.name)}</span>
+      <span style="font-size:10px;color:var(--text-faint);padding:2px 7px;border:1px solid var(--border-light);border-radius:8px">locked</span>
+    </div>`).join('');
+  // Extras section
+  if(extras.length){
+    html+=`<div style="font-size:11px;font-weight:600;color:var(--text-faint);letter-spacing:0.4px;margin:10px 0 4px">Custom categories</div>`;
+    html+=extras.map((cat,i)=>{
+      const globalIdx=categories.findIndex(c=>c.name===cat.name);
+      const isFirst=i===0;const isLast=i===extras.length-1;
+      return`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border-light)">
+        <input type="color" value="${cat.color}" title="Pick color"
+          style="width:26px;height:26px;padding:1px;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;background:transparent;flex-shrink:0"
+          onchange="updateCatColor('${esc(cat.name)}',this.value)">
+        <input type="text" value="${esc(cat.name)}"
+          style="flex:1;font-size:13px;padding:3px 8px;height:26px;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--parchment);color:var(--text)"
+          onblur="updateCatName('${esc(cat.name)}',this.value)"
+          onkeydown="if(event.key==='Enter')this.blur()">
+        <div style="display:flex;gap:3px;flex-shrink:0">
+          <button class="del-btn" title="Move up" onclick="moveCat('${esc(cat.name)}',-1)" ${isFirst?'disabled style="opacity:0.3"':''}>&#8679;</button>
+          <button class="del-btn" title="Move down" onclick="moveCat('${esc(cat.name)}',1)" ${isLast?'disabled style="opacity:0.3"':''}>&#8681;</button>
+          <button class="del-btn" title="Remove" onclick="removeCategory('${esc(cat.name)}')" style="color:var(--red);border-color:var(--red)">&#215;</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  el.innerHTML=html;
+}
+
+// ── NOTIFICATIONS ─────────────────────────────
+let dismissedNotifs=new Set(); // ids dismissed this session
+let notifPanelOpen=false;
+
+function toggleNotifPanel(){
+  notifPanelOpen=!notifPanelOpen;
+  document.getElementById('notif-panel').classList.toggle('open',notifPanelOpen);
+  if(notifPanelOpen)renderNotifList();
+  // Close on outside click
+  if(notifPanelOpen){
+    setTimeout(()=>document.addEventListener('click',closeNotifOnOutside),10);
+  }
+}
+
+function closeNotifOnOutside(e){
+  const panel=document.getElementById('notif-panel');
+  const btn=document.getElementById('notif-btn');
+  if(!panel||!btn)return;
+  if(!panel.contains(e.target)&&!btn.contains(e.target)){
+    notifPanelOpen=false;
+    panel.classList.remove('open');
+    document.removeEventListener('click',closeNotifOnOutside);
+  }
+}
+
+function buildNotifications(){
+  const notifs=[];
+  const today=new Date();today.setHours(0,0,0,0);
+  const reminderDays=settings.reminderDays||7;
+  const windowMs=reminderDays*24*60*60*1000;
+  const thisMonth=currentMonth();
+  const dayOfMonth=today.getDate();
+  const daysInMonth=new Date(today.getFullYear(),today.getMonth()+1,0).getDate();
+
+  // ── 1. Upcoming recurring bills ──
+  if(settings.notifs?.bills!==false) recurringBills.forEach(bill=>{
+    if(bill.freq!=='monthly')return;
+    const due=parseInt(bill.day)||1;
+    const daysUntil=due-dayOfMonth;
+    // Look ahead: due this month (and not past) or due early next month within window
+    let daysAway=daysUntil>=0?daysUntil:(daysInMonth-dayOfMonth+due);
+    if(daysAway<=reminderDays){
+      const id='recur-'+bill.id+'-'+thisMonth;
+      if(!dismissedNotifs.has(id)){
+        notifs.push({
+          id,type:'bill',icon:'&#128197;',
+          title:`${bill.vendor||bill.cat} due ${daysAway===0?'today':daysAway===1?'tomorrow':'in '+daysAway+' days'}`,
+          desc:`${bill.cat} · ${fmt(bill.amt)} · day ${due} of every month`,
+          urgency:daysAway<=2?'high':daysAway<=5?'med':'low'
+        });
+      }
+    }
+  });
+
+  // ── 2. Budget warnings — over 80% spent this month ──
+  const monthRecs=receiptsForMonth(thisMonth);
+  if(settings.notifs?.budget!==false){
+  CATS().forEach(name=>{
+    const budget=catMo(name);
+    if(budget<=0)return;
+    const spent=monthRecs.filter(r=>r.cat===name).reduce((s,r)=>s+r.amt,0);
+    const pct=spent/budget;
+    if(pct>=0.8){
+      const id='budget-warn-'+name+'-'+thisMonth;
+      if(!dismissedNotifs.has(id)){
+        const over=spent>budget;
+        notifs.push({
+          id,type:'budget',icon:over?'&#128308;':'&#128993;',
+          title:`${name} ${over?'over budget':'near budget limit'}`,
+          desc:`${fmt(spent)} spent of ${fmt(budget)} budget (${Math.round(pct*100)}%)`,
+          urgency:over?'high':'med'
+        });
+      }
+    }
+  });
+
+  } // end budget
+
+  // ── 3. Yearly expenses approaching (within 30 days) ──
+  if(settings.notifs?.yearly!==false){
+  const yr=today.getFullYear();
+  CATS().forEach(cat=>{
+    (expenses[cat]||[]).filter(e=>e.f==='Y'&&e.a>0).forEach(exp=>{
+      // We don't store the actual due month/day, so we use the recurring bill day if it exists
+      // For yearly items, remind in the same calendar month as today if amount is set
+      // Best we can do without a full date: flag all yearly items every January and in the reminder window
+      const id='yearly-'+cat+'-'+exp.n+'-'+yr;
+      if(!dismissedNotifs.has(id)){
+        // Remind about yearly expenses in the last week of the prior month or first week of the year
+        const monthNum=today.getMonth(); // 0-indexed
+        const dayOfYear=Math.floor((today-new Date(yr,0,0))/(1000*60*60*24));
+        if(dayOfYear<=reminderDays||(today.getDate()>=daysInMonth-reminderDays)){
+          notifs.push({
+            id,type:'yearly',icon:'&#128346;',
+            title:`Yearly expense: ${exp.n}`,
+            desc:`${cat} · ${fmt(exp.a)}/yr (${fmt(exp.a/12)}/mo) — review timing`,
+            urgency:'low'
+          });
+        }
+      }
+    });
+  });
+
+  } // end yearly
+
+  // ── 4. Sync staleness — no push in 7+ days OR never synced with provider configured ──
+  if(settings.notifs?.sync!==false&&settings.provider!=='none'){
+    if(!syncMeta.lastEditedAt){
+      const id='sync-never';
+      if(!dismissedNotifs.has(id)){
+        notifs.push({
+          id,type:'sync',icon:'&#9729;',
+          title:'Cloud not yet synced',
+          desc:'You have a sync provider configured but haven\'t pushed any data yet — tap Sync to get started',
+          urgency:'med'
+        });
+      }
+    } else {
+      const daysSince=(Date.now()-new Date(syncMeta.lastEditedAt).getTime())/(1000*60*60*24);
+      const id='sync-stale-'+Math.floor(daysSince/7);
+      if(daysSince>=7&&!dismissedNotifs.has(id)){
+        notifs.push({
+          id,type:'sync',icon:'&#9729;',
+          title:'Cloud sync is stale',
+          desc:`Last synced ${Math.floor(daysSince)} days ago — tap Sync to update`,
+          urgency:daysSince>=14?'med':'low'
+        });
+      }
+    }
+  }
+
+  // ── 5. Logging nudge — past day 20, no receipts this month ──
+  if(settings.notifs?.nudge!==false&&dayOfMonth>=20&&monthRecs.length===0){
+    const id='log-nudge-'+thisMonth;
+    if(!dismissedNotifs.has(id)){
+      notifs.push({
+        id,type:'nudge',icon:'&#9997;',
+        title:'No receipts logged this month',
+        desc:`It's the ${dayOfMonth}${dayOfMonth===21?'st':dayOfMonth===22?'nd':dayOfMonth===23?'rd':'th'} — add some purchases to track your spending`,
+        urgency:'low'
+      });
+    }
+  }
+
+  // Sort: high urgency first
+  const urgOrder={high:0,med:1,low:2};
+  notifs.sort((a,b)=>(urgOrder[a.urgency]||2)-(urgOrder[b.urgency]||2));
+
+  // Update badge
+  const badge=document.getElementById('notif-badge');
+  if(badge){
+    badge.textContent=notifs.length>9?'9+':notifs.length;
+    badge.classList.toggle('show',notifs.length>0);
+  }
+
+  return notifs;
+}
+
+function renderNotifList(){
+  const notifs=buildNotifications();
+  const el=document.getElementById('notif-list');
+  if(!el)return;
+  if(!notifs.length){
+    el.innerHTML='<div class="notif-empty">&#10003; All clear — nothing needs attention</div>';
+    return;
+  }
+  const urgLabels={high:'Urgent',med:'Heads up',low:'Info'};
+  const urgColors={high:'var(--red)',med:'var(--amber)',low:'var(--text-faint)'};
+  let lastUrgency=null;
+  let html='';
+  notifs.forEach(n=>{
+    if(n.urgency!==lastUrgency){
+      html+=`<div class="notif-section-label" style="color:${urgColors[n.urgency]}">${urgLabels[n.urgency]}</div>`;
+      lastUrgency=n.urgency;
+    }
+    const urgBorderColor={high:'var(--red)',med:'var(--amber)',low:'var(--text-faint)'};
+    const urgBg={high:'rgba(185,64,64,0.06)',med:'rgba(184,120,32,0.06)',low:'transparent'};
+    html+=`<div class="notif-item" id="ni-${n.id}" style="border-left:3px solid ${urgBorderColor[n.urgency]};background:${urgBg[n.urgency]};padding-left:11px">
+      <span class="notif-icon">${n.icon}</span>
+      <div class="notif-body">
+        <div class="notif-title" style="color:${n.urgency==='high'?'var(--red)':n.urgency==='med'?'var(--amber)':'var(--text)'}">${esc(n.title)}</div>
+        <div class="notif-desc">${esc(n.desc)}</div>
+      </div>
+      <button class="notif-dismiss" onclick="dismissNotif('${n.id}')" title="Dismiss">&#215;</button>
+    </div>`;
+  });
+  el.innerHTML=html;
+}
+
+function dismissNotif(id){
+  dismissedNotifs.add(id);
+  buildNotifications(); // refresh badge
+  renderNotifList();
+}
+
+function dismissAllNotifs(){
+  buildNotifications().forEach(n=>dismissedNotifs.add(n.id));
+  buildNotifications();
+  renderNotifList();
+}
+
+// ── TAB SWITCHING ─────────────────────────────
+function switchTab(tab){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+tab).classList.add('active');
+  document.getElementById('tab-'+tab).classList.add('active');
+  if(tab==='log'){renderLogMetrics();renderReceiptList();}
+  if(tab==='report'){populateMonthSelects();renderReport();}
+  if(tab==='planner')updatePlanner();
+}
+
+// ── REPORT VIEW TOGGLE ────────────────────────
+function setReportView(v){
+  reportView=v;
+  document.getElementById('vt-monthly').classList.toggle('on',v==='monthly');
+  document.getElementById('vt-yearly').classList.toggle('on',v==='yearly');
+  document.getElementById('rpt-month-sel').style.display=v==='monthly'?'':'none';
+  document.getElementById('rpt-year-sel').style.display=v==='yearly'?'':'none';
+  document.getElementById('rpt-main-title').textContent=v==='monthly'?'Monthly report':'Hibernation View';
+  document.getElementById('rpt-main-sub').textContent=v==='monthly'?'Budget vs. actual spending':'Full year at a glance — like a hedgehog seeing the whole winter ahead';
+  renderReport();
+}
+
+function renderReport(){
+  if(reportView==='yearly')renderYearlyReport();
+  else renderMonthlyReport();
+}
+
+// ── USER COLORS ───────────────────────────────
+function getUserColor(name){
+  if(!name)return'var(--text-faint)';
+  if(!knownUsers[name])knownUsers[name]=USER_COLORS[Object.keys(knownUsers).length%USER_COLORS.length];
+  return knownUsers[name];
+}
+
+function renderUserBreakdown(recs){
+  const byUser={};
+  recs.forEach(r=>{const u=r.by||'Unknown';if(!byUser[u])byUser[u]=0;byUser[u]+=r.amt;});
+  if(Object.keys(byUser).length<2)return'';
+  return`<div class="user-breakdown">${Object.entries(byUser).sort((a,b)=>b[1]-a[1]).map(([u,a])=>`<div class="user-chip"><div class="user-chip-dot" style="background:${getUserColor(u)}"></div><span class="user-chip-name">${esc(u)}</span><span class="user-chip-amt">${fmt(a)}</span></div>`).join('')}</div>`;
+}
+
+// ── MONTHLY REPORT ────────────────────────────
+function renderMonthlyReport(){
+  const ym=document.getElementById('rpt-month-sel')?.value||currentMonth();
+  const recs=receiptsForMonth(ym);
+  const spent=recs.reduce((s,r)=>s+r.amt,0);
+  const budgetMo=totalExpMo(),inc=totalIncome(),pct=budgetMo>0?Math.min(200,Math.round(spent/budgetMo*100)):0;
+  const rem=inc-spent;
+  const body=document.getElementById('report-body');
+  body.innerHTML=`
+    <div class="metrics-row">
+      <div class="metric"><div class="metric-label">Monthly income</div><div class="metric-val">${fmt(inc)}</div></div>
+      <div class="metric"><div class="metric-label">Total budgeted</div><div class="metric-val">${fmt(budgetMo)}</div></div>
+      <div class="metric"><div class="metric-label">Actually spent</div><div class="metric-val ${spent>budgetMo?'neg':''}">${fmt(spent)}</div></div>
+      <div class="metric"><div class="metric-label">Income remaining</div><div class="metric-val ${rem>=0?'pos':'neg'}">${rem<0?'-':''}${fmt(rem)}</div></div>
+    </div>
+    <div class="card">
+      <div class="card-hdr"><span class="card-title">Spending by category</span><span class="card-sub">${pct}% of budget used</span></div>
+      ${CATS().map(c=>{
+        const budget=catMo(c),actual=recs.filter(r=>r.cat===c).reduce((s,r)=>s+r.amt,0);
+        const cpct=budget>0?Math.min(200,Math.round(actual/budget*100)):(actual>0?100:0);
+        const over=actual>budget&&budget>0,warn=cpct>80&&cpct<=100;
+        const cls=over?'over':warn?'warn':'',ncls=over?'rpt-over':warn?'rpt-warn':'rpt-under';
+        const status=budget>0?(over?fmt(actual-budget)+' over':fmt(budget-actual)+' left'):(actual>0?fmt(actual)+' spent':'no budget set');
+        const catRecs=recs.filter(r=>r.cat===c);
+        return`<div class="rpt-cat-row">
+          <div class="rpt-cat-hdr">
+            <span class="rpt-cat-name" style="color:${catColor(c)}">${c}</span>
+            <span class="rpt-cat-nums"><span class="${ncls}">${fmt(actual)}</span> <span style="color:var(--text-faint)">/ ${fmt(budget)} — </span><span class="${ncls}">${status}</span>${budget>0?` <span style="color:var(--text-faint)">(${cpct}%)</span>`:''}</span>
+          </div>
+          <div class="progress-wrap"><div class="progress-fill ${cls}" style="width:${Math.min(100,cpct)}%"></div></div>
+          ${renderUserBreakdown(catRecs)}
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="card">
+      <div class="card-hdr"><span class="card-title">Transactions</span><span class="card-sub">${recs.length} transaction${recs.length!==1?'s':''}</span></div>
+      ${renderUserBreakdown(recs)}
+      ${recs.length?recs.map(r=>`<div class="receipt-row"><div class="cat-dot" style="background:${catColor(r.cat)}"></div><div class="receipt-info"><div class="receipt-store">${esc(r.vendor||r.cat)}</div><div class="receipt-meta">${esc(r.cat)} &middot; ${fmtDate(r.date)}</div>${r.note?`<div class="receipt-note">${esc(r.note)}</div>`:''}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><div class="receipt-amt">${fmtDec(r.amt)}</div>${r.by?`<div class="receipt-by" style="color:${getUserColor(r.by)}">${esc(r.by)}</div>`:''}</div></div>`).join(''):`<div class="empty-state"><div style="font-size:24px;margin-bottom:6px">&#128467;</div><div>No transactions for ${monthLabel(ym)}</div></div>`}
+    </div>`;
+}
+
+// ── YEARLY / HIBERNATION REPORT ───────────────
+function renderYearlyReport(){
+  const yr=document.getElementById('rpt-year-sel')?.value||currentYear();
+  const archiveRecs=(archives[yr]||[]);
+  const recs=[...receiptsForYear(yr),...archiveRecs.filter(a=>!receipts.find(r=>r.id===a.id))];
+  const totalSpent=recs.reduce((s,r)=>s+r.amt,0);
+  const annualBudget=totalExpMo()*12;
+  const inc=totalIncome()*12;
+  const rem=inc-totalSpent;
+  const nowYr=new Date().getFullYear().toString();
+  const nowMo=new Date().getMonth();
+  const isCurrentYear=(yr===nowYr);
+  const monthlyBudget=totalExpMo();
+  const monthTotals=Array.from({length:12},(_,i)=>{
+    const ym=yr+'-'+String(i+1).padStart(2,'0');
+    return receiptsForMonth(ym).reduce((s,r)=>s+r.amt,0);
+  });
+  const maxMonth=Math.max(...monthTotals,monthlyBudget,1);
+  const refPct=Math.round((monthlyBudget/maxMonth)*100);
+  const stars=Array.from({length:20},()=>`<circle cx="${Math.random()*100}%" cy="${Math.random()*100}%" r="${Math.random()*1.2+0.3}" fill="white" opacity="${Math.random()*0.5+0.2}"/>`).join('');
+  const body=document.getElementById('report-body');
+  const barArea=56;
+  body.innerHTML=`
+    <div class="hiber-header">
+      <svg class="hiber-stars" viewBox="0 0 100 100" preserveAspectRatio="none">${stars}</svg>
+      <div class="hiber-title">&#128564; Hibernation View — ${yr}</div>
+      <div class="hiber-sub">Bars show monthly spending. Dashed line = monthly budget (${fmt(monthlyBudget)}). Shaded bars = future months.</div>
+      <div style="position:relative;margin-top:12px;padding-bottom:4px">
+        <div class="month-bars" style="position:relative;z-index:1;padding-top:16px">
+          ${monthTotals.map((v,i)=>{
+            const isCur=isCurrentYear&&i===nowMo;
+            const isFuture=isCurrentYear&&i>nowMo;
+            const h=isFuture?3:Math.max(3,Math.round((v/maxMonth)*barArea));
+            const bg=isFuture?'rgba(255,255,255,0.1)':v>monthlyBudget?'#b94040':v>monthlyBudget*0.85?'#b87820':'#4a7c59';
+            return '<div class="month-bar-wrap" style="position:relative">'
+              +(isCur?'<span style=\'position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:8px;color:rgba(232,213,188,0.85);font-style:italic;white-space:nowrap\'>now</span>':'')
+              +'<div class="month-bar" style="height:'+h+'px;background:'+bg+';opacity:'+(isFuture?0.5:0.85)+';'+(isCur?'outline:1.5px dashed rgba(255,255,255,0.7);outline-offset:-1px;':'')+'">'
+              +'</div>'
+              +'<div class="month-bar-lbl" style="color:rgba(232,213,188,'+(isCur?1:0.7)+');font-weight:'+(isCur?700:400)+'">'+MONTH_NAMES[i].slice(0,1)+'</div>'
+              +'</div>';
+          }).join('')}
+        </div>
+        <div style="position:absolute;left:0;right:0;bottom:${16+Math.round((1-monthlyBudget/maxMonth)*barArea)}px;border-top:1.5px dashed rgba(255,255,255,0.45);z-index:2;pointer-events:none"></div>
+      </div>
+      <div style="display:flex;gap:14px;font-size:10px;color:rgba(232,213,188,0.55);margin-top:6px;flex-wrap:wrap">
+        <span style="color:#4a7c59">&#9632; Under budget</span>
+        <span style="color:#b87820">&#9632; Near limit</span>
+        <span style="color:#b94040">&#9632; Over budget</span>
+        <span>&#x2504; Monthly budget (${fmt(monthlyBudget)})</span>
+      </div>
+    </div>
+    </div>
+    <div class="metrics-row">
+      <div class="metric"><div class="metric-label">Annual income</div><div class="metric-val">${fmt(inc)}</div></div>
+      <div class="metric"><div class="metric-label">Annual budget</div><div class="metric-val">${fmt(annualBudget)}</div></div>
+      <div class="metric"><div class="metric-label">Total spent ${yr}</div><div class="metric-val ${totalSpent>annualBudget?'neg':''}">${fmt(totalSpent)}</div></div>
+      <div class="metric"><div class="metric-label">Income remaining</div><div class="metric-val ${rem>=0?'pos':'neg'}">${rem<0?'-':''}${fmt(rem)}</div></div>
+    </div>
+    ${renderUserBreakdown(recs)}
+    <div class="card">
+      <div class="card-hdr"><span class="card-title">Year by category</span><span class="card-sub">${recs.length} transactions</span></div>
+      ${CATS().map(c=>{
+        const annBudget=catMo(c)*12;
+        const catRecs=recs.filter(r=>r.cat===c);
+        const actual=catRecs.reduce((s,r)=>s+r.amt,0);
+        const monthlyTotals=Array.from({length:12},(_,i)=>{
+          const ym=yr+'-'+String(i+1).padStart(2,'0');
+          return catRecs.filter(r=>monthKey(r.date)===ym).reduce((s,r)=>s+r.amt,0);
+        });
+        const maxCat=Math.max(...monthlyTotals,catMo(c),1);
+        const cpct=annBudget>0?Math.min(200,Math.round(actual/annBudget*100)):0;
+        const over=actual>annBudget&&annBudget>0,warn=cpct>80&&cpct<=100;
+        const cls=over?'over':warn?'warn':'',ncls=over?'rpt-over':warn?'rpt-warn':'rpt-under';
+        return`<div class="hiber-cat-section">
+          <div class="hiber-cat-title" style="color:${catColor(c)}">
+            <span>${c}</span>
+            <span class="hiber-cat-annual"><span class="${ncls}">${fmt(actual)}</span> / ${fmt(annBudget)} yr</span>
+          </div>
+          <div class="month-bars" style="height:44px;margin-bottom:2px">
+            ${monthlyTotals.map((v,i)=>`<div class="month-bar-wrap">
+              <div class="month-bar" style="height:${v>0?Math.round((v/maxCat)*38)+3:2}px;background:${v>catMo(c)?'#b94040':v>catMo(c)*0.85?'#b87820':catColor(c)};opacity:0.75;border-radius:2px 2px 0 0"></div>
+              <div class="month-bar-lbl">${MONTH_NAMES[i].slice(0,1)}</div>
+            </div>`).join('')}
+          </div>
+          <div class="progress-wrap" style="height:5px;margin-bottom:4px"><div class="progress-fill ${cls}" style="width:${Math.min(100,cpct)}%"></div></div>
+          ${renderUserBreakdown(catRecs)}
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+// ── RECURRING BILLS ──────────────────────────
+function setRecurring(mode){
+  currentRecurring=mode;
+  document.getElementById('rt-none').classList.toggle('on',mode==='none');
+  document.getElementById('rt-monthly').classList.toggle('on',mode==='monthly');
+  const row=document.getElementById('recur-day-row');
+  if(row)row.style.display=mode==='monthly'?'block':'none';
+}
+
+function processRecurringBills(){
+  if(!recurringBills.length)return;
+  const today=todayStr();
+  const todayDay=new Date().getDate();
+  const ym=currentMonth();
+  let added=0;
+  recurringBills.forEach(bill=>{
+    if(bill.freq!=='monthly')return;
+    const dueDay=parseInt(bill.day)||1;
+    if(todayDay<dueDay)return; // not due yet this month
+    const alreadyLogged=receipts.some(r=>r.recurId===bill.id&&monthKey(r.date)===ym);
+    if(alreadyLogged)return;
+    receipts.push({
+      id:uid(),cat:bill.cat,amt:bill.amt,vendor:bill.vendor,
+      note:bill.note,date:today,by:settings.username||'',
+      recurring:true,recurId:bill.id
+    });
+    added++;
+  });
+  if(added>0){
+    receipts.sort((a,b)=>b.date.localeCompare(a.date));
+    populateMonthSelects();renderLogMetrics();renderReceiptList();
+    setGSB('info',`${added} recurring bill${added>1?'s':''} auto-logged`,'');
+  }
+}
+
+// ── VENDOR AUTOCOMPLETE ───────────────────────
+function showVendorDD(){
+  const inp=document.getElementById('log-vendor'),dd=document.getElementById('vendor-dd');
+  const cat=document.getElementById('log-cat').value,q=inp.value.trim().toLowerCase();
+  const s=Object.entries(vendors).filter(([n])=>!q||n.toLowerCase().includes(q)).sort((a,b)=>{const ac=a[1].cat===cat?1:0,bc=b[1].cat===cat?1:0;return bc-ac||b[1].count-a[1].count;}).slice(0,7);
+  if(!s.length){dd.style.display='none';return;}
+  const multi=new Set(s.map(([,v])=>v.cat)).size>1;
+  dd.innerHTML=s.map(([n,v])=>`<div class="vendor-item" onmousedown="selectVendor('${esc(n)}','${v.cat}')">${esc(n)}${multi?`<span class="vendor-item-cat">${v.cat}</span>`:''}</div>`).join('')+`<button class="vendor-clear-btn" onmousedown="clearVendors()">Clear saved vendors</button>`;
+  dd.style.display='block';
+}
+function hideVendorDD(){setTimeout(()=>{document.getElementById('vendor-dd').style.display='none';},150);}
+function selectVendor(n,cat){document.getElementById('log-vendor').value=n;document.getElementById('log-cat').value=cat;document.getElementById('vendor-dd').style.display='none';}
+function clearVendors(){if(confirm('Clear all saved vendors?')){vendors={};document.getElementById('vendor-dd').style.display='none';}}
+function saveVendor(n,cat){if(!n)return;const k=n.trim();if(!k)return;if(!vendors[k])vendors[k]={cat,count:0};vendors[k].count++;vendors[k].cat=cat;enforceVendorLimit();}
+
+// ── LOG RECEIPT ───────────────────────────────
+function updateDateLabel(){
+  const el=document.getElementById('log-date');
+  if(el&&!el.value)el.value=todayStr();
+}
+
+function addReceipt(){
+  const cat=document.getElementById('log-cat').value;
+  const amt=parseFloat(document.getElementById('log-amt').value)||0;
+  const vendor=document.getElementById('log-vendor').value.trim();
+  const note=document.getElementById('log-note').value.trim();
+  const date=document.getElementById('log-date').value||todayStr();
+  if(amt<=0){document.getElementById('log-amt').focus();return;}
+  saveVendor(vendor,cat);
+  // Handle recurring bill
+  if(currentRecurring==='monthly'){
+    const day=parseInt(document.getElementById('log-recur-day').value)||new Date().getDate();
+    const billId=uid();
+    recurringBills.push({id:billId,cat,amt,vendor,note,freq:'monthly',day,by:settings.username||''});
+    receipts.push({id:uid(),cat,amt,vendor,note,date,by:settings.username||'',recurring:true,recurId:billId});
+  } else {
+    receipts.push({id:uid(),cat,amt,vendor,note,date,by:settings.username||''});
+  }
+  receipts.sort((a,b)=>b.date.localeCompare(a.date));
+  document.getElementById('log-amt').value='';
+  document.getElementById('log-vendor').value='';
+  document.getElementById('log-note').value='';
+  document.getElementById('log-date').value=todayStr();
+  setRecurring('none');
+  populateMonthSelects();renderLogMetrics();renderReceiptList();
+  triggerAutosave('log');
+}
+
+function setRcptFilter(cat,btn){rcptFilterCat=cat;document.querySelectorAll('#rcpt-filters .pill').forEach(b=>b.classList.toggle('on',b.dataset.rc===cat));renderReceiptList();}
+
+function renderLogMetrics(){
+  const ym=document.getElementById('log-month-sel')?.value||currentMonth();
+  const recs=receiptsForMonth(ym),spent=recs.reduce((s,r)=>s+r.amt,0);
+  const budget=totalExpMo(),rem=budget-spent,pct=budget>0?Math.round(spent/budget*100):0;
+  document.getElementById('log-metrics').innerHTML=`<div class="metric"><div class="metric-label">Logged ${monthLabel(ym)}</div><div class="metric-val">${fmt(spent)}</div></div><div class="metric"><div class="metric-label">Monthly budget</div><div class="metric-val">${fmt(budget)}</div></div><div class="metric"><div class="metric-label">Remaining</div><div class="metric-val ${rem>=0?'pos':'neg'}">${rem<0?'-':''}${fmt(rem)}</div></div><div class="metric"><div class="metric-label">Budget used</div><div class="metric-val ${pct>100?'neg':pct>85?'warn':'pos'}">${pct}%</div></div>`;
+}
+
+function renderReceiptList(){
+  const ym=document.getElementById('log-month-sel')?.value||currentMonth();
+  let recs=receiptsForMonth(ym);
+  if(rcptFilterCat!=='all')recs=recs.filter(r=>r.cat===rcptFilterCat);
+  const el=document.getElementById('receipt-list');
+  // soft limit warning
+  const rcWarn=document.getElementById('receipt-limit-warn');
+  if(rcWarn){const pct=receipts.length/LIMITS.receipts;rcWarn.style.display=pct>=LIMITS.warnAt?'block':'none';rcWarn.textContent=`${receipts.length} active receipts — approaching the ${LIMITS.receipts} limit. Older years will archive automatically on next app open.`;}
+  if(!recs.length){el.innerHTML=`<div class="empty-state"><div style="font-size:28px;margin-bottom:8px">&#128467;</div><div>No receipts logged${rcptFilterCat!=='all'?' for '+rcptFilterCat:' yet'}</div><div style="font-size:12px;margin-top:4px;color:var(--text-faint)">Use the form above to log your first purchase</div></div>`;return;}
+  el.innerHTML=recs.map(r=>`<div class="receipt-row"><div class="cat-dot" style="background:${catColor(r.cat)}"></div><div class="receipt-info"><div class="receipt-store" style="display:flex;align-items:center;gap:5px">${esc(r.vendor||r.cat)}${r.recurring?'<span class="recur-badge">&#8635; recurring</span>':''}</div><div class="receipt-meta">${esc(r.cat)} &middot; ${fmtDate(r.date)}</div>${r.note?`<div class="receipt-note">${esc(r.note)}</div>`:''}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><div class="receipt-amt">${fmtDec(r.amt)}</div>${r.by?`<div class="receipt-by" style="color:${getUserColor(r.by)}">${esc(r.by)}</div>`:''}</div><button class="receipt-del" onclick="deleteReceipt('${r.id}')">&#215;</button></div>`).join('');
+}
+
+function deleteReceipt(id){receipts=receipts.filter(r=>r.id!==id);renderLogMetrics();renderReceiptList();triggerAutosave('log');}
+
+function exportReceiptsCSV(){
+  const ym=document.getElementById('log-month-sel')?.value||currentMonth();
+  let csv='Date,Category,Vendor,Amount,Note,LoggedBy\n';
+  receiptsForMonth(ym).forEach(r=>csv+=`${r.date},${r.cat},"${r.vendor||''}",${r.amt.toFixed(2)},"${r.note||''}","${r.by||''}"\n`);
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`hedgie-receipts-${ym}.csv`;a.click();
+}
+
+// ── PLANNER ───────────────────────────────────
+let plannerDebounce=null;
+function plannerChanged(){clearTimeout(plannerDebounce);plannerDebounce=setTimeout(()=>triggerAutosave('pl'),2000);}
+
+function updatePlanner(){
+  const inc=totalIncome(),exp=totalExpMo(),net=inc-exp,pct=inc>0?Math.min(200,Math.round(exp/inc*100)):0,surplus=Math.max(0,net);
+  document.getElementById('pl-metrics').innerHTML=`<div class="metric"><div class="metric-label">Income / mo</div><div class="metric-val">${fmt(inc)}</div></div><div class="metric"><div class="metric-label">Expenses / mo</div><div class="metric-val">${fmt(exp)}</div></div><div class="metric"><div class="metric-label">Net cash flow</div><div class="metric-val ${net>=0?'pos':'neg'}">${net<0?'-':''}${fmt(net)}</div></div><div class="metric"><div class="metric-label">Buffer allocated</div><div class="metric-val" id="pl-buf-total">$0</div></div>`;
+  document.getElementById('pl-pct-lbl').textContent=pct+'%';
+  const ff=document.getElementById('pl-flow-fill');ff.style.width=Math.min(100,pct)+'%';ff.className='progress-fill'+(pct>90&&pct<=100?' warn':pct>100?' over':'');
+  const {alloc,catScore:_cs}=calcBufferAlloc(surplus);
+  let tb=0;CATS().forEach(c=>{const a=alloc[c]||0;tb+=a;const el=document.getElementById('bv-'+c);if(el)el.textContent=fmt(a);const bar=document.getElementById('bv-bar-'+c);if(bar){const max=Math.max(...Object.values(alloc),1);bar.style.width=Math.round(a/max*100)+'%';}});
+  const bt=document.getElementById('pl-buf-total');if(bt)bt.textContent=fmt(tb);
+  const btAmt=document.getElementById('buf-total-amt');if(btAmt)btAmt.textContent=fmt(tb);
+  document.getElementById('buf-avail').textContent='Surplus: '+fmt(surplus);
+  renderIncome();renderExpenses();
+}
+
+function renderIncome(){
+  const el=document.getElementById('income-list');if(!el)return;el.innerHTML='';
+  income.forEach((r,i)=>{const d=document.createElement('div');d.style.cssText='display:flex;gap:8px;align-items:center;margin-bottom:6px';
+    d.innerHTML=`<input type="text" style="flex:1" value="${esc(r.n)}" placeholder="Source name" onchange="income[${i}].n=this.value">
+    <input type="number" style="width:130px" value="${r.a||''}" placeholder="0" min="0" step="1" onchange="income[${i}].a=parseFloat(this.value)||0;updatePlanner()">
+    <button class="del-btn" onclick="income.splice(${i},1);renderIncome();updatePlanner()">&#215;</button>`;
+    el.appendChild(d);});
+}
+function addIncome(){income.push({n:'',a:0});renderIncome();updatePlanner();}
+
+function renderExpenses(){
+  const sec=document.getElementById('expense-sections');if(!sec)return;sec.innerHTML='';
+  CATS().forEach(c=>{
+    if(planFilterCat!=='all'&&planFilterCat!==c)return;
+    const visRows=planFilterPri==='all'?expenses[c]:expenses[c].filter(r=>r.p===planFilterPri);
+    const ct=catMo(c),hasYr=expenses[c].some(r=>r.f==='Y');
+    const wrap=document.createElement('div');wrap.className='card';
+    wrap.innerHTML=`<div class="card-hdr"><span class="card-title" style="color:${catColor(c)}">${esc(c)}${hasYr?' <span style="font-size:11px;color:var(--text-faint);font-weight:400">· yearly items</span>':''}</span><span class="card-sub">${fmt(ct)}/mo &middot; ${fmt(ct*12)}/yr</span></div>
+    <div class="exp-grid" style="margin-bottom:4px"><span class="col-hdr">Expense</span><span class="col-hdr r">Amount</span><span class="col-hdr c">Freq</span><span class="col-hdr">Priority</span><span class="col-hdr r yr-col">Mo equiv</span><span></span></div>
+    <div id="erows-${c}"></div><button class="add-exp-btn" onclick="addExpense('${c}')">+ Add expense</button>`;
+    sec.appendChild(wrap);
+    const rc=document.getElementById('erows-'+c);
+    visRows.forEach(r=>{const ri=expenses[c].indexOf(r),mo=moAmt(r);
+      const rd=document.createElement('div');rd.className='exp-grid';rd.style.cssText='padding:4px 0;border-top:1px solid var(--border-light)';
+      rd.innerHTML=`<input class="exp-inp-name" type="text" value="${esc(r.n)}" placeholder="Expense name" onchange="expenses['${c}'][${ri}].n=this.value;plannerChanged()">
+      <input class="exp-inp-amt" type="number" value="${r.a||''}" placeholder="0" min="0" step="1" onchange="expenses['${c}'][${ri}].a=parseFloat(this.value)||0;updatePlanner()">
+      <div class="freq-tog"><button class="${r.f==='M'?'on':''}" onclick="expenses['${c}'][${ri}].f='M';updatePlanner()">Mo</button><button class="${r.f==='Y'?'on':''}" onclick="expenses['${c}'][${ri}].f='Y';updatePlanner()">Yr</button></div>
+      <select class="exp-sel" onchange="expenses['${c}'][${ri}].p=this.value;plannerChanged()"><option value="H"${r.p==='H'?' selected':''}>High</option><option value="M"${r.p==='M'?' selected':''}>Med</option><option value="L"${r.p==='L'?' selected':''}>Low</option></select>
+      <span class="yr-note yr-col">${r.f==='Y'?fmt(mo)+'/mo':''}</span>
+      <button class="del-btn" onclick="expenses['${c}'].splice(${ri},1);updatePlanner()">&#215;</button>`;
+      rc.appendChild(rd);});
+  });
+}
+function addExpense(c){if(expenses[c].length>=LIMITS.expPerCat){return;}expenses[c].push({n:'',a:0,p:'M',f:'M'});updatePlanner();}
+
+function calcBufferAlloc(surplus){
+  // Score each category by weighted monthly cost of its expense lines
+  // H lines count at 3x, M at 2x, L at 1x — then allocate surplus proportionally
+  const catPriority={};
+  const catScore={};
+  CATS().forEach(c=>{
+    const lines=expenses[c];
+    let score=0;
+    let dominantPri='L';
+    let hCost=0,mCost=0,lCost=0;
+    lines.forEach(l=>{
+      const mo=moAmt(l);
+      if(l.p==='H'){score+=mo*3;hCost+=mo;}
+      else if(l.p==='M'){score+=mo*2;mCost+=mo;}
+      else{score+=mo*1;lCost+=mo;}
+    });
+    // dominant priority = highest-cost tier
+    if(hCost>0) dominantPri='H';
+    else if(mCost>0) dominantPri='M';
+    catPriority[c]=dominantPri;
+    // minimum score of 1 so empty categories still show up
+    catScore[c]=Math.max(score,1);
+  });
+  const totalScore=Object.values(catScore).reduce((a,b)=>a+b,0)||1;
+  const alloc={};
+  CATS().forEach(c=>{alloc[c]=surplus*(catScore[c]/totalScore);});
+  return{alloc,catPriority,catScore};
+}
+
+function renderBuffers(){
+  const el=document.getElementById('buffer-list');if(!el)return;el.innerHTML='';
+  const surplus=Math.max(0,totalIncome()-totalExpMo());
+  const {alloc,catPriority,catScore}=calcBufferAlloc(surplus);
+  const maxAlloc=Math.max(...Object.values(alloc),1);
+  const priLabel={H:'High priority',M:'Medium priority',L:'Low priority'};
+  CATS().forEach(c=>{
+    const a=alloc[c],pri=catPriority[c];
+    const barPct=maxAlloc>0?Math.round(a/maxAlloc*100):0;
+    const d=document.createElement('div');d.className='buf-card';
+    const score=catScore[c]||0;
+    const scoreLabel=score>0?`weighted score: ${Math.round(score)}`:'no expenses set';
+    d.innerHTML=`
+      <div style="min-width:70px">
+        <span style="font-size:13px;font-weight:600;color:${catColor(c)}">${esc(c)}</span>
+        <div style="font-size:10px;color:var(--text-faint);margin-top:1px">${scoreLabel}</div>
+      </div>
+      <div class="buf-card-bar"><div class="buf-card-fill" id="bv-bar-${c}" style="width:${barPct}%;background:${catColor(c)};opacity:0.7"></div></div>
+      <span class="buf-pri-badge buf-pri-${pri}" title="${priLabel[pri]}">${priLabel[pri].split(' ')[0]}</span>
+      <span style="font-size:13px;font-weight:600;min-width:60px;text-align:right" id="bv-${c}">${fmt(a)}</span>`;
+    el.appendChild(d);
+  });
+}
+
+function setPlanFilter(type,val,btn){
+  if(type==='cat'){planFilterCat=val;document.querySelectorAll('#plan-pills .pill[data-f]').forEach(b=>b.classList.toggle('on',b.dataset.f===val));}
+  else{planFilterPri=planFilterPri===val?'all':val;document.querySelectorAll('#plan-pills .pill[data-fp]').forEach(b=>b.classList.toggle('on',b.dataset.fp===planFilterPri));}
+  renderExpenses();
+}
+
+// ── SAVE / RESTORE ────────────────────────────
+async function getFullState(){
+  const p={_hedgie:true,version:syncMeta.version,lastEditedBy:settings.username||'',lastEditedAt:new Date().toISOString(),data:{categories,income,expenses,receipts,vendors,archives,recurringBills}};
+  p.signature=await signPayload(p);return p;
+}
+
+function saveJSON(){
+  getFullState().then(state=>{
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));
+    const d=new Date();a.download=`hedgie-${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}.json`;a.click();
+  });
+}
+
+function restoreJSON(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=async e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      if(settings.sharedKey&&data.signature){
+        const vr=await verifyPayload(data);
+        if(!vr.ok&&!confirm('Signature mismatch — this backup may be from a different household. Load anyway?'))return;
+      }
+      applyPayload(data);input.value='';
+    }catch(e){alert('Could not read this file.');}
+  };
+  reader.readAsText(file);
+}
+
+function applyPayload(payload){
+  const d=payload.data||payload;
+  if(d.income)income=d.income;if(d.expenses)expenses=d.expenses;if(d.bufferPct)bufferPct=d.bufferPct;if(d.receipts)receipts=d.receipts;if(d.vendors)vendors=d.vendors;
+  if(payload.archives)archives=payload.archives;
+  runAutoArchive();
+  syncMeta.version=payload.version||0;syncMeta.lastEditedBy=payload.lastEditedBy||'';syncMeta.lastEditedAt=payload.lastEditedAt||'';syncMeta.lastPulledVersion=payload.version||0;
+  refreshAll();
+}
+
+function refreshAll(){initExpenses();rebuildCatUI();buildNotifications();document.getElementById('cat-count-lbl')&&(document.getElementById('cat-count-lbl').textContent=CATS().length+' categories');populateMonthSelects();renderBuffers();updatePlanner();renderLogMetrics();renderReceiptList();if(document.getElementById('panel-report').classList.contains('active'))renderReport();}
+
+function gatherRows(){
+  let rows=[];
+  income.forEach(r=>rows.push({type:'Income',cat:'',name:r.n,pri:'',freq:'Monthly',amount:r.a,monthly:r.a,annual:(r.a*12).toFixed(2)}));
+  CATS().forEach(c=>expenses[c].forEach(r=>{const mo=moAmt(r);rows.push({type:'Expense',cat:c,name:r.n,pri:PRIS[r.p],freq:r.f==='Y'?'Yearly':'Monthly',amount:r.a||0,monthly:mo.toFixed(2),annual:(mo*12).toFixed(2)});}));
+  return rows;
+}
+function exportCSV(){
+  let csv='Type,Category,Name,Priority,Frequency,Amount,Monthly Equiv,Annual Equiv\n';
+  gatherRows().forEach(r=>csv+=`${r.type},${r.cat},"${r.name}",${r.pri},${r.freq},${r.amount},${r.monthly},${r.annual}\n`);
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='hedgie-budget.csv';a.click();
+}
+function copySheets(){
+  let txt='Type\tCategory\tName\tPriority\tFrequency\tAmount\tMonthly Equiv\tAnnual Equiv\n';
+  gatherRows().forEach(r=>txt+=`${r.type}\t${r.cat}\t${r.name}\t${r.pri}\t${r.freq}\t${r.amount}\t${r.monthly}\t${r.annual}\n`);
+  navigator.clipboard.writeText(txt).then(()=>{const btn=document.getElementById('copy-btn');btn.textContent='Copied!';setTimeout(()=>btn.textContent='Copy for Sheets',1500);});
+}
+function exportArchiveCSV(){
+  const allArc=Object.values(archives).flat().sort((a,b)=>b.date.localeCompare(a.date));
+  if(!allArc.length){alert('No archived receipts yet.');return;}
+  let csv='Date,Category,Vendor,Amount,Note,LoggedBy\n';
+  allArc.forEach(r=>csv+=`${r.date},${r.cat},"${r.vendor||''}",${r.amt.toFixed(2)},"${r.note||''}","${r.by||''}"\n`);
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='hedgie-archived-receipts.csv';a.click();
+}
+function resetAll(){if(!confirm('Reset ALL data?'))return;income=[{n:'Primary salary',a:0},{n:'Side income',a:0}];categories=DEFAULT_CATS.map(c=>({...c}));expenses={};initExpenses();bufferPct={};receipts=[];vendors={};recurringBills=[];syncMeta={version:0,lastEditedBy:'',lastEditedAt:'',lastPulledVersion:0};refreshAll();}
+
+// ── INIT ──────────────────────────────────────
+initExpenses();
+runAutoArchive();
+updateDateLabel();
+rebuildCatUI();
+document.getElementById('cat-count-lbl')&&(document.getElementById('cat-count-lbl').textContent=CATS().length+' categories');
+setGSB('idle','Ready','');
+updateSyncButton();
+populateMonthSelects();
+renderBuffers();
+updatePlanner();
+renderLogMetrics();
+renderReceiptList();
+checkWelcome();
+loadSyncMeta();
+processRecurringBills();
+buildNotifications(); // runs after settings and syncMeta loaded
+// Refresh notifications every 5 minutes while app is open
+setInterval(()=>{buildNotifications();if(notifPanelOpen)renderNotifList();}, 5*60*1000);
+</script>
+</body>
+</html>
