@@ -1,6 +1,6 @@
 # 🦔 Hedgie — Hedge Your Spending
 
-A personal budget planner built as a single self-contained HTML file. No server required, no npm install, no build step. Open the file in any browser and start budgeting.
+A lightweight household budget planner as a single-page-app. No server, no install, no dependencies. Pilot app currently hosted at https://lancebramsay.github.io/hedgie/ for testing purposes.
 
 ## Features
 
