@@ -967,10 +967,10 @@ async function quickSync(){
 
     let resolved;
     if(isFirstSync){
-      // First sync — just apply cloud data, no push needed
-
+      // First sync — pull only, never push blank local state over real cloud data
       applyPayload(cloud);
       syncMeta.lastPulledVersion=cloud.version||0;
+      saveSyncMeta();
       updateSyncStatus('ok','First sync complete');
       setGSB('cloud','First sync complete','v'+cloud.version+' by '+(cloud.lastEditedBy||'cloud'));
       if(btn){btn.style.opacity='1';btn.style.pointerEvents='';}
@@ -2104,7 +2104,7 @@ function exportArchiveCSV(){
   allArc.forEach(r=>csv+=`${r.date},${r.cat},"${r.vendor||''}",${r.amt.toFixed(2)},"${r.note||''}","${r.by||''}"\n`);
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='hedgie-archived-receipts.csv';a.click();
 }
-function resetAll(){if(!confirm('Reset ALL data?'))return;income=[{n:'Primary salary',a:0},{n:'Side income',a:0}];categories=DEFAULT_CATS.map(c=>({...c}));expenses={};initExpenses();bufferPct={};receipts=[];vendors={};recurringBills=[];syncMeta={version:0,lastEditedBy:'',lastEditedAt:'',lastPulledVersion:0};refreshAll();}
+function resetAll(){if(!confirm('Reset ALL data?'))return;income=[{n:'Primary salary',a:0},{n:'Side income',a:0}];categories=DEFAULT_CATS.map(c=>({...c}));expenses={};initExpenses();bufferPct={};receipts=[];vendors={};recurringBills=[];syncMeta={version:0,lastEditedBy:'',lastEditedAt:'',lastPulledVersion:0};localStorage.removeItem('hedgie_syncmeta');refreshAll();}
 
 // ── INIT ──────────────────────────────────────
 initExpenses();
