@@ -1,6 +1,6 @@
 # 🦔 Hedgie — Hedge Your Spending
 
-A lightweight household budget planner as a single-page-app. No server, no install, no dependencies. Pilot app currently hosted at https://lancebramsay.github.io/hedgie/ for testing purposes.
+A lightweight household budget planner as a single-page-app. No server, no install, no dependencies. Pilot app currently hosted at https://lancebramsay.github.io/hedgie/ for testing purposes. Mirror at https://hedgie.pages.dev/.
 
 ## Features
 
