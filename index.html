@@ -1062,6 +1062,12 @@ function triggerAutosave(source){
 
 // ── CLOUD PAYLOAD ─────────────────────────────
 async function buildPayload(){
+  // Ensure categories includes any expense keys not already tracked
+  Object.keys(expenses).forEach(name=>{
+    if(!categories.find(c=>c.name===name)){
+      categories.push({name,color:'#888888'});
+    }
+  });
   const p={_hedgie:true,version:(syncMeta.version||0)+1,lastEditedBy:settings.username||'Unknown',lastEditedAt:new Date().toISOString(),data:{categories,income,expenses,receipts,vendors,archives,recurringBills}};
   p.signature=await signPayload(p);
   return p;
@@ -1069,15 +1075,23 @@ async function buildPayload(){
 
 function applyPayload(payload){
   const d=payload.data||payload;
-  // Handle old schema — if no categories key, keep current categories
+  // Handle categories — merge locked defaults + custom
   if(d.categories&&d.categories.length){
-    // Merge: keep locked defaults with potentially updated colors, append custom cats
     const locked=DEFAULT_CATS.map(dc=>{
       const saved=d.categories.find(sc=>sc.name===dc.name);
       return saved||dc;
     });
     const custom=d.categories.filter(sc=>!LOCKED_CATS.includes(sc.name));
     categories=[...locked,...custom];
+  }
+  // Reconstruct any categories that exist in expenses but not in categories array
+  // (handles payloads pushed before category tracking was complete)
+  if(d.expenses){
+    Object.keys(d.expenses).forEach(name=>{
+      if(!categories.find(c=>c.name===name)){
+        categories.push({name,color:'#888888'});
+      }
+    });
   }
   if(d.income)income=d.income;
   if(d.expenses){
