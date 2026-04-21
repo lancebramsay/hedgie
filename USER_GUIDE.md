@@ -268,7 +268,7 @@ Hedgie uses the Web Crypto API for HMAC-SHA256 payload signing, which requires a
 
 ## Multi-user households
 
-Hedgie is designed for households where two people share finances.
+Hedgie is designed for households where two or more people share finances.
 
 ### Setup
 
