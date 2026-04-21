@@ -1459,7 +1459,8 @@ function buildNotifications(){
   // ── 1. Upcoming recurring bills ──
   if(settings.notifs?.bills!==false) recurringBills.forEach(bill=>{
     if(bill.freq!=='monthly')return;
-    const due=parseInt(bill.day)||1;
+    const rawDue=parseInt(bill.day)||1;
+    const due=Math.min(rawDue,daysInMonth); // clamp to actual month length
     const daysUntil=due-dayOfMonth;
     // Look ahead: due this month (and not past) or due early next month within window
     let daysAway=daysUntil>=0?daysUntil:(daysInMonth-dayOfMonth+due);
@@ -1814,7 +1815,9 @@ function processRecurringBills(){
   let added=0;
   recurringBills.forEach(bill=>{
     if(bill.freq!=='monthly')return;
-    const dueDay=parseInt(bill.day)||1;
+    const rawDay=parseInt(bill.day)||1;
+    const daysInThisMonth=new Date(new Date().getFullYear(),new Date().getMonth()+1,0).getDate();
+    const dueDay=Math.min(rawDay,daysInThisMonth); // clamp to actual month length
     if(todayDay<dueDay)return; // not due yet this month
     const alreadyLogged=receipts.some(r=>r.recurId===bill.id&&monthKey(r.date)===ym);
     if(alreadyLogged)return;
