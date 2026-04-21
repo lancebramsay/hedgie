@@ -769,6 +769,8 @@ async function verifyPayload(payload){
 return {ok:true, unsigned:true};}
   // Key configured but payload has no signature — accept but flag
   if(!payload.signature) return {ok:true, unsigned:true};
+  // No _hedgie flag but has data — treat as valid unsigned legacy payload
+  if(!payload._hedgie&&payload.data) return {ok:true, unsigned:true};
   const encoder=new TextEncoder();
   const data=JSON.stringify(payload.data)+payload.version+payload.lastEditedAt;
   try{
@@ -944,7 +946,7 @@ async function quickSync(){
       if(btn){btn.style.opacity='1';btn.style.pointerEvents='';}
       return;
     }
-    if(!cloud||!cloud._hedgie){
+    if(!cloud||(!cloud._hedgie&&!cloud.data)){
       console.log('[Hedgie quickSync] FAILED validity check — type:', typeof cloud, 'value:', JSON.stringify(cloud).slice(0,300));
       alert('Sync failed — invalid payload. Check console (F12) for details.');
       setGSB('err','Invalid payload from cloud — open console for details','',false);
@@ -1148,7 +1150,7 @@ async function cloudPull(){
     const cloud=await fetchFromCloud();
     console.log('[Hedgie pull] raw cloud:', JSON.stringify(cloud).slice(0,300));
     console.log('[Hedgie pull] _hedgie:', cloud?._hedgie, 'version:', cloud?.version, 'keys:', cloud?Object.keys(cloud):null);
-    if(!cloud||!cloud._hedgie){
+    if(!cloud||(!cloud._hedgie&&!cloud.data)){
       console.log('[Hedgie pull] FAILED validity check — full payload:', JSON.stringify(cloud).slice(0,500));
       alert('Pull failed — check browser console (F12) for details');
       updateSyncStatus('err','Invalid payload');return;
