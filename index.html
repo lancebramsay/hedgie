@@ -945,6 +945,8 @@ async function quickSync(){
       return;
     }
     if(!cloud||!cloud._hedgie){
+      console.log('[Hedgie quickSync] FAILED validity check — type:', typeof cloud, 'value:', JSON.stringify(cloud).slice(0,300));
+      alert('Sync failed — invalid payload. Check console (F12) for details.');
       setGSB('err','Invalid payload from cloud — open console for details','',false);
       if(btn){btn.style.opacity='1';btn.style.pointerEvents='';}return;
     }
@@ -1144,7 +1146,11 @@ async function cloudPull(){
   updateSyncStatus('busy');
   try{
     const cloud=await fetchFromCloud();
+    console.log('[Hedgie pull] raw cloud:', JSON.stringify(cloud).slice(0,300));
+    console.log('[Hedgie pull] _hedgie:', cloud?._hedgie, 'version:', cloud?.version, 'keys:', cloud?Object.keys(cloud):null);
     if(!cloud||!cloud._hedgie){
+      console.log('[Hedgie pull] FAILED validity check — full payload:', JSON.stringify(cloud).slice(0,500));
+      alert('Pull failed — check browser console (F12) for details');
       updateSyncStatus('err','Invalid payload');return;
     }
     const vr=await verifyPayload(cloud);
