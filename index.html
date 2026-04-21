@@ -2054,15 +2054,6 @@ function restoreJSON(input){
   reader.readAsText(file);
 }
 
-function applyPayload(payload){
-  const d=payload.data||payload;
-  if(d.income)income=d.income;if(d.expenses)expenses=d.expenses;if(d.bufferPct)bufferPct=d.bufferPct;if(d.receipts)receipts=d.receipts;if(d.vendors)vendors=d.vendors;
-  if(payload.archives)archives=payload.archives;
-  runAutoArchive();
-  syncMeta.version=payload.version||0;syncMeta.lastEditedBy=payload.lastEditedBy||'';syncMeta.lastEditedAt=payload.lastEditedAt||'';syncMeta.lastPulledVersion=payload.version||0;
-  refreshAll();
-}
-
 function refreshAll(){initExpenses();rebuildCatUI();buildNotifications();document.getElementById('cat-count-lbl')&&(document.getElementById('cat-count-lbl').textContent=CATS().length+' categories');populateMonthSelects();renderBuffers();updatePlanner();renderLogMetrics();renderReceiptList();if(document.getElementById('panel-report').classList.contains('active'))renderReport();}
 
 function gatherRows(){
