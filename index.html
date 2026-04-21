@@ -938,6 +938,21 @@ function showBanner(id,type,msg,autohide=true){
 // ── QUICK SYNC ────────────────────────────────
 async function quickSync(){
   if(settings.provider==='none'){setGSB('warn','No sync provider configured — open Settings','',false);return;}
+  // Safety: never push if local data is clearly empty
+  const localIsEmpty=income.every(r=>!r.a)&&receipts.length===0&&Object.values(expenses).every(cat=>cat.every(r=>!r.a));
+  if(localIsEmpty){
+    // Force a pull-only sync — don't risk overwriting real cloud data with blank state
+    setGSB('saving','Pulling from cloud…','');
+    try{
+      const cloud=await fetchFromCloud();
+      if(cloud&&(cloud._hedgie||cloud.data)){
+        const vr=await verifyPayload(cloud);
+        if(vr.ok){applyPayload(cloud);setGSB('cloud','Pulled from cloud','v'+(cloud.version||'?')+' by '+(cloud.lastEditedBy||'cloud'));return;}
+      }
+      setGSB('warn','Could not pull — check provider settings','',false);
+    }catch(e){setGSB('err','Pull failed: '+e.message,'',false);}
+    return;
+  }
   const btn=document.getElementById('gsb-sync-btn');
   if(btn){btn.style.opacity='0.5';btn.style.pointerEvents='none';}
   setGSB('saving','Syncing…','');
