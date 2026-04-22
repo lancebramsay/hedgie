@@ -2,6 +2,37 @@
 
 All notable changes to Hedgie are documented here.
 
+## [1.3.0] — 2026-04-22
+
+### New features
+
+**Inline receipt editing**
+- Pencil edit button on every receipt row in the Log receipt tab
+- Inline edit form expands in-place — no modal, no page navigation
+- Editable fields: category, amount, vendor, note, date
+- Vendor memory updated on save
+
+**Recurring bill management**
+- Recurring receipt edit form includes a due day field
+- Saving updates the recurring bill template (category, amount, vendor, note, due day) so all future auto-logs reflect the change
+- Delete recurring bill button removes the template and stops future auto-logging without deleting any existing receipts
+
+## [1.2.0] — 2026-04-21
+
+### New features
+
+- Version display added to tab bar logo and budget planner footer
+- Granular erase options in Settings → Data (erase identity & sync, erase budget & receipts, erase everything)
+- Custom notification rule builder in Settings → Notifications
+
+### Fixes
+
+- Sync guards to prevent blank state overwriting cloud data
+- Custom categories reconstructed from expense keys on pull/push
+- Recurring bill due day clamped to actual month length
+- Yearly expense notification removed
+- No-cache headers added for GitHub Pages
+
 ## [1.1.0] — 2026-04-21
 
 ### Release name: Hedgie Open
