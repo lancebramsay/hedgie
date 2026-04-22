@@ -3,9 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
 <title>Hedgie — Hedge Your Spending</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -545,6 +542,13 @@ select{cursor:pointer}
             <option value="14">2 weeks out</option>
           </select>
         </div>
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border-light)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <span style="font-size:12px;font-weight:600;color:var(--text-mid)">Custom notifications</span>
+            <button class="btn" style="font-size:11px;padding:3px 10px" onclick="addCustomNotif()">+ Add</button>
+          </div>
+          <div id="custom-notif-list"></div>
+        </div>
       </div>
     </div>
 
@@ -655,7 +659,7 @@ let syncMeta={version:0,lastEditedBy:'',lastEditedAt:'',lastPulledVersion:0};
 let archives={};
 let recurringBills=[];
 let currentRecurring='none';
-let settings={username:'',provider:'none',jsonbinId:'',jsonbinKey:'',gistId:'',gistToken:'',selfUrl:'',selfToken:'',dropboxToken:'',sharedKey:'',reminderDays:7,notifs:{bills:true,budget:true,yearly:true,sync:true,nudge:true}};
+let settings={username:'',provider:'none',jsonbinId:'',jsonbinKey:'',gistId:'',gistToken:'',selfUrl:'',selfToken:'',dropboxToken:'',sharedKey:'',reminderDays:7,notifs:{bills:true,budget:true,yearly:true,sync:true,nudge:true},customNotifs:[]};
 let planFilterCat='all',planFilterPri='all',rcptFilterCat='all';
 let reportView='monthly';
 let pendingCloudData=null;
@@ -772,8 +776,6 @@ async function verifyPayload(payload){
 return {ok:true, unsigned:true};}
   // Key configured but payload has no signature — accept but flag
   if(!payload.signature) return {ok:true, unsigned:true};
-  // No _hedgie flag but has data — treat as valid unsigned legacy payload
-  if(!payload._hedgie&&payload.data) return {ok:true, unsigned:true};
   const encoder=new TextEncoder();
   const data=JSON.stringify(payload.data)+payload.version+payload.lastEditedAt;
   try{
@@ -890,7 +892,7 @@ function completeWelcome(){
 function saveSettings(){localStorage.setItem('hedgie_settings',JSON.stringify(settings));}
 
 // ── DRAWER ────────────────────────────────────
-function openDrawer(){document.getElementById('drawer').classList.add('open');document.getElementById('drawer-overlay').classList.add('open');renderHealthPanel();renderNotifToggles();}
+function openDrawer(){document.getElementById('drawer').classList.add('open');document.getElementById('drawer-overlay').classList.add('open');renderHealthPanel();renderNotifToggles();renderCustomNotifList();}
 function closeDrawer(){document.getElementById('drawer').classList.remove('open');document.getElementById('drawer-overlay').classList.remove('open');}
 
 function onProviderChange(silent){
@@ -938,21 +940,6 @@ function showBanner(id,type,msg,autohide=true){
 // ── QUICK SYNC ────────────────────────────────
 async function quickSync(){
   if(settings.provider==='none'){setGSB('warn','No sync provider configured — open Settings','',false);return;}
-  // Safety: never push if local data is clearly empty
-  const localIsEmpty=income.every(r=>!r.a)&&receipts.length===0&&Object.values(expenses).every(cat=>cat.every(r=>!r.a));
-  if(localIsEmpty){
-    // Force a pull-only sync — don't risk overwriting real cloud data with blank state
-    setGSB('saving','Pulling from cloud…','');
-    try{
-      const cloud=await fetchFromCloud();
-      if(cloud&&(cloud._hedgie||cloud.data)){
-        const vr=await verifyPayload(cloud);
-        if(vr.ok){applyPayload(cloud);setGSB('cloud','Pulled from cloud','v'+(cloud.version||'?')+' by '+(cloud.lastEditedBy||'cloud'));return;}
-      }
-      setGSB('warn','Could not pull — check provider settings','',false);
-    }catch(e){setGSB('err','Pull failed: '+e.message,'',false);}
-    return;
-  }
   const btn=document.getElementById('gsb-sync-btn');
   if(btn){btn.style.opacity='0.5';btn.style.pointerEvents='none';}
   setGSB('saving','Syncing…','');
@@ -964,9 +951,7 @@ async function quickSync(){
       if(btn){btn.style.opacity='1';btn.style.pointerEvents='';}
       return;
     }
-    if(!cloud||(!cloud._hedgie&&!cloud.data)){
-      console.log('[Hedgie quickSync] FAILED validity check — type:', typeof cloud, 'value:', JSON.stringify(cloud).slice(0,300));
-      alert('Sync failed — invalid payload. Check console (F12) for details.');
+    if(!cloud||!cloud._hedgie){
       setGSB('err','Invalid payload from cloud — open console for details','',false);
       if(btn){btn.style.opacity='1';btn.style.pointerEvents='';}return;
     }
@@ -982,10 +967,10 @@ async function quickSync(){
 
     let resolved;
     if(isFirstSync){
-      // First sync — pull only, never push blank local state over real cloud data
+      // First sync — just apply cloud data, no push needed
+
       applyPayload(cloud);
       syncMeta.lastPulledVersion=cloud.version||0;
-      saveSyncMeta();
       updateSyncStatus('ok','First sync complete');
       setGSB('cloud','First sync complete','v'+cloud.version+' by '+(cloud.lastEditedBy||'cloud'));
       if(btn){btn.style.opacity='1';btn.style.pointerEvents='';}
@@ -1077,12 +1062,6 @@ function triggerAutosave(source){
 
 // ── CLOUD PAYLOAD ─────────────────────────────
 async function buildPayload(){
-  // Ensure categories includes any expense keys not already tracked
-  Object.keys(expenses).forEach(name=>{
-    if(!categories.find(c=>c.name===name)){
-      categories.push({name,color:'#888888'});
-    }
-  });
   const p={_hedgie:true,version:(syncMeta.version||0)+1,lastEditedBy:settings.username||'Unknown',lastEditedAt:new Date().toISOString(),data:{categories,income,expenses,receipts,vendors,archives,recurringBills}};
   p.signature=await signPayload(p);
   return p;
@@ -1090,23 +1069,15 @@ async function buildPayload(){
 
 function applyPayload(payload){
   const d=payload.data||payload;
-  // Handle categories — merge locked defaults + custom
+  // Handle old schema — if no categories key, keep current categories
   if(d.categories&&d.categories.length){
+    // Merge: keep locked defaults with potentially updated colors, append custom cats
     const locked=DEFAULT_CATS.map(dc=>{
       const saved=d.categories.find(sc=>sc.name===dc.name);
       return saved||dc;
     });
     const custom=d.categories.filter(sc=>!LOCKED_CATS.includes(sc.name));
     categories=[...locked,...custom];
-  }
-  // Reconstruct any categories that exist in expenses but not in categories array
-  // (handles payloads pushed before category tracking was complete)
-  if(d.expenses){
-    Object.keys(d.expenses).forEach(name=>{
-      if(!categories.find(c=>c.name===name)){
-        categories.push({name,color:'#888888'});
-      }
-    });
   }
   if(d.income)income=d.income;
   if(d.expenses){
@@ -1180,11 +1151,7 @@ async function cloudPull(){
   updateSyncStatus('busy');
   try{
     const cloud=await fetchFromCloud();
-    console.log('[Hedgie pull] raw cloud:', JSON.stringify(cloud).slice(0,300));
-    console.log('[Hedgie pull] _hedgie:', cloud?._hedgie, 'version:', cloud?.version, 'keys:', cloud?Object.keys(cloud):null);
-    if(!cloud||(!cloud._hedgie&&!cloud.data)){
-      console.log('[Hedgie pull] FAILED validity check — full payload:', JSON.stringify(cloud).slice(0,500));
-      alert('Pull failed — check browser console (F12) for details');
+    if(!cloud||!cloud._hedgie){
       updateSyncStatus('err','Invalid payload');return;
     }
     const vr=await verifyPayload(cloud);
@@ -1272,6 +1239,279 @@ function resetCatsToDefault(){
   triggerAutosave('pl');
 }
 
+
+// ── CUSTOM NOTIFICATIONS ENGINE ──────────────────────────────
+const CN_FIELDS=[
+  {key:'receipt.category',   label:'Receipt category',          type:'cat'},
+  {key:'receipt.vendor',     label:'Vendor',                    type:'text'},
+  {key:'receipt.amount',     label:'Receipt amount ($)',         type:'num'},
+  {key:'receipt.note',       label:'Receipt note',              type:'text'},
+  {key:'receipt.by',         label:'Logged by',                 type:'text'},
+  {key:'month.total',        label:'Month total spent ($)',      type:'num'},
+  {key:'month.category',     label:'Month total by category ($)',type:'catnum'},
+  {key:'month.receipts',     label:'Receipt count this month',  type:'num'},
+  {key:'budget.pct',         label:'Category budget used (%)',  type:'catnum'},
+  {key:'days.since',         label:'Days since last receipt',   type:'num'},
+  {key:'expense.amount',     label:'Expense line amount ($)',   type:'num'},
+];
+const CN_OPS={
+  cat:    [{key:'is',label:'is'},{key:'is_not',label:'is not'}],
+  text:   [{key:'is',label:'is'},{key:'is_not',label:'is not'},{key:'contains',label:'contains'}],
+  num:    [{key:'gt',label:'exceeds'},{key:'lt',label:'is under'}],
+  catnum: [{key:'gt',label:'exceeds'},{key:'lt',label:'is under'}],
+};
+
+function evalCondition(cond){
+  const ym=currentMonth();
+  const monthRecs=receiptsForMonth(ym);
+  const v=cond.value;
+  const cat=cond.cat||'';
+  switch(cond.field){
+    case 'receipt.category':{
+      return monthRecs.some(r=>cond.op==='is'?r.cat===v:r.cat!==v);
+    }
+    case 'receipt.vendor':{
+      const lv=(v||'').toLowerCase();
+      return monthRecs.some(r=>{
+        const rv=(r.vendor||'').toLowerCase();
+        if(cond.op==='is')return rv===lv;
+        if(cond.op==='is_not')return rv!==lv;
+        return rv.includes(lv);
+      });
+    }
+    case 'receipt.amount':{
+      const n=parseFloat(v)||0;
+      return monthRecs.some(r=>cond.op==='gt'?r.amt>n:r.amt<n);
+    }
+    case 'receipt.note':{
+      const lv=(v||'').toLowerCase();
+      return monthRecs.some(r=>(r.note||'').toLowerCase().includes(lv));
+    }
+    case 'receipt.by':{
+      const lv=(v||'').toLowerCase();
+      return monthRecs.some(r=>{
+        const bv=(r.by||'').toLowerCase();
+        if(cond.op==='is')return bv===lv;
+        if(cond.op==='is_not')return bv!==lv;
+        return bv.includes(lv);
+      });
+    }
+    case 'month.total':{
+      const total=monthRecs.reduce((s,r)=>s+r.amt,0);
+      const n=parseFloat(v)||0;
+      return cond.op==='gt'?total>n:total<n;
+    }
+    case 'month.category':{
+      const total=monthRecs.filter(r=>r.cat===cat).reduce((s,r)=>s+r.amt,0);
+      const n=parseFloat(v)||0;
+      return cond.op==='gt'?total>n:total<n;
+    }
+    case 'month.receipts':{
+      const n=parseFloat(v)||0;
+      return cond.op==='gt'?monthRecs.length>n:monthRecs.length<n;
+    }
+    case 'budget.pct':{
+      const budget=catMo(cat);
+      if(budget<=0)return false;
+      const spent=monthRecs.filter(r=>r.cat===cat).reduce((s,r)=>s+r.amt,0);
+      const pct=Math.round(spent/budget*100);
+      const n=parseFloat(v)||0;
+      return cond.op==='gt'?pct>n:pct<n;
+    }
+    case 'days.since':{
+      const allDates=receipts.map(r=>new Date(r.date).getTime()).filter(Boolean);
+      if(!allDates.length)return false;
+      const latest=Math.max(...allDates);
+      const days=Math.floor((Date.now()-latest)/(1000*60*60*24));
+      const n=parseFloat(v)||0;
+      return days>n;
+    }
+    case 'expense.amount':{
+      const n=parseFloat(v)||0;
+      return Object.values(expenses).flat().some(e=>cond.op==='gt'?(e.a||0)>n:(e.a||0)<n);
+    }
+    default:return false;
+  }
+}
+
+function evalCustomRule(rule){
+  if(!rule.conditions||!rule.conditions.length)return false;
+  const results=rule.conditions.map(evalCondition);
+  return rule.conditionJoin==='or'?results.some(Boolean):results.every(Boolean);
+}
+
+function describeRule(rule){
+  if(!rule.conditions||!rule.conditions.length)return '';
+  return rule.conditions.map(c=>{
+    const f=CN_FIELDS.find(x=>x.key===c.field);
+    const ops=CN_OPS[f?.type||'num'];
+    const op=ops?.find(x=>x.key===c.op);
+    const catPart=c.cat?' ('+c.cat+')':'';
+    const isNum=c.value!==''&&!isNaN(c.value);
+    const val=c.field==='budget.pct'?c.value+'%':(isNum?'$'+c.value:c.value);
+    return (f?.label||c.field)+catPart+' '+(op?.label||c.op)+' '+(val||'?');
+  }).join(rule.conditionJoin==='or'?' OR ':' AND ');
+}
+
+// ── CUSTOM NOTIF UI ───────────────────────────
+let editingCustomId=null;
+
+function renderCustomNotifList(){
+  const el=document.getElementById('custom-notif-list');
+  if(!el)return;
+  if(!settings.customNotifs)settings.customNotifs=[];
+  const rules=settings.customNotifs;
+  if(!rules.length&&editingCustomId!=='__new__'){
+    el.innerHTML='<div style="font-size:12px;color:var(--text-faint);padding:6px 0">No custom notifications yet.</div>';
+    return;
+  }
+  let html='';
+  rules.forEach(rule=>{
+    if(editingCustomId===rule.id){html+=renderCustomNotifForm(rule);return;}
+    const urgColor={high:'var(--red)',med:'var(--amber)',low:'var(--text-soft)'}[rule.urgency]||'var(--text-soft)';
+    html+='<div style="background:var(--parchment);border:1px solid var(--border-light);border-radius:var(--radius-sm);padding:8px 10px;margin-bottom:6px">'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">'
+      +'<span style="font-size:11px;font-weight:600;color:'+urgColor+';flex:1">'+esc(rule.label||'Unnamed')+'</span>'
+      +'<label style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text-soft);cursor:pointer">'
+      +'<input type="checkbox" '+(rule.enabled?'checked':'')+' onchange="toggleCustomNotif(\''+rule.id+'\',this.checked)" style="cursor:pointer"> On</label>'
+      +'<button class="del-btn" style="width:20px;height:20px;font-size:12px" onclick="editCustomNotif(\''+rule.id+'\')">&#9998;</button>'
+      +'<button class="del-btn" style="width:20px;height:20px;font-size:12px;color:var(--red);border-color:var(--red)" onclick="deleteCustomNotif(\''+rule.id+'\')">&#215;</button>'
+      +'</div>'
+      +'<div style="font-size:11px;color:var(--text-soft)">'+esc(describeRule(rule))+'</div>'
+      +'</div>';
+  });
+  if(editingCustomId==='__new__')html+=renderCustomNotifForm(null);
+  el.innerHTML=html;
+}
+
+function renderCustomNotifForm(rule){
+  const id=rule?rule.id:'__new__';
+  const conds=(rule&&rule.conditions)||[{field:'month.total',op:'gt',value:'',cat:''}];
+  const join=(rule&&rule.conditionJoin)||'and';
+  const urgency=(rule&&rule.urgency)||'low';
+  const label=(rule&&rule.label)||'';
+  const cats=CATS();
+  let html='<div style="background:var(--warm-white);border:1px solid var(--brown-light);border-radius:var(--radius-sm);padding:10px;margin-bottom:6px">';
+  html+='<div class="drawer-field"><label>Notification label</label><input type="text" id="cn-label-'+id+'" value="'+esc(label)+'" placeholder="e.g. Sin over $100"></div>';
+  html+='<div style="display:flex;gap:8px;margin-bottom:8px;align-items:center;flex-wrap:wrap">';
+  html+='<span style="font-size:12px;color:var(--text-mid);font-weight:500">Urgency:</span>';
+  html+='<select id="cn-urgency-'+id+'" style="height:28px;font-size:12px;width:auto">';
+  ['low','med','high'].forEach(function(u){html+='<option value="'+u+'"'+(urgency===u?' selected':'')+'>'+(u==='med'?'Medium':u.charAt(0).toUpperCase()+u.slice(1))+'</option>';});
+  html+='</select>';
+  html+='<span style="font-size:12px;color:var(--text-mid);font-weight:500;margin-left:8px">Conditions join:</span>';
+  html+='<select id="cn-join-'+id+'" style="height:28px;font-size:12px;width:auto">';
+  html+='<option value="and"'+(join==='and'?' selected':'')+'>AND (all must match)</option>';
+  html+='<option value="or"'+(join==='or'?' selected':'')+'>OR (any must match)</option>';
+  html+='</select></div>';
+  html+='<div id="cn-conds-'+id+'">';
+  conds.slice(0,3).forEach(function(c,i){html+=renderCondRow(id,i,c,cats);});
+  html+='</div>';
+  if(conds.length<3)html+='<button class="add-exp-btn" onclick="addCondRow(\''+id+'\')">+ Add condition</button>';
+  html+='<div style="display:flex;gap:8px;margin-top:10px">';
+  html+='<button class="btn primary" style="font-size:12px;padding:5px 12px" onclick="saveCustomNotif(\''+id+'\')">Save</button>';
+  html+='<button class="btn" style="font-size:12px;padding:5px 12px" onclick="cancelCustomNotif()">Cancel</button>';
+  html+='</div></div>';
+  return html;
+}
+
+function renderCondRow(ruleId,idx,cond,cats){
+  const f=CN_FIELDS.find(function(x){return x.key===cond.field;})||CN_FIELDS[5];
+  const ops=CN_OPS[f.type]||CN_OPS.num;
+  const needsCat=f.type==='catnum';
+  let html='<div id="cn-row-'+ruleId+'-'+idx+'" style="display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap">';
+  html+='<select style="flex:2;min-width:120px;height:28px;font-size:11px" onchange="onCondFieldChange(\''+ruleId+'\','+idx+',this.value)">';
+  CN_FIELDS.forEach(function(fi){html+='<option value="'+fi.key+'"'+(fi.key===cond.field?' selected':'')+'>'+fi.label+'</option>';});
+  html+='</select>';
+  html+='<select id="cn-op-'+ruleId+'-'+idx+'" style="flex:1;min-width:80px;height:28px;font-size:11px">';
+  ops.forEach(function(o){html+='<option value="'+o.key+'"'+(o.key===cond.op?' selected':'')+'>'+o.label+'</option>';});
+  html+='</select>';
+  if(f.type==='cat'){
+    html+='<select id="cn-val-'+ruleId+'-'+idx+'" style="flex:1;min-width:80px;height:28px;font-size:11px">';
+    cats.forEach(function(c){html+='<option value="'+esc(c)+'"'+(c===cond.value?' selected':'')+'>'+esc(c)+'</option>';});
+    html+='</select>';
+  }else{
+    html+='<input type="'+(f.type==='num'||f.type==='catnum'?'number':'text')+'" id="cn-val-'+ruleId+'-'+idx+'" value="'+esc(cond.value||'')+'" placeholder="value" style="flex:1;min-width:60px;height:28px;font-size:11px;padding:2px 6px">';
+  }
+  if(needsCat){
+    html+='<select id="cn-cat-'+ruleId+'-'+idx+'" style="flex:1;min-width:80px;height:28px;font-size:11px">';
+    cats.forEach(function(c){html+='<option value="'+esc(c)+'"'+(c===cond.cat?' selected':'')+'>'+esc(c)+'</option>';});
+    html+='</select>';
+  }
+  html+='</div>';
+  return html;
+}
+
+function onCondFieldChange(ruleId,idx,newField){
+  const f=CN_FIELDS.find(function(x){return x.key===newField;})||CN_FIELDS[5];
+  const ops=CN_OPS[f.type]||CN_OPS.num;
+  const row=document.getElementById('cn-row-'+ruleId+'-'+idx);
+  if(!row)return;
+  const newCond={field:newField,op:ops[0].key,value:'',cat:CATS()[0]||''};
+  row.outerHTML=renderCondRow(ruleId,idx,newCond,CATS());
+}
+
+function addCondRow(ruleId){
+  const container=document.getElementById('cn-conds-'+ruleId);
+  if(!container)return;
+  const idx=container.children.length;
+  if(idx>=3)return;
+  container.insertAdjacentHTML('beforeend',renderCondRow(ruleId,idx,{field:'month.total',op:'gt',value:'',cat:''},CATS()));
+  if(idx+1>=3){const btn=container.nextElementSibling;if(btn&&btn.classList.contains('add-exp-btn'))btn.style.display='none';}
+}
+
+function gatherConditions(ruleId){
+  const container=document.getElementById('cn-conds-'+ruleId);
+  if(!container)return[];
+  const conds=[];
+  for(let i=0;i<container.children.length;i++){
+    const field=container.children[i].querySelector('select')?.value;
+    if(!field)continue;
+    const op=document.getElementById('cn-op-'+ruleId+'-'+i)?.value||'gt';
+    const val=document.getElementById('cn-val-'+ruleId+'-'+i)?.value||'';
+    const cat=document.getElementById('cn-cat-'+ruleId+'-'+i)?.value||'';
+    conds.push({field,op,value:val,cat});
+  }
+  return conds;
+}
+
+function saveCustomNotif(formId){
+  const label=(document.getElementById('cn-label-'+formId)?.value||'').trim()||'Custom alert';
+  const urgency=document.getElementById('cn-urgency-'+formId)?.value||'low';
+  const join=document.getElementById('cn-join-'+formId)?.value||'and';
+  const conditions=gatherConditions(formId);
+  if(!conditions.length){alert('Add at least one condition.');return;}
+  if(!settings.customNotifs)settings.customNotifs=[];
+  if(formId==='__new__'){
+    settings.customNotifs.push({id:uid(),label,urgency,conditionJoin:join,conditions,enabled:true});
+  }else{
+    const idx=settings.customNotifs.findIndex(function(r){return r.id===formId;});
+    if(idx>=0)settings.customNotifs[idx]=Object.assign({},settings.customNotifs[idx],{label,urgency,conditionJoin:join,conditions});
+  }
+  editingCustomId=null;
+  saveSettings();buildNotifications();renderCustomNotifList();
+}
+
+function cancelCustomNotif(){editingCustomId=null;renderCustomNotifList();}
+
+function addCustomNotif(){
+  if((settings.customNotifs||[]).length>=10){alert('Maximum 10 custom notifications.');return;}
+  editingCustomId='__new__';
+  renderCustomNotifList();
+}
+
+function editCustomNotif(id){editingCustomId=id;renderCustomNotifList();}
+
+function deleteCustomNotif(id){
+  if(!confirm('Delete this custom notification?'))return;
+  settings.customNotifs=(settings.customNotifs||[]).filter(function(r){return r.id!==id;});
+  saveSettings();buildNotifications();renderCustomNotifList();
+}
+
+function toggleCustomNotif(id,enabled){
+  const rule=(settings.customNotifs||[]).find(function(r){return r.id===id;});
+  if(rule)rule.enabled=enabled;
+  saveSettings();buildNotifications();
+}
 
 function renderNotifToggles(){
   const el=document.getElementById('notif-toggles');
@@ -1498,8 +1738,7 @@ function buildNotifications(){
   // ── 1. Upcoming recurring bills ──
   if(settings.notifs?.bills!==false) recurringBills.forEach(bill=>{
     if(bill.freq!=='monthly')return;
-    const rawDue=parseInt(bill.day)||1;
-    const due=Math.min(rawDue,daysInMonth); // clamp to actual month length
+    const due=parseInt(bill.day)||1;
     const daysUntil=due-dayOfMonth;
     // Look ahead: due this month (and not past) or due early next month within window
     let daysAway=daysUntil>=0?daysUntil:(daysInMonth-dayOfMonth+due);
@@ -1540,7 +1779,7 @@ function buildNotifications(){
 
   } // end budget
 
-  // ── 3. Sync staleness — no push in 7+ days OR never synced with provider configured ──
+  // ── 4. Sync staleness — no push in 7+ days OR never synced with provider configured ──
   if(settings.notifs?.sync!==false&&settings.provider!=='none'){
     if(!syncMeta.lastEditedAt){
       const id='sync-never';
@@ -1578,6 +1817,21 @@ function buildNotifications(){
       });
     }
   }
+
+  // ── 6. Custom notifications ──
+  (settings.customNotifs||[]).forEach(rule=>{
+    if(!rule.enabled)return;
+    const id='custom-'+rule.id+'-'+thisMonth;
+    if(dismissedNotifs.has(id))return;
+    if(evalCustomRule(rule)){
+      notifs.push({
+        id,type:'custom',icon:'\u2B50',
+        title:rule.label||'Custom alert',
+        desc:describeRule(rule),
+        urgency:rule.urgency||'low'
+      });
+    }
+  });
 
   // Sort: high urgency first
   const urgOrder={high:0,med:1,low:2};
@@ -1827,9 +2081,7 @@ function processRecurringBills(){
   let added=0;
   recurringBills.forEach(bill=>{
     if(bill.freq!=='monthly')return;
-    const rawDay=parseInt(bill.day)||1;
-    const daysInThisMonth=new Date(new Date().getFullYear(),new Date().getMonth()+1,0).getDate();
-    const dueDay=Math.min(rawDay,daysInThisMonth); // clamp to actual month length
+    const dueDay=parseInt(bill.day)||1;
     if(todayDay<dueDay)return; // not due yet this month
     const alreadyLogged=receipts.some(r=>r.recurId===bill.id&&monthKey(r.date)===ym);
     if(alreadyLogged)return;
@@ -2091,7 +2343,7 @@ function exportArchiveCSV(){
   allArc.forEach(r=>csv+=`${r.date},${r.cat},"${r.vendor||''}",${r.amt.toFixed(2)},"${r.note||''}","${r.by||''}"\n`);
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='hedgie-archived-receipts.csv';a.click();
 }
-function resetAll(){if(!confirm('Reset ALL data?'))return;income=[{n:'Primary salary',a:0},{n:'Side income',a:0}];categories=DEFAULT_CATS.map(c=>({...c}));expenses={};initExpenses();bufferPct={};receipts=[];vendors={};recurringBills=[];syncMeta={version:0,lastEditedBy:'',lastEditedAt:'',lastPulledVersion:0};localStorage.removeItem('hedgie_syncmeta');refreshAll();}
+function resetAll(){if(!confirm('Reset ALL data?'))return;income=[{n:'Primary salary',a:0},{n:'Side income',a:0}];categories=DEFAULT_CATS.map(c=>({...c}));expenses={};initExpenses();bufferPct={};receipts=[];vendors={};recurringBills=[];syncMeta={version:0,lastEditedBy:'',lastEditedAt:'',lastPulledVersion:0};refreshAll();}
 
 // ── INIT ──────────────────────────────────────
 initExpenses();
