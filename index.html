@@ -2234,7 +2234,7 @@ function renderReceiptEditForm(r){
   html+=`<div class="full"><label>Note</label><input type="text" id="re-note-${r.id}" value="${esc(r.note||'')}"></div>`;
   html+=`<div><label>Date</label><input type="date" id="re-date-${r.id}" value="${r.date||''}"></div>`;
   if(bill){
-    html+=`<div><label>Due day (recurring bill)</label><input type="number" id="re-day-${r.id}" value="${bill.day||1}" min="1" max="31"></div>`;
+    html+=`<div class="full"><label>Due day (recurring bill)</label><input type="number" id="re-day-${r.id}" value="${bill.day||1}" min="1" max="31" style="text-align:left"></div>`;
     html+=`<div class="full" style="font-size:11px;color:var(--purple);background:var(--purple-light);border-radius:var(--radius-sm);padding:6px 8px">&#8635; Recurring bill — saving updates amount, category, vendor, and due day for all future auto-logs.</div>`;
   } else if(isRecurring){
     html+=`<div class="full" style="font-size:11px;color:var(--amber);background:var(--amber-light);border-radius:var(--radius-sm);padding:6px 8px">&#8635; This was a recurring receipt but the bill template is missing — only this receipt will be updated.</div>`;
