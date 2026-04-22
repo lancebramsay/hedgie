@@ -950,6 +950,44 @@ async function quickSync(){
   const btn=document.getElementById('gsb-sync-btn');
   if(btn){btn.style.opacity='0.5';btn.style.pointerEvents='none';}
   setGSB('saving','Syncing…','');
+
+  // ── Guard 1: never push if local data is empty ──
+  const localHasData=totalIncome()>0||receipts.length>0||totalExpMo()>0;
+  if(!localHasData){
+    try{
+      const cloud=await fetchFromCloud();
+      if(cloud&&(cloud._hedgie||cloud.data)){
+        const vr=await verifyPayload(cloud);
+        if(vr.ok){applyPayload(cloud);setGSB('cloud','Pulled from cloud','v'+(cloud.version||'?')+' by '+(cloud.lastEditedBy||'cloud'));}
+        else{setGSB('err','Signature mismatch — check shared key','',false);}
+      }else{setGSB('warn','Nothing in cloud yet — add data and Push to start','',false);}
+    }catch(e){setGSB('err','Pull failed: '+e.message,'',false);}
+    if(btn){btn.style.opacity='1';btn.style.pointerEvents='';}
+    return;
+  }
+
+  // ── Guard 2: if we have local data but have never pulled, confirm before pushing ──
+  const neverSynced=syncMeta.lastPulledVersion===0&&syncMeta.version===0;
+  if(neverSynced){
+    let cloudCheck=null;
+    try{cloudCheck=await fetchFromCloud();}catch(e){}
+    if(cloudCheck&&(cloudCheck._hedgie||cloudCheck.data)&&(cloudCheck.version||0)>0){
+      const pullInstead=confirm(
+        'Cloud has existing data (v'+(cloudCheck.version||'?')+' by '+(cloudCheck.lastEditedBy||'someone')+').\n\n'+
+        'OK = Pull from cloud (your local data will be replaced)\n'+
+        'Cancel = Push local to cloud (cloud data will be overwritten)'
+      );
+      if(pullInstead){
+        const vr=await verifyPayload(cloudCheck);
+        if(vr.ok){applyPayload(cloudCheck);setGSB('cloud','Pulled from cloud','v'+(cloudCheck.version||'?'));}
+        else{setGSB('err','Signature mismatch — check shared key','',false);}
+        if(btn){btn.style.opacity='1';btn.style.pointerEvents='';}
+        return;
+      }
+      // User chose to push local — fall through
+    }
+  }
+
   try{
     // Step 1 — fetch cloud
     let cloud=null;
@@ -958,32 +996,28 @@ async function quickSync(){
       if(btn){btn.style.opacity='1';btn.style.pointerEvents='';}
       return;
     }
-    if(!cloud||!cloud._hedgie){
-      setGSB('err','Invalid payload from cloud — open console for details','',false);
-      if(btn){btn.style.opacity='1';btn.style.pointerEvents='';}return;
+
+    // If cloud is empty/invalid, safe to push
+    if(!cloud||((!cloud._hedgie)&&!cloud.data)){
+      const payload=await buildPayload();
+      await pushToCloud(payload);
+      applyPayload(payload);
+      setGSB('cloud','Pushed to cloud — first sync','just now');
+      if(btn){btn.style.opacity='1';btn.style.pointerEvents='';}
+      return;
     }
 
     // Step 2 — verify signature
     const vr=await verifyPayload(cloud);
     if(!vr.ok){setGSB('err','Signature mismatch — check shared key in Settings','',true);if(btn){btn.style.opacity='1';btn.style.pointerEvents='';}return;}
 
-    // Step 3 — build local snapshot
+    // Step 3 — decide direction
     const localPayload={version:syncMeta.version,lastEditedBy:settings.username,lastEditedAt:new Date().toISOString(),data:{categories,income,expenses,receipts,vendors,archives,recurringBills}};
-    const isFirstSync=syncMeta.lastPulledVersion===0&&syncMeta.version===0;
     const cloudAhead=(cloud.version||0)>(syncMeta.lastPulledVersion||0);
 
     let resolved;
-    if(isFirstSync){
-      // First sync — just apply cloud data, no push needed
-
-      applyPayload(cloud);
-      syncMeta.lastPulledVersion=cloud.version||0;
-      updateSyncStatus('ok','First sync complete');
-      setGSB('cloud','First sync complete','v'+cloud.version+' by '+(cloud.lastEditedBy||'cloud'));
-      if(btn){btn.style.opacity='1';btn.style.pointerEvents='';}
-      return;
-    } else if(cloudAhead&&budgetChanged(localPayload,cloud)){
-      // Budget conflict — need user input before we can push
+    if(cloudAhead&&budgetChanged(localPayload,cloud)){
+      // Budget conflict — need user input
       pendingCloudData=cloud;
       showConflictModal(cloud);
       updateSyncStatus('conflict');
@@ -993,7 +1027,7 @@ async function quickSync(){
       // Cloud ahead, no budget conflict — merge receipts
       resolved=mergePayloads(localPayload,cloud);
     } else {
-      // Local is same or ahead — just push local
+      // Local same or ahead — push local
       resolved=await buildPayload();
     }
 
@@ -1005,8 +1039,9 @@ async function quickSync(){
     syncMeta.lastEditedBy=resolved.lastEditedBy;
     syncMeta.lastEditedAt=resolved.lastEditedAt;
     syncMeta.lastPulledVersion=resolved.version;
+    saveSyncMeta();
     updateSyncStatus('ok','Synced');
-    setGSB('cloud',isFirstSync?'First sync complete':'Synced ↑↓','just now');
+    setGSB('cloud','Synced ↑↓','just now');
   } catch(e){
     setGSB('err','Sync failed: '+e.message,'',false);
   }
