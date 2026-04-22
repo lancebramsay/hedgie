@@ -562,7 +562,14 @@ select{cursor:pointer}
         <div id="health-panel"></div>
         <div class="btn-row" style="margin-top:10px;flex-wrap:wrap">
           <button class="btn" style="font-size:12px" onclick="exportArchiveCSV()">Export archived receipts</button>
-          <button class="btn danger" style="font-size:12px" onclick="resetAll()">Reset all data</button>
+        </div>
+        <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border-light)">
+          <div style="font-size:11px;font-weight:600;color:var(--text-faint);letter-spacing:0.3px;margin-bottom:8px">DANGER ZONE</div>
+          <div class="btn-row" style="flex-wrap:wrap;gap:6px">
+            <button class="btn danger" style="font-size:12px" onclick="resetIdentity()">Erase identity &amp; sync</button>
+            <button class="btn danger" style="font-size:12px" onclick="resetBudgetAndReceipts()">Erase budget &amp; receipts</button>
+            <button class="btn danger" style="font-size:12px;font-weight:700" onclick="resetAll()">Erase everything</button>
+          </div>
         </div>
       </div>
     </div>
@@ -2343,7 +2350,42 @@ function exportArchiveCSV(){
   allArc.forEach(r=>csv+=`${r.date},${r.cat},"${r.vendor||''}",${r.amt.toFixed(2)},"${r.note||''}","${r.by||''}"\n`);
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='hedgie-archived-receipts.csv';a.click();
 }
-function resetAll(){if(!confirm('Reset ALL data?'))return;income=[{n:'Primary salary',a:0},{n:'Side income',a:0}];categories=DEFAULT_CATS.map(c=>({...c}));expenses={};initExpenses();bufferPct={};receipts=[];vendors={};recurringBills=[];syncMeta={version:0,lastEditedBy:'',lastEditedAt:'',lastPulledVersion:0};refreshAll();}
+function resetIdentity(){
+  if(!confirm('Erase your display name, shared key, and all cloud sync credentials? Your budget and receipts are untouched.'))return;
+  settings.username='';
+  settings.provider='none';
+  settings.jsonbinId='';settings.jsonbinKey='';
+  settings.gistId='';settings.gistToken='';
+  settings.selfUrl='';settings.selfToken='';
+  settings.dropboxToken='';
+  settings.sharedKey='';
+  saveSettings();
+  document.getElementById('cfg-username').value='';
+  document.getElementById('cfg-provider').value='none';
+  onProviderChange(true);
+  renderKeyDisplay();
+  updateSyncStatus('idle');
+  updateSyncButton();
+  setGSB('info','Identity and sync credentials cleared','');
+}
+
+function resetBudgetAndReceipts(){
+  if(!confirm('Erase all income, budget lines, receipts, vendors, and archives? Your identity and sync settings are untouched.'))return;
+  income=[{n:'Primary salary',a:0},{n:'Side income',a:0}];
+  categories=DEFAULT_CATS.map(c=>({...c}));
+  expenses={};initExpenses();
+  bufferPct={};
+  receipts=[];
+  vendors={};
+  recurringBills=[];
+  archives={};
+  syncMeta={version:0,lastEditedBy:'',lastEditedAt:'',lastPulledVersion:0};
+  localStorage.removeItem('hedgie_syncmeta');
+  refreshAll();
+  setGSB('info','Budget and receipts cleared','');
+}
+
+function resetAll(){if(!confirm('Erase ALL data including identity, sync credentials, budget, and receipts? This cannot be undone.'))return;income=[{n:'Primary salary',a:0},{n:'Side income',a:0}];categories=DEFAULT_CATS.map(c=>({...c}));expenses={};initExpenses();bufferPct={};receipts=[];vendors={};recurringBills=[];archives={};syncMeta={version:0,lastEditedBy:'',lastEditedAt:'',lastPulledVersion:0};localStorage.removeItem('hedgie_syncmeta');settings={username:'',provider:'none',jsonbinId:'',jsonbinKey:'',gistId:'',gistToken:'',selfUrl:'',selfToken:'',dropboxToken:'',sharedKey:'',reminderDays:7,notifs:{bills:true,budget:true,yearly:true,sync:true,nudge:true},customNotifs:[]};saveSettings();document.getElementById('cfg-username').value='';document.getElementById('cfg-provider').value='none';onProviderChange(true);renderKeyDisplay();updateSyncStatus('idle');updateSyncButton();refreshAll();}
 
 // ── INIT ──────────────────────────────────────
 initExpenses();
