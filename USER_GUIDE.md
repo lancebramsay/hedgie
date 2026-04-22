@@ -60,6 +60,14 @@ Bills set to day 29, 30, or 31 are automatically clamped to the last day of shor
 
 Use the category pills to filter the receipt list. The month selector lets you browse any past month. Click **Export CSV** to download the current month's receipts as a CSV file.
 
+### Editing a receipt
+
+Click the **✏️ pencil button** on any receipt row to expand an inline edit form. All fields are editable: category, amount, vendor, note, and date. Click **Save** to apply changes or **Cancel** to discard them.
+
+For **recurring receipts**, the edit form also shows the **due day** field. Changing it updates the recurring bill template, so all future auto-logged instances will use the new day. The form also shows the current amount and category — saving those changes likewise updates the template going forward.
+
+The **Delete recurring bill** button (only visible on recurring receipts) removes the bill template so it stops auto-logging in future months. Existing receipts are kept intact — they just lose the recurring badge.
+
 ---
 
 ## Monthly report tab

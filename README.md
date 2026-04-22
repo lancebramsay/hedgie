@@ -8,7 +8,7 @@ A lightweight household budget planner as a single-page-app. No server, no insta
 
 ## Features
 
-- **Log receipts** — quick-entry form with vendor memory, date picker, and recurring bill support
+- **Log receipts** — quick-entry form with vendor memory, date picker, recurring bill support, and inline editing
 - **Monthly report** — budget vs. actual spending by category with color-coded progress bars and per-user breakdown
 - **Hibernation View** — full-year spending timeline with monthly bars and a budget reference line
 - **Budget planner** — income sources, categorized expenses with monthly/yearly frequency toggle and High/Medium/Low priority
