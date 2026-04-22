@@ -1,4 +1,4 @@
-# 🦔 Hedgie User Guide
+# 🦔 Hedgie Open — User Guide
 
 > A lightweight household budget planner as a single-page-app. No server, no install, no dependencies.
 
@@ -12,7 +12,7 @@
 - [Settings](#settings)
 - [Cloud sync](#cloud-sync)
 - [Multi-user households](#multi-user-households)
-- [Backups](#backups)
+- [Backups and data management](#backups-and-data-management)
 - [Tips and tricks](#tips-and-tricks)
 
 ---
@@ -25,220 +25,223 @@
 4. Head to **Budget planner** and fill in your income sources and monthly expenses
 5. Start logging purchases in **Log receipt** as you spend
 
-That's the whole setup. No account required, no internet connection needed for core features.
+No account required. No internet connection needed for core features.
 
 ---
 
 ## Log receipt tab
 
-This is your day-to-day view for tracking purchases as they happen.
+Your day-to-day view for tracking purchases as they happen.
 
 ### Logging a purchase
-
-Fill in the quick-entry form at the top:
 
 | Field | Notes |
 |---|---|
 | **Category** | Pick from your active categories |
-| **Amount** | Dollar amount — decimals supported |
+| **Amount** | Dollar amount, decimals supported |
 | **Vendor / store** | Optional but recommended — Hedgie remembers it |
-| **Note** | Optional freeform note (e.g. "weekly grocery run") |
+| **Note** | Optional freeform note |
 | **Date** | Defaults to today, fully editable |
 | **Recurring** | See below |
 
-Click **Add to log** to save the entry.
+Click **Add to log** to save.
 
 ### Vendor memory
 
-Once you log a purchase at a vendor, Hedgie remembers the name and the category you used. Next time you start typing that vendor's name, it will auto-suggest and pre-fill the category. This makes recurring purchases much faster to log.
-
-To clear all saved vendors, type any vendor name and click **Clear saved vendors** at the bottom of the dropdown.
+Once you log a purchase at a vendor, Hedgie remembers the name and the category you used. Next time you type that vendor's name it auto-suggests and pre-fills the category. To clear all saved vendors, type any vendor name and click **Clear saved vendors** at the bottom of the dropdown.
 
 ### Recurring bills
 
-Toggle a receipt to **Monthly** before saving to mark it as a recurring bill. You'll be prompted for the day of month the bill is due (e.g. day 1 for a mortgage due on the 1st).
+Toggle a receipt to **Monthly** before saving to mark it as a recurring bill. Enter the day of month it's due. Hedgie automatically logs that bill every month on or after its due date when you open the app. Recurring entries show a purple **↺ recurring** badge.
 
-Once saved as recurring, Hedgie will automatically log that bill every month on or after its due date when you open the app — you won't need to re-enter it. Recurring entries are marked with a purple **↺ recurring** badge in the receipt list.
+Bills set to day 29, 30, or 31 are automatically clamped to the last day of shorter months.
 
-### Filtering receipts
+### Filtering and exporting
 
-Use the category pills below the form to filter the receipt list by category. The month selector lets you browse any past month's receipts.
-
-### Deleting a receipt
-
-Click the **×** button on the right side of any receipt row. This cannot be undone.
-
-### Exporting receipts
-
-Click **Export CSV** to download the current month's receipts as a spreadsheet-ready CSV file.
+Use the category pills to filter the receipt list. The month selector lets you browse any past month. Click **Export CSV** to download the current month's receipts as a CSV file.
 
 ---
 
 ## Monthly report tab
 
-A summary of how your spending compares to your budget for any given month.
-
 ### Reading the report
 
-At the top you'll see four summary metrics: monthly income, total budgeted, actually spent, and income remaining after spending.
+Four summary metrics at the top: monthly income, total budgeted, actually spent, and income remaining. Below that, each category shows a progress bar:
 
-Below that, each category shows:
-- A colored progress bar filling left to right as you spend toward the budget
 - **Green** — comfortably under budget
 - **Amber** — over 85% of budget used
 - **Red** — over budget
-- The exact amounts spent and remaining, plus the percentage used
 
-If multiple household members are logging receipts, a user breakdown appears under each category showing who spent what.
-
-### Changing the month
-
-Use the month selector in the top right to browse any past month.
+If multiple household members are logging receipts, a user breakdown appears showing who spent what.
 
 ### Hibernation View
 
-Click the **🌙 Hibernate** toggle to switch to a full-year view. This shows:
+Click **🌙 Hibernate** to switch to a full-year view:
 
-- A bar chart with one bar per month, color-coded by spending level
-- A dashed reference line showing your monthly budget threshold
-- A **now** label floating above the current month's bar
+- Bar chart with one bar per month, color-coded by spending level
+- Dashed reference line at your monthly budget threshold
+- **now** label above the current month's bar
 - Future months shown as faint placeholders
-- A per-category breakdown with monthly sparklines for the year
-
-Switch back to **Active** to return to the standard monthly view.
+- Per-category sparklines with annual totals
 
 ---
 
 ## Budget planner tab
 
-This is where you set your income, expenses, and category budgets. Everything here drives the progress bars in the monthly report.
-
 ### Income sources
 
-Click **+ Add source** to add an income line. Enter a label (e.g. "Primary salary") and a monthly amount. Add as many sources as you have — Hedgie sums them automatically.
+Click **+ Add source** to add an income line with a label and monthly amount. Hedgie sums them automatically.
 
 ### Expense lines
 
-Each category has its own expense list. For each line you set:
+For each expense line:
 
 | Field | Options |
 |---|---|
-| **Name** | Label for the expense (e.g. "Mortgage") |
+| **Name** | Label for the expense |
 | **Amount** | The cost |
-| **Frequency** | **Mo** (monthly) or **Yr** (yearly) |
+| **Frequency** | **Mo** (monthly) or **Yr** (yearly — divided by 12 for monthly equivalent) |
 | **Priority** | High, Medium, or Low |
 
-Yearly expenses are automatically divided by 12 and shown as a monthly equivalent so your budget math is always apples-to-apples.
-
-Click **+ Add expense** at the bottom of any category section to add a new line. Click **×** to remove one.
-
-### Filtering expenses
-
-Use the **Category** pills to focus on one category at a time. Use the **Priority** pills to show only High, Medium, or Low priority lines.
+Click **+ Add expense** at the bottom of any category to add a line. Click **×** to remove one.
 
 ### Rainy day buffer
 
-At the bottom of the planner is the Rainy Day Buffer — your monthly surplus (income minus expenses) automatically distributed across categories as a reserve. The allocation is weighted by each category's priority and actual monthly cost, so high-cost, high-priority categories like Home get a bigger share.
-
-This isn't money you spend — it's a per-category cushion for unexpected costs.
+At the bottom of the planner, your monthly surplus (income minus expenses) is distributed across categories as a reserve. Allocation is weighted by each category's priority and actual monthly cost. This is a planning guide, not a rule.
 
 ### Managing categories
 
-Click **Manage categories** to expand the category manager. From here you can:
+Click **Manage categories** to expand the category manager:
 
-- **Change a category color** using the color picker (click the swatch)
-- **Add a custom category** with **+ Add category**
-- **Rename, reorder, or remove** custom categories using the inline controls
-- **Reset to defaults** to restore the original six categories and colors
+- **Change color** — click the color swatch
+- **Add custom category** — **+ Add category**
+- **Rename** — click the name field on any custom category and type
+- **Reorder** — use the ↑↓ arrows
+- **Remove** — click **×** (moves any receipts in that category to "Other")
+- **Reset to defaults** — restores the original six categories and colors
 
-The six default categories — Home, Transportation, Food, Services, Debts, Savings — are locked and cannot be removed, but their colors are customizable.
+The six default categories (Home, Transportation, Food, Services, Debts, Savings) are locked and cannot be removed, but their colors are customizable.
 
-### Saving and restoring
-
-Use the buttons in the top-right corner of the planner:
+### Save and export
 
 | Button | What it does |
 |---|---|
-| **Save local** | Downloads a timestamped `.json` backup to your device |
+| **Save local** | Downloads a timestamped `.json` backup |
 | **Restore local** | Loads any `.json` backup file |
-| **Export CSV** | Downloads your full budget plan as a CSV |
-| **Copy for Sheets** | Copies tab-separated data to paste into Google Sheets |
+| **Export CSV** | Downloads your budget plan as a CSV |
+| **Copy for Sheets** | Copies tab-separated data for Google Sheets paste |
 
 ---
 
 ## Notifications
 
-The bell icon in the top-right of the tab bar shows a red badge when there are active notifications. Click it to open the notification panel.
+The bell icon in the tab bar shows a badge when there are active notifications.
 
-### Notification types
+### Built-in notification types
 
 | Icon | Type | When it appears |
 |---|---|---|
 | 📅 | **Upcoming bill** | A recurring bill is due within your reminder window |
-| 🔴 | **Budget warning** | A category has hit 80% or more of its monthly budget |
-| 🕖 | **Yearly expense** | A yearly expense line is approaching its period |
-| ☁️ | **Sync staleness** | Cloud sync hasn't run in 7+ days, or has never been set up |
-| ✏️ | **Logging nudge** | It's past the 20th of the month and no receipts have been logged |
+| 🔴 | **Budget warning** | A category has hit 80%+ of its monthly budget |
+| ☁️ | **Sync staleness** | No cloud sync in 7+ days, or never synced with a provider configured |
+| ✏️ | **Logging nudge** | Past the 20th of the month with no receipts logged |
 
-Notifications are color-coded by urgency — red border for urgent, amber for heads up, and subtle for informational. Click **×** on any notification to dismiss it for the session, or **Dismiss all** to clear everything at once.
+Notifications are color-coded: red border for urgent, amber for heads up, muted for info. Click **×** to dismiss for the session, or **Dismiss all** to clear everything.
+
+### Custom notifications
+
+Open gear → **Notifications → Custom notifications → + Add** to build your own rules.
+
+Each rule has:
+- A **label** shown in the notification panel
+- An **urgency** level (Low, Medium, High)
+- A **join** mode (AND — all conditions must match, or OR — any condition must match)
+- Up to **3 conditions**
+
+**Available fields:**
+
+| Field | Operators |
+|---|---|
+| Receipt category | is / is not |
+| Vendor | is / is not / contains |
+| Receipt amount ($) | exceeds / is under |
+| Receipt note | contains |
+| Logged by | is / is not / contains |
+| Month total spent ($) | exceeds / is under |
+| Month total by category ($) | exceeds / is under (+ category picker) |
+| Receipt count this month | exceeds / is under |
+| Category budget used (%) | exceeds / is under (+ category picker) |
+| Days since last receipt | exceeds |
+| Expense line amount ($) | exceeds / is under |
+
+Saved rules can be toggled on/off, edited, or deleted inline.
 
 ### Configuring notifications
 
-Open the gear icon → **Notifications** to toggle each notification type on or off individually. You can also set your **bill reminder window** to either 1 week or 2 weeks out — this is per-user, so each household member can have their own preference.
+Gear → **Notifications** to toggle each built-in type on or off. Set your **bill reminder window** to 1 or 2 weeks.
 
 ---
 
 ## Settings
 
-Access settings via the **gear icon** in the bottom-right corner. The drawer has four sections:
+Access settings via the **gear icon** in the bottom-right corner.
 
 ### Identity
 
-- **Display name** — stamps your receipts and sync events so your household knows who logged what
-- **Shared secret key** — a cryptographic key used to sign sync payloads (see [Cloud sync](#cloud-sync))
+- **Display name** — stamps your receipts and sync events
+- **Shared secret key** — cryptographic key for HMAC-SHA256 signing of sync payloads (see [Cloud sync](#cloud-sync))
 
 ### Cloud sync
 
-Choose a sync provider and enter your credentials. See [Cloud sync](#cloud-sync) for full setup instructions.
+Choose a sync provider and enter your credentials. See [Cloud sync](#cloud-sync) for full setup.
 
 ### Notifications
 
-Toggle individual notification types and set your bill reminder window.
+Toggle built-in notification types, set bill reminder window, and manage custom notification rules.
 
 ### Data
 
-- **Data health panel** — shows payload size, active receipt count, archived receipt count, and vendor memory usage vs limits
-- **Export archived receipts** — download all archived receipts (older than the prior calendar year) as a CSV
-- **Reset all data** — wipes everything and returns Hedgie to factory defaults
+- **Data health panel** — payload size, active receipt count, archived count, vendor count vs limits
+- **Export archived receipts** — download all archived receipts as CSV
+
+**Danger zone:**
+
+| Button | What it clears |
+|---|---|
+| **Erase identity & sync** | Display name, shared key, all provider credentials |
+| **Erase budget & receipts** | Income, expenses, receipts, vendors, archives, syncMeta |
+| **Erase everything** | All of the above plus all settings |
+
+Each button shows a specific confirmation dialog before clearing anything.
 
 ---
 
 ## Cloud sync
 
-Cloud sync is optional. Without it, your data lives only in your browser's local storage and in any `.json` backups you download. With it, you can sync between devices and share with a household partner.
+Cloud sync is optional. Without it, data lives only in localStorage and in any `.json` backups you download.
 
-### Choosing a provider
+### Provider comparison
 
 | Provider | Best for | Cost |
 |---|---|---|
-| **JSONBin.io** | Beginners, easiest setup | Free tier available |
+| **JSONBin.io** | Beginners, easiest setup | Free tier |
 | **GitHub Gist** | GitHub users | Free |
 | **Self-hosted** | Homelab / full control | Free (your server) |
-| **Dropbox** | Existing Dropbox users | Free tier available |
+| **Dropbox** | Existing Dropbox users | Free tier |
 
 ### JSONBin setup
 
 1. Create a free account at [jsonbin.io](https://jsonbin.io)
-2. Click **+ Create Bin** — initialize it with `{"_hedgie":true,"version":0}`
-3. Copy the **Bin ID** and **Master Key** from the dashboard
-4. In Hedgie: gear → Cloud sync → select **JSONBin** → paste both values
-5. Click **Push** to write your data to the cloud
+2. Click **+ Create Bin** — initialize with `{"_hedgie":true,"version":0}`
+3. Copy the **Bin ID** and **Master Key**
+4. Gear → Cloud sync → JSONBin → paste both values
+5. Click **Push**
 
 ### GitHub Gist setup
 
 1. Create a **private** Gist at [gist.github.com](https://gist.github.com) with a file named `hedgie.json`
-2. Generate a Personal Access Token at [github.com/settings/tokens](https://github.com/settings/tokens) with the `gist` scope
-3. In Hedgie: gear → Cloud sync → select **GitHub Gist** → paste your Gist ID and token
+2. Generate a Personal Access Token at [github.com/settings/tokens](https://github.com/settings/tokens) with `gist` scope
+3. Gear → Cloud sync → GitHub Gist → paste your Gist ID and token
 
 ### Sync operations
 
@@ -246,60 +249,56 @@ Cloud sync is optional. Without it, your data lives only in your browser's local
 |---|---|
 | **Pull** | Fetches the cloud version and applies it locally |
 | **Push** | Sends your local data to the cloud |
-| **Sync** (status bar) | Pulls first, then pushes — the safest everyday option |
+| **Sync** (status bar) | Smart sync — pulls or pushes as appropriate |
 
-**First sync rule:** On a fresh device or fresh session, always pull before pushing. Hedgie enforces this automatically — autosave will not push until you've completed at least one manual pull or push in the session, so you can't accidentally overwrite real cloud data with a blank local state.
+### Sync safety guards
+
+The Sync button has two built-in safeguards:
+
+**Guard 1 — Empty state:** If local data is blank (no income, no expenses, no receipts), Hedgie always pulls from the cloud instead of pushing. A blank session can never overwrite real cloud data.
+
+**Guard 2 — First sync with local data:** If you have real local data but the session has never synced before (e.g. after restoring from a backup), Hedgie fetches the cloud first and shows a confirmation dialog asking whether to pull or push. You choose explicitly — nothing happens automatically.
 
 ### Conflict resolution
 
-If both you and your household partner have made budget plan changes since the last sync, Hedgie detects the conflict and shows a resolution modal:
+If both household members have made budget plan changes since the last sync, a conflict modal appears:
 
-- **Take cloud version** — replaces your local budget plan with the cloud version
-- **Keep my budget** — keeps your local plan and discards the cloud changes
-- **Merge receipts, keep my budget** — merges all receipts from both sides, keeps your budget plan
+- **Take cloud version** — replaces local budget plan with cloud version
+- **Keep my budget** — keeps local plan, discards cloud changes
+- **Merge receipts, keep my budget** — merges receipts from both sides, keeps local budget
 
-Receipts are always merged automatically regardless of which option you choose — no receipts are ever lost in a conflict.
+Receipts are always merged automatically regardless of choice — no receipts are lost.
 
 ### HTTPS requirement
 
-Hedgie uses the Web Crypto API for HMAC-SHA256 payload signing, which requires a secure context (`https://` or `localhost`). Sync still works when running from a local `file://` URL, but signatures are skipped. For full signing, deploy Hedgie to Cloudflare Pages or any HTTPS host.
+HMAC signing requires a secure context (`https://` or `localhost`). Sync works from `file://` URLs but signatures are skipped. Deploy to Cloudflare Pages or GitHub Pages for full signing support.
 
 ---
 
 ## Multi-user households
 
-Hedgie is designed for households where two or more people share finances.
-
 ### Setup
 
-1. One person sets up cloud sync and generates a shared secret key (gear → Identity → **Generate**)
-2. Copy the key (gear → Identity → **Copy**) and share it with your partner via AirDrop, iMessage, or another trusted channel — never email
-3. Your partner opens Hedgie, enters their display name, pastes the shared key, and enters the same sync provider credentials
-4. Both tap **Sync** — receipts are merged, budget plan is shared
+1. One person sets up cloud sync and generates a shared key (gear → Identity → **Generate**)
+2. Copy the key (gear → Identity → **Copy**) and share via AirDrop or iMessage — never email
+3. Partner opens Hedgie, enters their display name, pastes the shared key, enters the same sync credentials
+4. Both tap **Sync** — receipts merge, budget plan is shared
 
 ### How it works
 
-Each receipt is stamped with the display name of the person who logged it. In the monthly report and Hibernation View, a user breakdown shows each person's spending contribution per category. Both users see the same budget plan — it's shared, not per-person.
-
-When both users sync, Hedgie automatically merges receipts by ID so there are never duplicates. If the budget plan differs, the conflict modal appears.
+Each receipt is stamped with the display name of who logged it. The monthly report and Hibernation View show per-user spending breakdowns for categories and totals. The budget plan is shared between all users.
 
 ---
 
-## Backups
+## Backups and data management
 
-Hedgie stores data in your browser's `localStorage`. This means:
+Hedgie stores data in browser `localStorage`. Data persists between sessions on the same browser, but clearing browser data or switching browsers will show a fresh app.
 
-- Data persists between sessions on the same browser
-- Clearing browser data or using a different browser will show a fresh app
-- Data does not sync automatically unless cloud sync is configured
-
-**Always keep a local backup.** Use **Save local** in the Budget planner to download a `.json` file. Store it in iCloud Drive, Google Drive, or any folder that syncs between your devices.
-
-To restore from a backup, use **Restore local** and select the `.json` file.
+**Always keep a local backup.** Use **Save local** in Budget planner to download a `.json` file. Store it in iCloud Drive, Google Drive, or any syncing folder.
 
 ### Auto-archive
 
-Receipts older than the prior calendar year are automatically moved to an archive on app startup. Archived receipts don't count against the active receipt limit and don't appear in the monthly report — but they're still included in Hibernation View for the year they belong to, and you can export them as CSV from **Settings → Data**.
+Receipts older than the prior calendar year are automatically moved to an archive on startup. Archived receipts don't count against the active receipt limit, don't appear in the monthly report, but are still visible in Hibernation View and exportable from Settings → Data.
 
 ### Payload limits
 
@@ -309,22 +308,20 @@ Receipts older than the prior calendar year are automatically moved to an archiv
 | Vendor memory | 160 | 200 (auto-prunes oldest) |
 | Sync payload | 80KB | ~100KB (JSONBin free tier) |
 
-The **Data health panel** in Settings shows your current usage against these limits.
-
 ---
 
 ## Tips and tricks
 
-**Use recurring bills for everything predictable.** Mortgage, car payment, subscriptions — log them once as recurring and they disappear from your to-do list. You'll still see them in the receipt list each month, but you won't have to remember to enter them.
+**Use recurring bills for everything predictable.** Mortgage, car payment, subscriptions — log them once as recurring and Hedgie handles them automatically each month.
 
-**Set your budget before the month starts.** The monthly report is only meaningful if your budget planner has real numbers in it. Spend 10 minutes in the planner at the start of each month adjusting for anything unusual — a trip, an annual renewal, a big purchase.
+**Set your budget before the month starts.** The monthly report is only useful if the planner has real numbers. Spend 10 minutes at the start of each month adjusting for anything unusual.
 
-**Log receipts at the point of purchase.** The fastest habit is tapping the app as you leave a store. The vendor memory makes this a 10-second process for regular shops.
+**Log receipts at the point of purchase.** Vendor memory makes this a 10-second process for regular shops.
 
-**Use the note field for context.** "Weekly grocery run" vs "holiday groceries" vs "meal prep supplies" — notes make the receipt list useful months later when you're reviewing spending patterns.
+**Use custom notifications for your real patterns.** Set a rule for "Sin category month total exceeds $100" or "days since last receipt exceeds 7" — the built-in nudges are generic, custom rules are personal.
 
-**Hibernation View is best at year-end.** Open it in December and you'll see your full year's spending pattern at a glance — which months were expensive, which categories ran over, and how your buffer held up.
+**Hibernation View is best at year-end.** Open it in December to see your full year at a glance — which months ran expensive, which categories went over, how the buffer held up.
 
-**Export to Sheets for deeper analysis.** The **Copy for Sheets** button puts your budget plan on the clipboard in a format that pastes cleanly into Google Sheets or Excel. From there you can build custom charts, run scenario analysis, or share a read-only view with a financial advisor.
+**Export to Sheets for deeper analysis.** **Copy for Sheets** puts your budget plan on the clipboard in a format that pastes cleanly into Google Sheets or Excel.
 
-**The rainy day buffer is a planning tool, not a rule.** It shows you where your surplus would go if you allocated it proportionally by priority. You don't have to follow it exactly — use it as a starting point for deciding where extra money should go each month.
+**The rainy day buffer is a planning guide.** It shows proportional surplus allocation by category priority. You don't have to follow it exactly — use it as a starting point for deciding where extra money should go.
