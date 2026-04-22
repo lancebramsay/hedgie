@@ -73,6 +73,12 @@ select{cursor:pointer}
 .receipt-amt{font-size:14px;font-weight:600;white-space:nowrap;flex-shrink:0}
 .receipt-del{background:none;border:none;color:var(--text-faint);cursor:pointer;font-size:17px;padding:2px 4px;flex-shrink:0;line-height:1}
 .receipt-del:hover{color:var(--red)}
+.receipt-edit{background:none;border:none;color:var(--text-faint);cursor:pointer;font-size:14px;padding:2px 4px;flex-shrink:0;line-height:1}
+.receipt-edit:hover{color:var(--brown)}
+.receipt-edit-form{background:var(--parchment);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;margin:4px 0;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.receipt-edit-form label{font-size:11px;color:var(--text-mid);display:block;margin-bottom:3px;font-weight:500}
+.receipt-edit-form input,.receipt-edit-form select{height:32px;font-size:12px}
+.receipt-edit-form .full{grid-column:1/-1}
 .receipt-by{font-size:10px;color:var(--text-faint);white-space:nowrap}
 .pills{display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-bottom:1rem}
 .pill-label{font-size:11px;color:var(--text-soft);white-space:nowrap;font-weight:500}
@@ -2199,6 +2205,8 @@ function renderLogMetrics(){
   document.getElementById('log-metrics').innerHTML=`<div class="metric"><div class="metric-label">Logged ${monthLabel(ym)}</div><div class="metric-val">${fmt(spent)}</div></div><div class="metric"><div class="metric-label">Monthly budget</div><div class="metric-val">${fmt(budget)}</div></div><div class="metric"><div class="metric-label">Remaining</div><div class="metric-val ${rem>=0?'pos':'neg'}">${rem<0?'-':''}${fmt(rem)}</div></div><div class="metric"><div class="metric-label">Budget used</div><div class="metric-val ${pct>100?'neg':pct>85?'warn':'pos'}">${pct}%</div></div>`;
 }
 
+let editingReceiptId=null;
+
 function renderReceiptList(){
   const ym=document.getElementById('log-month-sel')?.value||currentMonth();
   let recs=receiptsForMonth(ym);
@@ -2208,7 +2216,83 @@ function renderReceiptList(){
   const rcWarn=document.getElementById('receipt-limit-warn');
   if(rcWarn){const pct=receipts.length/LIMITS.receipts;rcWarn.style.display=pct>=LIMITS.warnAt?'block':'none';rcWarn.textContent=`${receipts.length} active receipts — approaching the ${LIMITS.receipts} limit. Older years will archive automatically on next app open.`;}
   if(!recs.length){el.innerHTML=`<div class="empty-state"><div style="font-size:28px;margin-bottom:8px">&#128467;</div><div>No receipts logged${rcptFilterCat!=='all'?' for '+rcptFilterCat:' yet'}</div><div style="font-size:12px;margin-top:4px;color:var(--text-faint)">Use the form above to log your first purchase</div></div>`;return;}
-  el.innerHTML=recs.map(r=>`<div class="receipt-row"><div class="cat-dot" style="background:${catColor(r.cat)}"></div><div class="receipt-info"><div class="receipt-store" style="display:flex;align-items:center;gap:5px">${esc(r.vendor||r.cat)}${r.recurring?'<span class="recur-badge">&#8635; recurring</span>':''}</div><div class="receipt-meta">${esc(r.cat)} &middot; ${fmtDate(r.date)}</div>${r.note?`<div class="receipt-note">${esc(r.note)}</div>`:''}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><div class="receipt-amt">${fmtDec(r.amt)}</div>${r.by?`<div class="receipt-by" style="color:${getUserColor(r.by)}">${esc(r.by)}</div>`:''}</div><button class="receipt-del" onclick="deleteReceipt('${r.id}')">&#215;</button></div>`).join('');
+  el.innerHTML=recs.map(r=>{
+    if(editingReceiptId===r.id) return renderReceiptEditForm(r);
+    return `<div class="receipt-row"><div class="cat-dot" style="background:${catColor(r.cat)}"></div><div class="receipt-info"><div class="receipt-store" style="display:flex;align-items:center;gap:5px">${esc(r.vendor||r.cat)}${r.recurring?'<span class="recur-badge">&#8635; recurring</span>':''}</div><div class="receipt-meta">${esc(r.cat)} &middot; ${fmtDate(r.date)}</div>${r.note?`<div class="receipt-note">${esc(r.note)}</div>`:''}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><div class="receipt-amt">${fmtDec(r.amt)}</div>${r.by?`<div class="receipt-by" style="color:${getUserColor(r.by)}">${esc(r.by)}</div>`:''}</div><button class="receipt-edit" onclick="startEditReceipt('${r.id}')" title="Edit">&#9998;</button><button class="receipt-del" onclick="deleteReceipt('${r.id}')">&#215;</button></div>`;
+  }).join('');
+}
+
+function renderReceiptEditForm(r){
+  const bill=r.recurId?recurringBills.find(b=>b.id===r.recurId):null;
+  const cats=CATS();
+  let html=`<div class="receipt-edit-form" id="ref-${r.id}">`;
+  html+=`<div><label>Category</label><select id="re-cat-${r.id}">${cats.map(c=>`<option value="${esc(c)}"${c===r.cat?' selected':''}>${esc(c)}</option>`).join('')}</select></div>`;
+  html+=`<div><label>Amount ($)</label><input type="number" id="re-amt-${r.id}" value="${r.amt}" min="0" step="0.01"></div>`;
+  html+=`<div class="full"><label>Vendor</label><input type="text" id="re-vendor-${r.id}" value="${esc(r.vendor||'')}"></div>`;
+  html+=`<div class="full"><label>Note</label><input type="text" id="re-note-${r.id}" value="${esc(r.note||'')}"></div>`;
+  html+=`<div><label>Date</label><input type="date" id="re-date-${r.id}" value="${r.date||''}"></div>`;
+  if(bill){
+    html+=`<div><label>Due day (recurring bill)</label><input type="number" id="re-day-${r.id}" value="${bill.day||1}" min="1" max="31"></div>`;
+    html+=`<div class="full" style="font-size:11px;color:var(--purple);background:var(--purple-light);border-radius:var(--radius-sm);padding:6px 8px">&#8635; Recurring bill — changing the due day updates all future auto-logs.</div>`;
+  }
+  html+=`<div class="full" style="display:flex;gap:8px;margin-top:2px">`;
+  html+=`<button class="btn primary" style="font-size:12px;padding:5px 12px" onclick="saveReceiptEdit('${r.id}')">Save</button>`;
+  if(bill) html+=`<button class="btn" style="font-size:12px;padding:5px 12px;color:var(--red);border-color:var(--red)" onclick="deleteRecurringBill('${bill.id}')">Delete recurring bill</button>`;
+  html+=`<button class="btn" style="font-size:12px;padding:5px 12px" onclick="cancelReceiptEdit()">Cancel</button>`;
+  html+=`</div></div>`;
+  return html;
+}
+
+function startEditReceipt(id){
+  editingReceiptId=id;
+  renderReceiptList();
+  // scroll form into view
+  setTimeout(()=>document.getElementById('ref-'+id)?.scrollIntoView({behavior:'smooth',block:'nearest'}),50);
+}
+
+function cancelReceiptEdit(){
+  editingReceiptId=null;
+  renderReceiptList();
+}
+
+function saveReceiptEdit(id){
+  const r=receipts.find(x=>x.id===id);
+  if(!r)return;
+  r.cat=document.getElementById('re-cat-'+id)?.value||r.cat;
+  r.amt=parseFloat(document.getElementById('re-amt-'+id)?.value)||r.amt;
+  r.vendor=document.getElementById('re-vendor-'+id)?.value.trim()||r.vendor;
+  r.note=document.getElementById('re-note-'+id)?.value.trim()||'';
+  r.date=document.getElementById('re-date-'+id)?.value||r.date;
+  // Update recurring bill template if present
+  if(r.recurId){
+    const bill=recurringBills.find(b=>b.id===r.recurId);
+    if(bill){
+      bill.cat=r.cat;
+      bill.amt=r.amt;
+      bill.vendor=r.vendor;
+      bill.note=r.note;
+      const newDay=parseInt(document.getElementById('re-day-'+id)?.value)||bill.day;
+      bill.day=Math.min(newDay,31);
+    }
+  }
+  saveVendor(r.vendor,r.cat);
+  receipts.sort((a,b)=>b.date.localeCompare(a.date));
+  editingReceiptId=null;
+  renderLogMetrics();
+  renderReceiptList();
+  buildNotifications();
+  triggerAutosave('log');
+}
+
+function deleteRecurringBill(billId){
+  if(!confirm('Delete this recurring bill? Future months will no longer auto-log it. Past receipts are kept.'))return;
+  recurringBills=recurringBills.filter(b=>b.id!==billId);
+  // Remove the recurring flag from any receipts tied to this bill
+  receipts.forEach(r=>{if(r.recurId===billId){delete r.recurring;delete r.recurId;}});
+  editingReceiptId=null;
+  renderReceiptList();
+  buildNotifications();
+  triggerAutosave('log');
 }
 
 function deleteReceipt(id){receipts=receipts.filter(r=>r.id!==id);renderLogMetrics();renderReceiptList();triggerAutosave('log');}
