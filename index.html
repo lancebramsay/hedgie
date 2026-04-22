@@ -2224,6 +2224,8 @@ function renderReceiptList(){
 
 function renderReceiptEditForm(r){
   const bill=r.recurId?recurringBills.find(b=>b.id===r.recurId):null;
+  // Treat as recurring if it has the recurring flag, even if template is missing
+  const isRecurring=r.recurring||!!r.recurId;
   const cats=CATS();
   let html=`<div class="receipt-edit-form" id="ref-${r.id}">`;
   html+=`<div><label>Category</label><select id="re-cat-${r.id}">${cats.map(c=>`<option value="${esc(c)}"${c===r.cat?' selected':''}>${esc(c)}</option>`).join('')}</select></div>`;
@@ -2233,7 +2235,9 @@ function renderReceiptEditForm(r){
   html+=`<div><label>Date</label><input type="date" id="re-date-${r.id}" value="${r.date||''}"></div>`;
   if(bill){
     html+=`<div><label>Due day (recurring bill)</label><input type="number" id="re-day-${r.id}" value="${bill.day||1}" min="1" max="31"></div>`;
-    html+=`<div class="full" style="font-size:11px;color:var(--purple);background:var(--purple-light);border-radius:var(--radius-sm);padding:6px 8px">&#8635; Recurring bill — changing the due day updates all future auto-logs.</div>`;
+    html+=`<div class="full" style="font-size:11px;color:var(--purple);background:var(--purple-light);border-radius:var(--radius-sm);padding:6px 8px">&#8635; Recurring bill — saving updates amount, category, vendor, and due day for all future auto-logs.</div>`;
+  } else if(isRecurring){
+    html+=`<div class="full" style="font-size:11px;color:var(--amber);background:var(--amber-light);border-radius:var(--radius-sm);padding:6px 8px">&#8635; This was a recurring receipt but the bill template is missing — only this receipt will be updated.</div>`;
   }
   html+=`<div class="full" style="display:flex;gap:8px;margin-top:2px">`;
   html+=`<button class="btn primary" style="font-size:12px;padding:5px 12px" onclick="saveReceiptEdit('${r.id}')">Save</button>`;
