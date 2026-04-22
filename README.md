@@ -1,10 +1,14 @@
 # 🦔 Hedgie Open
 
+<<<<<<< HEAD
 A lightweight household budget planner as a single-page-app. No server, no install, no dependencies.
 
 **Live:** [lancebramsay.github.io/hedgie](https://lancebramsay.github.io/hedgie) · Mirror: [hedgie.pages.dev](https://hedgie.pages.dev)
 
 ---
+=======
+A lightweight household budget planner as a single-page-app. No server, no install, no dependencies. Pilot app currently hosted at https://lancebramsay.github.io/hedgie/ for testing purposes. Cloudflare mirror at https://hedgie.pages.dev/.
+>>>>>>> 42a57898e61b15a520fb37c02624e152fab49085
 
 ## Features
 
