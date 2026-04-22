@@ -1280,7 +1280,6 @@ function renderNotifToggles(){
   const types=[
     {key:'bills',label:'Upcoming recurring bills',icon:'&#128197;'},
     {key:'budget',label:'Budget warnings (80%+ spent)',icon:'&#128308;'},
-    {key:'yearly',label:'Yearly expenses approaching',icon:'&#128346;'},
     {key:'sync',label:'Cloud sync staleness',icon:'&#9729;'},
     {key:'nudge',label:'Monthly logging reminder',icon:'&#9997;'},
   ];
@@ -1541,34 +1540,7 @@ function buildNotifications(){
 
   } // end budget
 
-  // ── 3. Yearly expenses approaching (within 30 days) ──
-  if(settings.notifs?.yearly!==false){
-  const yr=today.getFullYear();
-  CATS().forEach(cat=>{
-    (expenses[cat]||[]).filter(e=>e.f==='Y'&&e.a>0).forEach(exp=>{
-      // We don't store the actual due month/day, so we use the recurring bill day if it exists
-      // For yearly items, remind in the same calendar month as today if amount is set
-      // Best we can do without a full date: flag all yearly items every January and in the reminder window
-      const id='yearly-'+cat+'-'+exp.n+'-'+yr;
-      if(!dismissedNotifs.has(id)){
-        // Remind about yearly expenses in the last week of the prior month or first week of the year
-        const monthNum=today.getMonth(); // 0-indexed
-        const dayOfYear=Math.floor((today-new Date(yr,0,0))/(1000*60*60*24));
-        if(dayOfYear<=reminderDays||(today.getDate()>=daysInMonth-reminderDays)){
-          notifs.push({
-            id,type:'yearly',icon:'&#128346;',
-            title:`Yearly expense: ${exp.n}`,
-            desc:`${cat} · ${fmt(exp.a)}/yr (${fmt(exp.a/12)}/mo) — review timing`,
-            urgency:'low'
-          });
-        }
-      }
-    });
-  });
-
-  } // end yearly
-
-  // ── 4. Sync staleness — no push in 7+ days OR never synced with provider configured ──
+  // ── 3. Sync staleness — no push in 7+ days OR never synced with provider configured ──
   if(settings.notifs?.sync!==false&&settings.provider!=='none'){
     if(!syncMeta.lastEditedAt){
       const id='sync-never';
