@@ -2,6 +2,19 @@
 
 All notable changes to Hedgie are documented here.
 
+## [1.4.2] — 2026-04-22
+
+### Changes
+
+**Donation button**
+- Liberapay "Support Hedgie Open" button added to the Budget planner footer, below the version line
+- Inline SVG Liberapay logo — no external script dependency, consistent with zero-dependency philosophy
+- Links to `liberapay.com/lancebramsay/donate` in a new tab
+
+**First-session sync notification fix**
+- Removed the `neverSynced` requirement — notification now fires whenever local data is empty and a sync provider is configured, regardless of prior sync history
+- Covers the case where a user has synced before but opens a fresh session with no data loaded
+
 ## [1.4.1] — 2026-04-22
 
 ### Notification fixes
