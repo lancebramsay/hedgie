@@ -2,6 +2,48 @@
 
 All notable changes to Hedgie are documented here.
 
+## [1.5.0] — 2026-04-23
+
+### New features
+
+**Dark mode**
+- Moon/sun toggle button (&#9790;/&#9728;) in the tab bar, left of the notification bell
+- Preference saved in `settings.darkMode` and synced in the cloud payload so it follows you across devices
+- Full CSS variable override via `body.dark` — no hardcoded colors anywhere
+
+**PWA / home screen install**
+- `manifest.json` with 192×192 and 512×512 hedgehog icons, name "Hedgie Open 🦔"
+- Install button ("⌤ Install") appears in the tab bar when the browser fires `beforeinstallprompt`
+- Button hidden once installed; `pwaInstalled: true` written to settings and synced so other devices don't prompt
+- Apple-specific meta tags for iOS home screen compatibility
+
+### Notification improvements
+
+**Sort order: high → med → low → info**
+- Added `info` urgency tier (shown in blue) sitting below `low`
+- Bell badge color now reflects the highest-priority item in the queue (red / amber / green / blue)
+
+**First-sync notification demoted to `info`**
+- Was `high`; now shows as a blue heads-up rather than a red alert
+
+**Monthly local backup reminder (new, `info` urgency)**
+- Fires on the 1st of each month when provider is local-only and budget data exists
+- Prompts user to use "Save local" in Budget planner
+- Independently toggleable as "Monthly local backup reminder" in Settings → Notifications
+
+### Status bar fixes
+
+**Local-only mode no longer says "Ready"**
+- When provider is `none` and data exists, drawer status reads "Saved locally"
+- When provider is `none` and no data exists, reads "No data yet — add income and expenses to get started"
+- `triggerAutosave` calls `updateSyncStatus('idle')` after local saves so the drawer status stays current
+
+### Other fixes
+
+**Welcome screen hedgehog** — legs (the two foot ellipses) were missing; now matches the tab bar logo exactly
+
+**Custom notification placeholder** — changed from "Sin over $100" to "Leisure over $100"
+
 ## [1.4.5] — 2026-04-22
 
 ### Changes
