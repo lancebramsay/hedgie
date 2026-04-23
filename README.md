@@ -138,12 +138,7 @@ MIT — see [LICENSE](LICENSE)
 
 ## Roadmap
 
-- [ ] PWA manifest for home screen install
-- [ ] AES-GCM payload encryption (opt-in)
-
-## Related
-
-**Hedgie** (coming soon) — native iOS/macOS app with CloudKit sync, SwiftUI interface, and expanded financial planning features.
+**Hedgie** (coming soon) — native iOS/macOS app with CloudKit sync, SwiftUI interface, and expanded financial planning features called the Den.
 
 ## Contributing
 
