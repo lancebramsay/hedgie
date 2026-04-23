@@ -2,6 +2,25 @@
 
 All notable changes to Hedgie are documented here.
 
+## [1.5.1] — 2026-04-23
+
+### Bug fixes
+
+**`undefined is not an object (evaluating 'cloud.data.income')` crash**
+- Root cause: after the v1.5.0 dark-mode wipe, the cloud payload had no `.data` field (empty push), and all three sync functions (`quickSync`, `cloudPull`, `cloudPush`) passed the raw cloud object directly to `budgetChanged`, `mergePayloads`, and `showConflictModal` without ever checking for missing or encrypted data
+- Added `toPlainPayload(payload)` helper that decrypts AES-GCM payloads and guarantees `.data` always exists (falling back to empty defaults if the payload is malformed or bare)
+- `quickSync` now calls `cloud = await toPlainPayload(cloud)` before Step 3
+- `cloudPull` now calls `plainCloud = await toPlainPayload(cloud)` and uses it throughout
+- `cloudPush` now calls `plainCloud2 = await toPlainPayload(cloud)` before `budgetChanged`/`mergePayloads`/conflict modal
+- `mergePayloads` and `budgetChanged` additionally use `cloud.data||{}` defensively
+- `showConflictModal` uses `(cd.receipts||[]).length` instead of bare `cloud.data.receipts.length`
+
+**iOS home screen install button not appearing**
+- `beforeinstallprompt` is a Chrome/Android-only API and never fires on iOS Safari
+- Added `checkIosInstallBanner()` which detects iOS via user agent, checks that the app is not already running standalone (i.e. already installed), and shows a dismissible blue banner with Share ⎙ → Add to Home Screen instructions
+- Banner is dismissed with ✕ and the dismissal is persisted in `localStorage` so it does not reappear after reload
+- Called at startup after settings are loaded
+
 ## [1.5.0] — 2026-04-23
 
 ### New features

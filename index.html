@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -1154,7 +1154,8 @@ async function quickSync(){
     const vr=await verifyPayload(cloud);
     if(!vr.ok){setGSB('err','Signature mismatch — check shared key in Settings','',true);if(btn){btn.style.opacity='1';btn.style.pointerEvents='';}return;}
 
-    // Step 3 — decide direction
+    // Step 3 - decrypt + decide direction
+    cloud=await toPlainPayload(cloud);
     const localPayload={version:syncMeta.version,lastEditedBy:settings.username,lastEditedAt:new Date().toISOString(),data:{categories,income,expenses,receipts,vendors,archives,recurringBills,financing}};
     const cloudAhead=(cloud.version||0)>(syncMeta.lastPulledVersion||0);
 
@@ -1346,22 +1347,45 @@ function _applyData(d,payload){
 }
 
 function mergePayloads(local,cloud){
-  const allIds=new Set([...local.data.receipts.map(r=>r.id),...cloud.data.receipts.map(r=>r.id)]);
-  const cb=Object.fromEntries(cloud.data.receipts.map(r=>[r.id,r]));
-  const lb=Object.fromEntries(local.data.receipts.map(r=>[r.id,r]));
+  // cloud must already be a decrypted plain-data payload
+  const cd=cloud.data||{};
+  const allIds=new Set([...(local.data.receipts||[]).map(r=>r.id),...(cd.receipts||[]).map(r=>r.id)]);
+  const cb=Object.fromEntries((cd.receipts||[]).map(r=>[r.id,r]));
+  const lb=Object.fromEntries((local.data.receipts||[]).map(r=>[r.id,r]));
   const merged=Array.from(allIds).map(id=>cb[id]||lb[id]);
   merged.sort((a,b)=>b.date.localeCompare(a.date));
-  // merge archives
-  const mergedArc={...((local.data&&local.data.archives)||{}),...((cloud.data&&cloud.data.archives)||{})};
-  const mergedCats=(cloud.data&&cloud.data.categories)||local.data.categories||DEFAULT_CATS;
-  return {...local,version:Math.max(local.version,cloud.version)+1,lastEditedBy:settings.username||'Unknown',lastEditedAt:new Date().toISOString(),data:{...local.data,receipts:merged,vendors:{...cloud.data.vendors,...local.data.vendors},archives:mergedArc,categories:mergedCats}};
+  const mergedArc={...((local.data&&local.data.archives)||{}),...(cd.archives||{})};
+  const mergedCats=cd.categories||local.data.categories||DEFAULT_CATS;
+  return {...local,version:Math.max(local.version,cloud.version)+1,lastEditedBy:settings.username||'Unknown',lastEditedAt:new Date().toISOString(),data:{...local.data,receipts:merged,vendors:{...(cd.vendors||{}),...(local.data.vendors||{})},archives:mergedArc,categories:mergedCats}};
 }
 
 function budgetChanged(local,cloud){
-  return JSON.stringify({i:local.data.income,e:local.data.expenses,cat:local.data.categories})!==JSON.stringify({i:cloud.data.income,e:cloud.data.expenses,cat:cloud.data.categories});
+  const cd=cloud.data||{};
+  return JSON.stringify({i:local.data.income,e:local.data.expenses,cat:local.data.categories})!==JSON.stringify({i:cd.income,e:cd.expenses,cat:cd.categories});
 }
 
 // ── CLOUD ADAPTERS ────────────────────────────
+// ── DECRYPT CLOUD PAYLOAD ───────────────────────────
+// Always call this after fetchFromCloud + verifyPayload.
+// Returns a guaranteed plain-data payload {_hedgie,version,...,data:{...}}
+// so all downstream code (budgetChanged, mergePayloads, showConflictModal) never
+// touches undefined cloud.data from an encrypted or corrupted payload.
+async function toPlainPayload(payload){
+  if(!payload)return null;
+  if(payload.encrypted){
+    if(!settings.sharedKey)throw new Error('Payload is encrypted — add your shared key in Settings → Identity');
+    try{
+      const d=await decryptData(payload.ciphertext,payload.iv,settings.sharedKey);
+      return {...payload,encrypted:false,data:d};
+    }catch(e){
+      throw new Error('Decryption failed — wrong shared key?');
+    }
+  }
+  // Ensure .data always exists even for a malformed/empty payload
+  if(!payload.data)return {...payload,data:{income:[],expenses:{},receipts:[],vendors:{},archives:{},recurringBills:[],categories:DEFAULT_CATS,financing:[]}};
+  return payload;
+}
+
 async function fetchFromCloud(){
   const p=settings.provider;
   if(p==='jsonbin'){const r=await fetch(`https://api.jsonbin.io/v3/b/${settings.jsonbinId}/latest`,{headers:{'X-Master-Key':settings.jsonbinKey}});if(!r.ok)throw new Error('JSONBin '+r.status);const j=await r.json();return j.record;}
@@ -1406,19 +1430,21 @@ async function cloudPull(){
     const vr=await verifyPayload(cloud);
     if(!vr.ok){updateSyncStatus('err','Signature mismatch — wrong shared key?');setGSB('err','Signature invalid — check shared key in Settings','',true);return;}
     if(vr.unsigned&&settings.sharedKey){setGSB('warn','Cloud payload has no signature — push to sign it','');}
+        // Decrypt before any .data access
+    let plainCloud;try{plainCloud=await toPlainPayload(cloud);}catch(e){updateSyncStatus('err',e.message);setGSB('err',e.message,'',true);return;}
     const localPayload={version:syncMeta.version,data:{categories,income,expenses,receipts,vendors,archives,recurringBills,financing}};
-    const cloudVer=cloud.version||0;
+    const cloudVer=plainCloud.version||0;
     const isFirstSync=syncMeta.lastPulledVersion===0&&syncMeta.version===0;
     if(cloudVer>(syncMeta.lastPulledVersion||0)){
       if(isFirstSync){
         // First ever sync — just take cloud, no conflict needed
-        await applyPayloadAsync(cloud);
+        await applyPayloadAsync(plainCloud);
         updateSyncStatus('ok','First sync complete · '+fmtAgo(cloud.lastEditedAt));
         setGSB('cloud','First sync complete','by '+(cloud.lastEditedBy||'someone'));
-      } else if(budgetChanged(localPayload,cloud)){
-        pendingCloudData=cloud;showConflictModal(cloud);updateSyncStatus('conflict');
+      } else if(budgetChanged(localPayload,plainCloud)){
+        pendingCloudData=plainCloud;showConflictModal(plainCloud);updateSyncStatus('conflict');
       }else{
-        const merged=mergePayloads(localPayload,cloud);
+        const merged=mergePayloads(localPayload,plainCloud);
         await applyPayloadAsync(merged);updateSyncStatus('ok','Merged · '+fmtAgo(cloud.lastEditedAt)+' by '+(cloud.lastEditedBy||'someone'));
         setGSB('cloud','Receipts merged from cloud','by '+(cloud.lastEditedBy||'someone'));
       }
@@ -1437,8 +1463,9 @@ async function cloudPush(){
       if(vr.unsigned&&settings.sharedKey){setGSB('warn','Remote payload unsigned — will be signed on push','');}
       if((cloud.version||0)>syncMeta.lastPulledVersion){
         const localPayload={version:syncMeta.version,data:{categories,income,expenses,receipts,vendors,archives,recurringBills,financing}};
-        if(budgetChanged(localPayload,cloud)){pendingCloudData=cloud;showConflictModal(cloud);updateSyncStatus('conflict');return;}
-        const merged=mergePayloads(localPayload,cloud);
+        let plainCloud2;try{plainCloud2=await toPlainPayload(cloud);}catch(e){updateSyncStatus('err',e.message);setGSB('err',e.message,'',true);return;}
+        if(budgetChanged(localPayload,plainCloud2)){pendingCloudData=plainCloud2;showConflictModal(plainCloud2);updateSyncStatus('conflict');return;}
+        const merged=mergePayloads(localPayload,plainCloud2);
         await pushToCloud(merged);await applyPayloadAsync(merged);updateSyncStatus('ok','Merged and pushed');setGSB('cloud','Synced to cloud — receipts merged','');return;
       }
     }
@@ -1451,7 +1478,7 @@ async function cloudPush(){
 
 // ── CONFLICT MODAL ────────────────────────────
 function showConflictModal(cloud){
-  document.getElementById('conflict-detail').innerHTML=`<strong>Cloud:</strong> v${cloud.version} · ${fmtAgo(cloud.lastEditedAt)} by <strong>${esc(cloud.lastEditedBy||'someone')}</strong><br><strong>Yours:</strong> v${syncMeta.version} · last pushed ${syncMeta.lastEditedAt?fmtAgo(syncMeta.lastEditedAt):'never'}<br><strong>Receipts:</strong> Cloud ${cloud.data.receipts.length}, you ${receipts.length} — will merge automatically<br><strong>Budget plan:</strong> Differences detected`;
+  document.getElementById('conflict-detail').innerHTML=`<strong>Cloud:</strong> v${cloud.version} · ${fmtAgo(cloud.lastEditedAt)} by <strong>${esc(cloud.lastEditedBy||'someone')}</strong><br><strong>Yours:</strong> v${syncMeta.version} · last pushed ${syncMeta.lastEditedAt?fmtAgo(syncMeta.lastEditedAt):'never'}<br><strong>Receipts:</strong> Cloud ${(cd.receipts||[]).length}, you ${receipts.length} — will merge automatically<br><strong>Budget plan:</strong> Differences detected`;
   document.getElementById('conflict-modal').classList.add('open');
 }
 async function resolveConflict(choice){
@@ -1459,7 +1486,7 @@ async function resolveConflict(choice){
   const cloud=pendingCloudData;if(!cloud)return;
   const local={version:syncMeta.version,lastEditedBy:settings.username,lastEditedAt:new Date().toISOString(),data:{categories,income,expenses,receipts,vendors,archives,recurringBills,financing}};
   let resolved=mergePayloads(local,cloud);
-  if(choice==='theirs'){resolved.data.income=cloud.data.income;resolved.data.expenses=cloud.data.expenses;resolved.data.bufferPct=cloud.data.bufferPct;}
+  if(choice==="theirs"){const cd2=cloud.data||{};resolved.data.income=cd2.income||income;resolved.data.expenses=cd2.expenses||expenses;resolved.data.bufferPct=cd2.bufferPct;}
   resolved.signature=await signPayload(resolved);
   await applyPayloadAsync(resolved);
   try{await pushToCloud(resolved);updateSyncStatus('ok','Conflict resolved');setGSB('cloud','Conflict resolved — synced ↑↓','just now');}
@@ -2703,6 +2730,23 @@ function toggleDarkMode(){
 
 // ── PWA INSTALL ──────────────────────────
 let _pwaInstallPrompt=null;
+
+// â”€â”€ iOS PWA INSTALL BANNER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// iOS Safari doesn't fire beforeinstallprompt â€” detect iOS and show a manual instruction banner
+function checkIosInstallBanner(){
+  const isIos=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isStandalone=('standalone' in window.navigator)&&window.navigator.standalone;
+  const dismissed=localStorage.getItem('hedgie_ios_banner_dismissed');
+  if(isIos&&!isStandalone&&!settings.pwaInstalled&&!dismissed){
+    const banner=document.getElementById('ios-install-banner');
+    if(banner)banner.style.display='flex';
+  }
+}
+function dismissIosBanner(){
+  const banner=document.getElementById('ios-install-banner');
+  if(banner)banner.style.display='none';
+  localStorage.setItem('hedgie_ios_banner_dismissed','1');
+}
 window.addEventListener('beforeinstallprompt',e=>{
   e.preventDefault();
   _pwaInstallPrompt=e;
@@ -2817,6 +2861,7 @@ renderLogMetrics();
 renderReceiptList();
 checkWelcome();
 applyDarkMode(); // apply saved dark mode preference after settings loaded
+checkIosInstallBanner(); // show iOS install banner if on iOS Safari without standalone mode
 loadSyncMeta();
 processRecurringBills();
 updateSyncStatus('idle'); // seed GSB with correct local/cloud state
