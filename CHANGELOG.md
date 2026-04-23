@@ -2,6 +2,49 @@
 
 All notable changes to Hedgie are documented here.
 
+## [1.4.1] — 2026-04-22
+
+### Notification fixes
+
+**First-session sync prompt**
+- New notification fires when a session opens with no local data, a sync provider is configured, and no sync has ever completed
+- Urgency: High — shown immediately so a new device user knows to tap Sync before entering data
+- Categorised under the existing sync notification toggle so it can be disabled if preferred
+
+**Logging nudge fix**
+- Nudge no longer fires for a blank app with no budget data — it now only fires when income or expense lines exist but no receipts have been logged past day 20
+- Prevents confusing "you haven't logged anything" alerts for users who haven't set up a budget yet
+
+### Schema additions (backward compatible, all fields optional)
+
+**`financing[]` array**
+- New top-level field in the sync payload `data` object
+- Empty array in Hedgie Open — populated and managed by Hedgie native (Den features)
+- Preserved through all sync operations: push, pull, merge, conflict resolution, and local restore
+- Financing account shape:
+  ```
+  {
+    id, name,
+    type: 'loan' | 'credit' | 'lease' | 'other',
+    originalBalance, currentBalance,
+    interestRate, termMonths,
+    startDate, endDate,
+    linkedCategoryName,
+    linkedExpenseIds: []
+  }
+  ```
+
+**`category.financing` flag**
+- Optional boolean on category objects
+- When `true`, signals that expense lines in this category can be linked to a Den financing account
+- The Debts default category is a natural candidate; any custom category can also opt in
+- Has no effect in Hedgie Open — used by Hedgie native to surface financing UI on relevant expense lines
+
+**`expense.financeId` and `recurringBill.financeId`**
+- Optional string field on expense line items and recurring bill templates
+- Stores the `id` of the linked financing account from `financing[]`
+- Has no effect in Hedgie Open — used by Hedgie native to track payment history against a specific loan or line of credit
+
 ## [1.4.0] — 2026-04-22
 
 ### New features
