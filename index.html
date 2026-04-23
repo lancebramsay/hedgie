@@ -252,7 +252,7 @@ select{cursor:pointer}
       <ellipse cx="20" cy="48" rx="5" ry="3" fill="#c9a882"/>
       <ellipse cx="32" cy="49" rx="5" ry="3" fill="#c9a882"/>
     </svg>
-    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v1.3.0</div></div>
+    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v1.4.0</div></div>
   </div>
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('log')" id="tab-log">
@@ -458,7 +458,7 @@ select{cursor:pointer}
     </div>
   </div>
   <div class="hint">Use the gear icon &#x2699; to configure cloud sync, shared keys, and user settings</div>
-  <div class="hint" style="margin-top:4px">Hedgie Open · v1.3.0 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
+  <div class="hint" style="margin-top:4px">Hedgie Open · v1.4.0 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
 </div>
 
 <!-- GEAR -->
@@ -526,6 +526,15 @@ select{cursor:pointer}
           </select>
         </div>
         <div id="provider-fields"></div>
+        <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border-light)">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+            <span style="flex:1;font-size:13px;color:var(--text)">&#128274; Encrypt sync payload</span>
+            <input type="checkbox" id="cfg-encrypt" ${settings.encryptSync?'checked':''}
+              onchange="toggleEncryption(this.checked)"
+              style="width:16px;height:16px;cursor:pointer;accent-color:var(--brown)">
+          </label>
+          <div id="encrypt-status" style="font-size:11px;color:var(--text-faint);margin-top:5px;line-height:1.5"></div>
+        </div>
         <div class="btn-row" style="margin-top:12px">
           <button class="btn" onclick="cloudPull()">&#8595; Pull</button>
           <button class="btn primary" onclick="cloudPush()">&#8593; Push</button>
@@ -569,6 +578,7 @@ select{cursor:pointer}
         <div id="health-panel"></div>
         <div class="btn-row" style="margin-top:10px;flex-wrap:wrap">
           <button class="btn" style="font-size:12px" onclick="exportArchiveCSV()">Export archived receipts</button>
+          <button class="btn" style="font-size:12px" onclick="exportDecryptedBackup()">Export decrypted backup</button>
         </div>
         <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border-light)">
           <div style="font-size:11px;font-weight:600;color:var(--text-faint);letter-spacing:0.3px;margin-bottom:8px">DANGER ZONE</div>
@@ -673,7 +683,7 @@ let syncMeta={version:0,lastEditedBy:'',lastEditedAt:'',lastPulledVersion:0};
 let archives={};
 let recurringBills=[];
 let currentRecurring='none';
-let settings={username:'',provider:'none',jsonbinId:'',jsonbinKey:'',gistId:'',gistToken:'',selfUrl:'',selfToken:'',dropboxToken:'',sharedKey:'',reminderDays:7,notifs:{bills:true,budget:true,yearly:true,sync:true,nudge:true},customNotifs:[]};
+let settings={username:'',provider:'none',jsonbinId:'',jsonbinKey:'',gistId:'',gistToken:'',selfUrl:'',selfToken:'',dropboxToken:'',sharedKey:'',encryptSync:false,reminderDays:7,notifs:{bills:true,budget:true,yearly:true,sync:true,nudge:true},customNotifs:[]};
 let planFilterCat='all',planFilterPri='all',rcptFilterCat='all';
 let reportView='monthly';
 let pendingCloudData=null;
@@ -773,7 +783,11 @@ async function signPayload(payload){
   if(!window.crypto||!window.crypto.subtle){
 return null;}
   const encoder=new TextEncoder();
-  const data=JSON.stringify(payload.data)+payload.version+payload.lastEditedAt;
+  // Sign over ciphertext+iv for encrypted payloads, data for plain
+  const dataStr=payload.encrypted
+    ?(payload.ciphertext||'')+(payload.iv||'')
+    :JSON.stringify(payload.data);
+  const data=dataStr+payload.version+payload.lastEditedAt;
   try{
     const keyMat=await crypto.subtle.importKey('raw',encoder.encode(settings.sharedKey),{name:'HMAC',hash:'SHA-256'},false,['sign']);
     const sig=await crypto.subtle.sign('HMAC',keyMat,encoder.encode(data));
@@ -791,7 +805,11 @@ return {ok:true, unsigned:true};}
   // Key configured but payload has no signature — accept but flag
   if(!payload.signature) return {ok:true, unsigned:true};
   const encoder=new TextEncoder();
-  const data=JSON.stringify(payload.data)+payload.version+payload.lastEditedAt;
+  // For encrypted payloads, sign over ciphertext+iv rather than data
+  const dataStr=payload.encrypted
+    ?(payload.ciphertext||'')+(payload.iv||'')
+    :JSON.stringify(payload.data);
+  const data=dataStr+payload.version+payload.lastEditedAt;
   try{
     const keyMat=await crypto.subtle.importKey('raw',encoder.encode(settings.sharedKey),{name:'HMAC',hash:'SHA-256'},false,['verify']);
     const sigBytes=Uint8Array.from(payload.signature.match(/.{2}/g).map(b=>parseInt(b,16)));
@@ -799,6 +817,41 @@ return {ok:true, unsigned:true};}
     return {ok, unsigned:false};
   }catch(e){
 return {ok:true, unsigned:true};}
+}
+
+// ── AES-GCM ENCRYPTION ───────────────────────
+const ENC_PBKDF2_ITERATIONS=100000;
+const ENC_SALT_AES='hedgie-aes-v1';
+const ENC_SALT_HMAC='hedgie-hmac-v1';
+
+async function deriveAesKey(secret){
+  if(!window.crypto||!window.crypto.subtle)return null;
+  const enc=new TextEncoder();
+  const keyMat=await crypto.subtle.importKey('raw',enc.encode(secret),{name:'PBKDF2'},false,['deriveKey']);
+  return crypto.subtle.deriveKey(
+    {name:'PBKDF2',salt:enc.encode(ENC_SALT_AES),iterations:ENC_PBKDF2_ITERATIONS,hash:'SHA-256'},
+    keyMat,{name:'AES-GCM',length:256},false,['encrypt','decrypt']
+  );
+}
+
+async function encryptData(data,secret){
+  const key=await deriveAesKey(secret);
+  if(!key)throw new Error('Encryption not available — requires HTTPS');
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const enc=new TextEncoder();
+  const cipherBuf=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,enc.encode(JSON.stringify(data)));
+  const toB64=buf=>btoa(String.fromCharCode(...new Uint8Array(buf)));
+  return {iv:toB64(iv.buffer),ciphertext:toB64(cipherBuf)};
+}
+
+async function decryptData(ciphertext,iv,secret){
+  const key=await deriveAesKey(secret);
+  if(!key)throw new Error('Decryption not available — requires HTTPS');
+  const fromB64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+  const plainBuf=await crypto.subtle.decrypt(
+    {name:'AES-GCM',iv:fromB64(iv)},key,fromB64(ciphertext)
+  );
+  return JSON.parse(new TextDecoder().decode(plainBuf));
 }
 
 // ── LIMITS & HEALTH ──────────────────────────
@@ -906,8 +959,56 @@ function completeWelcome(){
 function saveSettings(){localStorage.setItem('hedgie_settings',JSON.stringify(settings));}
 
 // ── DRAWER ────────────────────────────────────
-function openDrawer(){document.getElementById('drawer').classList.add('open');document.getElementById('drawer-overlay').classList.add('open');renderHealthPanel();renderNotifToggles();renderCustomNotifList();}
+function openDrawer(){
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('drawer-overlay').classList.add('open');
+  renderHealthPanel();renderNotifToggles();renderCustomNotifList();
+  // Render encryption toggle state
+  const cb=document.getElementById('cfg-encrypt');
+  if(cb)cb.checked=!!settings.encryptSync;
+  renderEncryptStatus();
+}
 function closeDrawer(){document.getElementById('drawer').classList.remove('open');document.getElementById('drawer-overlay').classList.remove('open');}
+
+function toggleEncryption(enabled){
+  if(enabled&&!settings.sharedKey){
+    alert('A shared key is required to enable encryption. Generate one in the Identity section first.');
+    const cb=document.getElementById('cfg-encrypt');if(cb)cb.checked=false;
+    return;
+  }
+  if(enabled&&(!window.crypto||!window.crypto.subtle)){
+    alert('Encryption requires HTTPS. Load Hedgie over https:// to enable this feature.');
+    const cb=document.getElementById('cfg-encrypt');if(cb)cb.checked=false;
+    return;
+  }
+  settings.encryptSync=enabled;
+  saveSettings();
+  renderEncryptStatus();
+}
+
+function renderEncryptStatus(){
+  const el=document.getElementById('encrypt-status');
+  if(!el)return;
+  if(!settings.encryptSync){
+    el.textContent='Off — sync payloads are plain JSON.';
+    return;
+  }
+  if(!settings.sharedKey){el.textContent='Requires a shared key — generate one in Identity.';el.style.color='var(--amber)';return;}
+  if(!window.crypto||!window.crypto.subtle){el.textContent='Requires HTTPS to function.';el.style.color='var(--red)';return;}
+  el.style.color='var(--green)';
+  el.textContent='✓ Enabled — payloads encrypted with AES-256-GCM. Both household members need the same shared key.';
+}
+
+async function exportDecryptedBackup(){
+  const data={categories,income,expenses,receipts,vendors,archives,recurringBills};
+  const payload={_hedgie:true,version:syncMeta.version,lastEditedBy:syncMeta.lastEditedBy,lastEditedAt:syncMeta.lastEditedAt,data};
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='hedgie-decrypted-backup-'+todayStr()+'.json';
+  a.click();
+  setGSB('saved','Decrypted backup exported','');
+}
 
 function onProviderChange(silent){
   const p=document.getElementById('cfg-provider').value;
@@ -965,7 +1066,7 @@ async function quickSync(){
       const cloud=await fetchFromCloud();
       if(cloud&&(cloud._hedgie||cloud.data)){
         const vr=await verifyPayload(cloud);
-        if(vr.ok){applyPayload(cloud);setGSB('cloud','Pulled from cloud','v'+(cloud.version||'?')+' by '+(cloud.lastEditedBy||'cloud'));}
+        if(vr.ok){await applyPayloadAsync(cloud);setGSB('cloud','Pulled from cloud','v'+(cloud.version||'?')+' by '+(cloud.lastEditedBy||'cloud'));}
         else{setGSB('err','Signature mismatch — check shared key','',false);}
       }else{setGSB('warn','Nothing in cloud yet — add data and Push to start','',false);}
     }catch(e){setGSB('err','Pull failed: '+e.message,'',false);}
@@ -986,7 +1087,7 @@ async function quickSync(){
       );
       if(pullInstead){
         const vr=await verifyPayload(cloudCheck);
-        if(vr.ok){applyPayload(cloudCheck);setGSB('cloud','Pulled from cloud','v'+(cloudCheck.version||'?'));}
+        if(vr.ok){await applyPayloadAsync(cloudCheck);setGSB('cloud','Pulled from cloud','v'+(cloudCheck.version||'?'));}
         else{setGSB('err','Signature mismatch — check shared key','',false);}
         if(btn){btn.style.opacity='1';btn.style.pointerEvents='';}
         return;
@@ -1008,7 +1109,7 @@ async function quickSync(){
     if(!cloud||((!cloud._hedgie)&&!cloud.data)){
       const payload=await buildPayload();
       await pushToCloud(payload);
-      applyPayload(payload);
+      await applyPayloadAsync(payload);
       setGSB('cloud','Pushed to cloud — first sync','just now');
       if(btn){btn.style.opacity='1';btn.style.pointerEvents='';}
       return;
@@ -1041,7 +1142,7 @@ async function quickSync(){
     // Step 4 — sign and push
     resolved.signature=await signPayload(resolved);
     await pushToCloud(resolved);
-    applyPayload(resolved);
+    await applyPayloadAsync(resolved);
     syncMeta.version=resolved.version;
     syncMeta.lastEditedBy=resolved.lastEditedBy;
     syncMeta.lastEditedAt=resolved.lastEditedAt;
@@ -1111,13 +1212,54 @@ function triggerAutosave(source){
 
 // ── CLOUD PAYLOAD ─────────────────────────────
 async function buildPayload(){
-  const p={_hedgie:true,version:(syncMeta.version||0)+1,lastEditedBy:settings.username||'Unknown',lastEditedAt:new Date().toISOString(),data:{categories,income,expenses,receipts,vendors,archives,recurringBills}};
+  const rawData={categories,income,expenses,receipts,vendors,archives,recurringBills};
+  const base={_hedgie:true,version:(syncMeta.version||0)+1,lastEditedBy:settings.username||'Unknown',lastEditedAt:new Date().toISOString()};
+  if(settings.encryptSync&&settings.sharedKey){
+    try{
+      const {iv,ciphertext}=await encryptData(rawData,settings.sharedKey);
+      const p={...base,encrypted:true,iv,ciphertext};
+      p.signature=await signPayload(p);
+      return p;
+    }catch(e){
+      setGSB('err','Encryption failed: '+e.message,'',false);
+      throw e;
+    }
+  }
+  const p={...base,data:rawData};
   p.signature=await signPayload(p);
   return p;
 }
 
+async function applyPayloadAsync(payload){
+  let d;
+  if(payload.encrypted){
+    if(!settings.sharedKey){
+      setGSB('err','Cloud payload is encrypted — add your shared key in Settings → Identity','',false);
+      throw new Error('No key to decrypt payload');
+    }
+    try{
+      d=await decryptData(payload.ciphertext,payload.iv,settings.sharedKey);
+    }catch(e){
+      setGSB('err','Decryption failed — wrong shared key?','',false);
+      throw new Error('Decryption failed: '+e.message);
+    }
+  }else{
+    d=payload.data||payload;
+  }
+  _applyData(d,payload);
+}
+
 function applyPayload(payload){
-  const d=payload.data||payload;
+  // Synchronous path for unencrypted payloads (backward compat)
+  if(payload.encrypted){
+    // Kick off async and return; callers that need to await should use applyPayloadAsync
+    applyPayloadAsync(payload).catch(e=>console.error('applyPayload decrypt error:',e));
+    return;
+  }
+  _applyData(payload.data||payload,payload);
+}
+
+function _applyData(d,payload){
   // Handle old schema — if no categories key, keep current categories
   if(d.categories&&d.categories.length){
     // Merge: keep locked defaults with potentially updated colors, append custom cats
@@ -1212,14 +1354,14 @@ async function cloudPull(){
     if(cloudVer>(syncMeta.lastPulledVersion||0)){
       if(isFirstSync){
         // First ever sync — just take cloud, no conflict needed
-        applyPayload(cloud);
+        await applyPayloadAsync(cloud);
         updateSyncStatus('ok','First sync complete · '+fmtAgo(cloud.lastEditedAt));
         setGSB('cloud','First sync complete','by '+(cloud.lastEditedBy||'someone'));
       } else if(budgetChanged(localPayload,cloud)){
         pendingCloudData=cloud;showConflictModal(cloud);updateSyncStatus('conflict');
       }else{
         const merged=mergePayloads(localPayload,cloud);
-        applyPayload(merged);updateSyncStatus('ok','Merged · '+fmtAgo(cloud.lastEditedAt)+' by '+(cloud.lastEditedBy||'someone'));
+        await applyPayloadAsync(merged);updateSyncStatus('ok','Merged · '+fmtAgo(cloud.lastEditedAt)+' by '+(cloud.lastEditedBy||'someone'));
         setGSB('cloud','Receipts merged from cloud','by '+(cloud.lastEditedBy||'someone'));
       }
     }else{updateSyncStatus('ok','Already up to date');setGSB('saved','Already up to date','');}
@@ -1239,7 +1381,7 @@ async function cloudPush(){
         const localPayload={version:syncMeta.version,data:{categories,income,expenses,receipts,vendors,archives,recurringBills}};
         if(budgetChanged(localPayload,cloud)){pendingCloudData=cloud;showConflictModal(cloud);updateSyncStatus('conflict');return;}
         const merged=mergePayloads(localPayload,cloud);
-        await pushToCloud(merged);applyPayload(merged);updateSyncStatus('ok','Merged and pushed');setGSB('cloud','Synced to cloud — receipts merged','');return;
+        await pushToCloud(merged);await applyPayloadAsync(merged);updateSyncStatus('ok','Merged and pushed');setGSB('cloud','Synced to cloud — receipts merged','');return;
       }
     }
     const payload=await buildPayload();
@@ -1261,7 +1403,7 @@ async function resolveConflict(choice){
   let resolved=mergePayloads(local,cloud);
   if(choice==='theirs'){resolved.data.income=cloud.data.income;resolved.data.expenses=cloud.data.expenses;resolved.data.bufferPct=cloud.data.bufferPct;}
   resolved.signature=await signPayload(resolved);
-  applyPayload(resolved);
+  await applyPayloadAsync(resolved);
   try{await pushToCloud(resolved);updateSyncStatus('ok','Conflict resolved');setGSB('cloud','Conflict resolved — synced ↑↓','just now');}
   catch(e){updateSyncStatus('err','Resolved locally, push failed: '+e.message);setGSB('err','Resolved locally — push failed','');}
   pendingCloudData=null;
@@ -2443,7 +2585,7 @@ function restoreJSON(input){
         const vr=await verifyPayload(data);
         if(!vr.ok&&!confirm('Signature mismatch — this backup may be from a different household. Load anyway?'))return;
       }
-      applyPayload(data);input.value='';
+      await applyPayloadAsync(data);input.value='';
     }catch(e){alert('Could not read this file.');}
   };
   reader.readAsText(file);

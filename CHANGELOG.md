@@ -2,6 +2,40 @@
 
 All notable changes to Hedgie are documented here.
 
+## [1.4.0] — 2026-04-22
+
+### New features
+
+**AES-GCM payload encryption (opt-in)**
+- Toggle in Settings → Cloud sync: "Encrypt sync payload"
+- Off by default — fully backward compatible with existing unencrypted setups
+- Uses AES-256-GCM via the Web Crypto API
+- Key derived from the existing shared secret via PBKDF2 (100,000 iterations, salt: `hedgie-aes-v1`) — no new key to share
+- HMAC signature covers `ciphertext+iv` when encrypted, `data` when plain — integrity check works in both modes
+- Graceful error states: wrong key, missing key, and non-HTTPS contexts each show distinct messages
+- Toggle guards: requires a shared key and HTTPS — shows specific alert if either is missing
+
+**Decrypted export**
+- New button in Settings → Data: "Export decrypted backup"
+- Always exports plain JSON regardless of encryption state
+- Produces a file identical to Save local — compatible with Restore local and future Hedgie native app
+- Migration path: export decrypted → Restore local on destination device → Push to overwrite cloud
+
+### Schema
+
+Encrypted payload format (canonical, shared with future Hedgie native):
+```json
+{
+  "_hedgie": true,
+  "version": 12,
+  "encrypted": true,
+  "iv": "<base64 12-byte IV>",
+  "ciphertext": "<base64 AES-GCM ciphertext>",
+  "signature": "<HMAC-SHA256 over ciphertext+iv+version+lastEditedAt>"
+}
+```
+Key derivation: `PBKDF2(sharedSecret, salt='hedgie-aes-v1', iterations=100000, hash=SHA-256) → AES-256 key`
+
 ## [1.3.0] — 2026-04-22
 
 ### New features
