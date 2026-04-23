@@ -2,6 +2,15 @@
 
 All notable changes to Hedgie are documented here.
 
+## [1.5.4] — 2026-04-23
+
+### Fix
+
+**iOS install banner: reverted navigator.share() approach**
+- `navigator.share()` opens the generic system share sheet which does not include Add to Home Screen — that option only appears in the browser's own toolbar Share button, which cannot be triggered programmatically on iOS
+- Replaced the button with a clear inline instruction: the iOS Share icon (SVG matching the actual toolbar icon) followed by "Share in your browser toolbar, then Add to Home Screen"
+- Removed the dead `iosShareInstall()` function
+
 ## [1.5.3] — 2026-04-23
 
 ### Changes
