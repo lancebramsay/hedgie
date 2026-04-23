@@ -2,6 +2,15 @@
 
 All notable changes to Hedgie are documented here.
 
+## [1.4.5] — 2026-04-22
+
+### Changes
+
+**First-sync notification now independently toggleable**
+- "Sync prompt on empty session" is now its own entry in Settings → Notifications, separate from the sync staleness toggle
+- Uses a dedicated `notifs.firstSync` key — existing users get it defaulted to on without any action required
+- Staleness and first-sync notifications can now be controlled independently
+
 ## [1.4.4] — 2026-04-22
 
 ### Changes
