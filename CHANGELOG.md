@@ -2,6 +2,14 @@
 
 All notable changes to Hedgie are documented here.
 
+## [1.4.4] — 2026-04-22
+
+### Changes
+
+**Encrypt sync payload moved to Identity**
+- The "Encrypt sync payload" toggle now lives under Settings → Identity, directly below the shared key section
+- Makes more sense there since encryption derives from the shared key — both settings belong together
+
 ## [1.4.3] — 2026-04-22
 
 ### Changes
