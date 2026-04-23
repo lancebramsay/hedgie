@@ -1,137 +1,203 @@
-🦔 Hedgie Open
+# 🦔 Hedgie Open
 
-A lightweight, single-file household budget planner.
+Lightweight, single-file household budget planner.
 
-Live: https://lancebramsay.github.io/hedgie
+Live: [https://lancebramsay.github.io/hedgie](https://lancebramsay.github.io/hedgie)
+Mirror: [https://hedgie.pages.dev](https://hedgie.pages.dev)
 
-Mirror: https://hedgie.pages.dev
+---
 
-Overview
+## Overview
 
-Hedgie Open is a zero-dependency, offline-first budgeting app that runs entirely from a single index.html. No accounts, no backend, no build step.
+Hedgie Open is an offline-first budgeting app that runs entirely from a single `index.html`.
 
-Optional cloud sync enables multi-user households with signed (and optionally encrypted) data.
+No accounts. No backend. No build step.
 
-Features
-Budgeting & tracking
-Quick receipt logging with vendor memory and recurring bills
-Monthly report with budget vs. actual and per-user breakdown
-Yearly “Hibernation View” with budget reference line
-Flexible budget planner (monthly/yearly expenses, priorities)
-Custom categories with color, reorder, rename, and delete
-Insights & automation
-Rainy day buffer allocation based on priority and spend
-Built-in notifications (bills, budget usage, sync, reminders)
-Custom notification rules (11 fields, AND/OR logic, 4 urgency levels)
-Data & sync
-Optional cloud sync (JSONBin, GitHub Gist, Dropbox, self-hosted)
-HMAC-SHA256 signing for integrity
-Optional AES-256-GCM encryption (Web Crypto)
-Conflict resolution and automatic receipt merging
-App experience
-Dark mode (synced across devices)
-Installable as a PWA (desktop + mobile)
-Multi-user support with per-entry attribution
-Auto-archive for old receipts
-Granular data erase options
-Getting started
-Download index.html
-Open in any modern browser
-Enter your display name
-Add income and expenses in Budget planner
-Start logging receipts
+Optional cloud sync supports multi-user households with signed and optionally encrypted data.
 
-Works fully offline. No setup required.
+---
 
-Cloud sync (optional)
+## Features
 
-Supports multiple free providers:
+### Budgeting
 
-JSONBin (recommended)
+* Receipt logging with vendor memory and recurring bills
+* Monthly budget vs actual tracking
+* Yearly spending view (Hibernation View)
+* Budget planner with monthly/yearly support
+* Custom categories (color, reorder, rename)
 
-Create a bin with:
+### Insights
 
+* Rainy day buffer allocation
+* Built-in notifications (bills, budgets, sync, reminders)
+* Custom notification rules (11 fields, AND/OR logic)
+
+### Sync & data
+
+* JSONBin, GitHub Gist, Dropbox, or self-hosted sync
+* HMAC-SHA256 signed payloads
+* Optional AES-256-GCM encryption
+* Conflict resolution and auto-merge
+* Auto-archive for old receipts
+
+### App features
+
+* Dark mode (synced across devices)
+* Installable PWA (desktop + mobile)
+* Multi-user attribution per entry
+* Granular data erase options
+
+---
+
+## Getting started
+
+1. Download `index.html`
+2. Open in a modern browser
+3. Enter display name
+4. Add income and expenses
+5. Start logging receipts
+
+Works fully offline.
+
+---
+
+## Cloud sync (optional)
+
+### JSONBin
+
+```json
 {"_hedgie":true,"version":0}
-Paste Bin ID + Master Key into Settings → Cloud sync
-Push from one device, Sync on others
-GitHub Gist
-Create a private Gist (hedgie.json)
-Use a token with gist scope
-Self-hosted
-GET → return JSON
-PUT → store JSON
-Optional Bearer auth
+```
+
+* Create bin → copy Bin ID + Master Key
+* Add in Settings → Cloud sync
+* Push from one device, sync on others
+
+### GitHub Gist
+
+* Create private gist (`hedgie.json`)
+* Generate token with `gist` scope
+* Add Gist ID + token in app
+
+### Self-hosted
+
+* GET returns JSON
+* PUT stores JSON
+* Optional Bearer token
+
+```bash
 npm install express
-HEDGIE_TOKEN=your-secret node server.js
-Security model
-Shared secret key (Settings → Identity)
-All payloads:
-Signed with HMAC-SHA256
-Optionally encrypted with AES-256-GCM
-Key must match across devices or sync is rejected
-PWA installation
-Desktop / Android
+HEDGIE_TOKEN=secret node server.js
+```
 
-Use the in-app Install button when available.
+---
 
-iOS / iPadOS
+## Security
 
-Apple does not allow programmatic install prompts.
+* Shared secret key (Settings → Identity)
+* HMAC-SHA256 signing
+* Optional AES-256-GCM encryption
+* Sync rejected on key mismatch
 
-Tap Share in the browser toolbar
-Tap Add to Home Screen
+---
 
-Hedgie displays this instruction in-app when applicable.
+## PWA install
 
-Sync safety
-Empty state guard → always pulls
-First-sync guard → requires explicit choice
+### Android / Desktop
 
-Manual Pull and Push are always available.
+Use the Install button when available.
 
-Data management
-Action	Effect
-Erase identity & sync	Clears name, key, provider credentials
-Erase budget & receipts	Clears all financial data
-Erase everything	Full reset
-Limits
-Resource	Warning	Limit
-Active receipts	800	1,000
-Vendor memory	160	200
-Expense lines/category	—	25
-Sync payload	80KB	~100KB
-Compatibility
-Feature	Chrome	Safari	Firefox	Brave
-Core app	✓	✓	✓	✓
-Cloud sync	✓	✓	✓	✓
-Crypto (HMAC/AES)	HTTPS only	HTTPS only	HTTPS only	HTTPS only
+### iOS / iPadOS
 
-Web Crypto requires https:// or localhost.
-On file://, sync works but cryptographic features are disabled.
+1. Tap Share in browser
+2. Tap Add to Home Screen
 
-Deployment
-GitHub Pages
-Fork → enable Pages → deploy main
-Cloudflare Pages
-Upload index.html → deploy
-License
+(No programmatic install support on iOS)
 
-MIT — see LICENSE
+---
 
-Roadmap
+## Sync safety
 
-Hedgie (native)
-Planned iOS/macOS app with CloudKit sync and expanded financial planning (“Den”).
+* Empty state → always pulls
+* First sync → requires user choice (pull/push)
+* Manual Pull / Push always available
 
-Contributing
+---
 
-Issues and PRs welcome. See CONTRIBUTING.md.
+## Data controls
 
-Recent changes (v1.5.x)
-Improved iOS install guidance (manual, platform-correct)
-Added AES-GCM encryption for sync payloads
-Introduced full dark mode with synced preference
-Fixed sync crash from malformed payloads
-Refined notification system (added info tier)
-Improved iOS install detection and visibility
-Dark mode UI refinements (including receipt log contrast)
+* Erase identity & sync
+* Erase budget & receipts
+* Erase everything
+
+---
+
+## Limits
+
+* Receipts: 1,000 max
+* Vendors: 200 max
+* Expense lines/category: 25 max
+* Sync payload: ~100KB limit
+
+---
+
+## Compatibility
+
+* Chrome ✓
+* Safari ✓
+* Firefox ✓
+* Brave ✓
+
+Notes:
+
+* Crypto requires HTTPS or localhost
+* file:// disables encryption/sync signing
+
+---
+
+## Deployment
+
+### GitHub Pages
+
+* Fork repo
+* Enable Pages on main branch
+
+### Cloudflare Pages
+
+* Upload `index.html`
+
+---
+
+## License
+
+MIT
+
+---
+
+## Roadmap
+
+Native Hedgie app:
+
+* iOS/macOS (SwiftUI)
+* CloudKit sync
+* Expanded financial planning ("Den")
+
+---
+
+## Contributing
+
+PRs and issues welcome.
+See CONTRIBUTING.md.
+
+---
+
+## Recent changes (v1.5.x)
+
+* iOS install flow fixed (manual-only)
+* Dark mode improvements
+* AES-GCM encryption added
+* Sync crash fixes (payload validation)
+* Notification system improvements (info tier)
+* Improved iOS install detection
+* Receipt log dark mode contrast fix
