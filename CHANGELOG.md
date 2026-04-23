@@ -2,6 +2,20 @@
 
 All notable changes to Hedgie are documented here.
 
+## [1.5.3] — 2026-04-23
+
+### Changes
+
+**iOS install: "Add to Home Screen" button now triggers native share sheet**
+- Tapping the button calls `navigator.share()` (available on iOS Safari and iOS Brave/WebKit), which opens the native share sheet where Add to Home Screen is prominently shown — one fewer step for the user
+- If `navigator.share` is unavailable (e.g. non-WebKit browser), the button shows a fallback hint: "Open in Safari, tap Share ⌘ → Add to Home Screen"
+- If the user cancels the share sheet, a brief instruction hint appears in the banner
+- Hint text is set dynamically at detection time so it always reflects the actual available path
+
+**Dark mode: receipt log box darkened**
+- `.quick-log` (the brown log-a-purchase card) overridden in `body.dark` to `#2a1f14` — a proper dark espresso tone instead of the inverted tan that was too bright
+- Input and select fields inside the log form also darkened with a matching dark overlay
+
 ## [1.5.2] — 2026-04-23
 
 ### Bug fixes

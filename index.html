@@ -22,6 +22,8 @@
   --shadow:rgba(61,42,16,0.07);
   --radius-sm:8px;--radius-md:12px;--radius-lg:16px;
 }
+body.dark .quick-log{background:#2a1f14}
+body.dark .quick-form input,body.dark .quick-form select{background:rgba(0,0,0,0.25);border-color:rgba(255,255,255,0.15);color:var(--text)}
 body.dark{
   --cream:#1a1510;--warm-white:#211c16;--parchment:#2a2219;--tan:#352b1f;
   --brown-light:#7a5c3a;--brown:#a07848;--brown-dark:#c9a882;--spine:#e8d5bc;
@@ -267,7 +269,7 @@ select{cursor:pointer}
       <ellipse cx="20" cy="48" rx="5" ry="3" fill="#c9a882"/>
       <ellipse cx="32" cy="49" rx="5" ry="3" fill="#c9a882"/>
     </svg>
-    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v1.5.2</div></div>
+    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v1.5.3</div></div>
   </div>
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('log')" id="tab-log">
@@ -313,7 +315,8 @@ select{cursor:pointer}
 
 <!-- iOS PWA INSTALL BANNER -->
 <div id="ios-install-banner" style="display:none;background:var(--blue-light);border-bottom:1px solid var(--blue);padding:7px 12px;align-items:center;gap:8px">
-  <span style="font-size:13px;color:var(--blue);flex:1;line-height:1.4">&#128242; To install: tap <strong>Share &#11016;</strong> then <strong>Add to Home Screen</strong></span>
+  <button onclick="iosShareInstall()" style="display:flex;align-items:center;gap:6px;background:var(--blue);border:none;border-radius:var(--radius-sm);cursor:pointer;padding:5px 12px;color:#fff;font-size:13px;font-family:inherit;font-weight:500;flex-shrink:0">&#128242; Add to Home Screen</button>
+  <span id="ios-banner-hint" style="font-size:11px;color:var(--blue);flex:1;line-height:1.4"></span>
   <button onclick="dismissIosBanner()" style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--blue);padding:0 4px;flex-shrink:0;line-height:1;opacity:0.7">&#215;</button>
 </div>
 
@@ -483,7 +486,7 @@ select{cursor:pointer}
     </div>
   </div>
   <div class="hint">Use the gear icon &#x2699; to configure cloud sync, shared keys, and user settings</div>
-  <div class="hint" style="margin-top:4px">Hedgie Open · v1.5.2 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
+  <div class="hint" style="margin-top:4px">Hedgie Open · v1.5.3 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
   <div class="hint" style="margin-top:8px" id="donate-btn-planner"></div>
 </div>
 
@@ -2746,20 +2749,46 @@ let _pwaInstallPrompt=null;
 // is that the app is actually running as an installed PWA (standalone).
 function checkIosInstallBanner(){
   const isIos=/iphone|ipad|ipod/i.test(navigator.userAgent)||
-               (/macintosh/i.test(navigator.userAgent)&&navigator.maxTouchPoints>1); // iPad on iPadOS 13+
+               (/macintosh/i.test(navigator.userAgent)&&navigator.maxTouchPoints>1);
   const isStandalone=('standalone' in window.navigator)&&window.navigator.standalone;
-  if(isIos&&!isStandalone){
-    // Show tab-bar ðŸ“² button
-    const btn=document.getElementById('pwa-install-btn');
-    if(btn)btn.style.display='block';
-    // Show instruction banner
-    const banner=document.getElementById('ios-install-banner');
-    if(banner)banner.style.display='flex';
+  if(!isIos||isStandalone)return;
+  // Show tab-bar button
+  const btn=document.getElementById('pwa-install-btn');
+  if(btn)btn.style.display='block';
+  // Show banner
+  const banner=document.getElementById('ios-install-banner');
+  if(banner)banner.style.display='flex';
+  // Set hint text: if navigator.share is available (Safari/WebKit), the button will trigger it
+  // For browsers where share is unavailable, show manual instructions
+  const hint=document.getElementById('ios-banner-hint');
+  if(hint){
+    hint.textContent=navigator.share
+      ?'Tap the button to open the share sheet, then choose Add to Home Screen'
+      :'In Safari: tap Share \u2318 then Add to Home Screen';
   }
 }
 function dismissIosBanner(){
   const banner=document.getElementById('ios-install-banner');
   if(banner)banner.style.display='none';
+}
+async function iosShareInstall(){
+  if(navigator.share){
+    try{
+      await navigator.share({
+        title:'Hedgie Open \ud83e\udd94',
+        text:'Track your spending with Hedgie Open',
+        url:window.location.href
+      });
+    }catch(e){
+      // User cancelled or share failed - show manual instructions as fallback
+      const hint=document.getElementById('ios-banner-hint');
+      if(hint)hint.textContent='Tap Share \u2318 in the toolbar, then choose Add to Home Screen';
+    }
+  }else{
+    // navigator.share not available (non-Safari iOS browser) - show instructions
+    const hint=document.getElementById('ios-banner-hint');
+    if(hint){hint.textContent='Open in Safari, then tap Share \u2318 \u2192 Add to Home Screen';hint.style.fontWeight='600';}
+  }
 }
 window.addEventListener('beforeinstallprompt',e=>{
   e.preventDefault();
