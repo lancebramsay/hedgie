@@ -1,145 +1,137 @@
-# 🦔 Hedgie Open
+🦔 Hedgie Open
 
-A lightweight household budget planner as a single-page-app. 
+A lightweight, single-file household budget planner.
 
-**Live:** [lancebramsay.github.io/hedgie](https://lancebramsay.github.io/hedgie) · Mirror: [hedgie.pages.dev](https://hedgie.pages.dev)
+Live: https://lancebramsay.github.io/hedgie
 
----
+Mirror: https://hedgie.pages.dev
 
-## Features
+Overview
 
-- **Log receipts** — quick-entry form with vendor memory, date picker, recurring bill support, and inline editing
-- **Monthly report** — budget vs. actual spending by category with color-coded progress bars and per-user breakdown
-- **Hibernation View** — full-year spending timeline with monthly bars and a budget reference line
-- **Budget planner** — income sources, categorized expenses with monthly/yearly frequency toggle and High/Medium/Low priority
-- **Custom categories** — six locked defaults plus unlimited custom categories with color picker, rename, reorder, and remove
-- **Rainy day buffer** — monthly surplus allocated across categories weighted by priority and actual expense cost
-- **Custom notifications** — build your own alerts from 11 queryable fields with AND/OR condition logic
-- **Built-in notifications** — upcoming bills, budget warnings, sync staleness, and logging reminders
-- **Cloud sync** — optional, supports JSONBin, GitHub Gist, self-hosted endpoints, and Dropbox
-- **HMAC signing** — shared secret key signs every sync payload for household integrity checking
-- **Multi-user** — display name stamps every receipt and sync event; conflict resolution modal on budget differences
-- **Auto-archive** — receipts older than the prior calendar year move to archive automatically
-- **Granular data erase** — erase identity only, budget and receipts only, or everything
+Hedgie Open is a zero-dependency, offline-first budgeting app that runs entirely from a single index.html. No accounts, no backend, no build step.
 
-## Getting started
+Optional cloud sync enables multi-user households with signed (and optionally encrypted) data.
 
-1. Download `index.html`
-2. Open it in any modern browser (Chrome, Safari, Firefox, Brave)
-3. Enter your display name when prompted
-4. Go to **Budget planner** and fill in your income and expenses
-5. Log receipts in **Log receipt** as you spend
+Features
+Budgeting & tracking
+Quick receipt logging with vendor memory and recurring bills
+Monthly report with budget vs. actual and per-user breakdown
+Yearly “Hibernation View” with budget reference line
+Flexible budget planner (monthly/yearly expenses, priorities)
+Custom categories with color, reorder, rename, and delete
+Insights & automation
+Rainy day buffer allocation based on priority and spend
+Built-in notifications (bills, budget usage, sync, reminders)
+Custom notification rules (11 fields, AND/OR logic, 4 urgency levels)
+Data & sync
+Optional cloud sync (JSONBin, GitHub Gist, Dropbox, self-hosted)
+HMAC-SHA256 signing for integrity
+Optional AES-256-GCM encryption (Web Crypto)
+Conflict resolution and automatic receipt merging
+App experience
+Dark mode (synced across devices)
+Installable as a PWA (desktop + mobile)
+Multi-user support with per-entry attribution
+Auto-archive for old receipts
+Granular data erase options
+Getting started
+Download index.html
+Open in any modern browser
+Enter your display name
+Add income and expenses in Budget planner
+Start logging receipts
 
-No account, no signup, no internet required for core use.
+Works fully offline. No setup required.
 
-## Cloud sync (optional)
+Cloud sync (optional)
 
-Hedgie can sync between household members using any of these free providers:
+Supports multiple free providers:
 
-### JSONBin.io (recommended for beginners)
+JSONBin (recommended)
 
-1. Create a free account at [jsonbin.io](https://jsonbin.io)
-2. Click **+ Create Bin** — initialize it with `{"_hedgie":true,"version":0}`
-3. Copy your **Bin ID** and **Master Key** from the dashboard
-4. Open the gear icon → **Cloud sync** → select JSONBin and paste both values
-5. Click **Push** — your data is now in the cloud
-6. Your household partner opens Hedgie on their device, enters the same credentials, and taps **Sync**
+Create a bin with:
 
-### GitHub Gist (for GitHub users)
-
-1. Create a **private** Gist at [gist.github.com](https://gist.github.com) with a file named `hedgie.json`
-2. Generate a Personal Access Token with `gist` scope at [github.com/settings/tokens](https://github.com/settings/tokens)
-3. In Hedgie: gear → Cloud sync → GitHub Gist, paste your Gist ID and token
-
-### Self-hosted endpoint
-
-Point Hedgie at any endpoint that accepts:
-- `GET /your-path` → returns the stored JSON payload
-- `PUT /your-path` → accepts a JSON body and stores it
-
-Add an optional Bearer token for authentication. Works well on a homelab. See `server.js` for a ready-to-run Node.js/Express example.
-
-```bash
+{"_hedgie":true,"version":0}
+Paste Bin ID + Master Key into Settings → Cloud sync
+Push from one device, Sync on others
+GitHub Gist
+Create a private Gist (hedgie.json)
+Use a token with gist scope
+Self-hosted
+GET → return JSON
+PUT → store JSON
+Optional Bearer auth
 npm install express
 HEDGIE_TOKEN=your-secret node server.js
-```
+Security model
+Shared secret key (Settings → Identity)
+All payloads:
+Signed with HMAC-SHA256
+Optionally encrypted with AES-256-GCM
+Key must match across devices or sync is rejected
+PWA installation
+Desktop / Android
 
-### Shared secret key
+Use the in-app Install button when available.
 
-For multi-user sync, generate a shared key in **Settings → Identity**. Both users paste the same key. Every sync payload is HMAC-SHA256 signed — if the key doesn't match, the payload is rejected before any data is applied. Share the key once via AirDrop or iMessage, never email.
+iOS / iPadOS
 
-## Sync safety
+Apple does not allow programmatic install prompts.
 
-The Sync button has two built-in guards to prevent accidental data loss:
+Tap Share in the browser toolbar
+Tap Add to Home Screen
 
-- **Empty state guard** — if local data is blank, Hedgie always pulls instead of pushing
-- **First-sync guard** — if local data exists but the session has never synced before, Hedgie fetches the cloud first and asks you to choose pull-or-push before proceeding
+Hedgie displays this instruction in-app when applicable.
 
-Use **Pull** and **Push** in the Cloud sync accordion for full manual control.
+Sync safety
+Empty state guard → always pulls
+First-sync guard → requires explicit choice
 
-## Custom notifications
+Manual Pull and Push are always available.
 
-Open gear → **Notifications → Custom notifications** → **+ Add** to build your own alerts. Each rule supports up to 3 conditions joined by AND or OR, with fields including:
+Data management
+Action	Effect
+Erase identity & sync	Clears name, key, provider credentials
+Erase budget & receipts	Clears all financial data
+Erase everything	Full reset
+Limits
+Resource	Warning	Limit
+Active receipts	800	1,000
+Vendor memory	160	200
+Expense lines/category	—	25
+Sync payload	80KB	~100KB
+Compatibility
+Feature	Chrome	Safari	Firefox	Brave
+Core app	✓	✓	✓	✓
+Cloud sync	✓	✓	✓	✓
+Crypto (HMAC/AES)	HTTPS only	HTTPS only	HTTPS only	HTTPS only
 
-- Receipt category, vendor, amount, note, or who logged it
-- Month total spent, month total by category, receipt count this month
-- Category budget percentage used
-- Days since last receipt
-- Expense line amount
+Web Crypto requires https:// or localhost.
+On file://, sync works but cryptographic features are disabled.
 
-Rules fire inside the bell notification panel at Low, Medium, or High urgency.
+Deployment
+GitHub Pages
+Fork → enable Pages → deploy main
+Cloudflare Pages
+Upload index.html → deploy
+License
 
-## Data erase options
+MIT — see LICENSE
 
-The **Data** accordion in Settings has three targeted erase options:
+Roadmap
 
-| Button | What it clears |
-|---|---|
-| Erase identity & sync | Display name, shared key, all provider credentials |
-| Erase budget & receipts | Income, expenses, receipts, vendors, archives, syncMeta |
-| Erase everything | All of the above plus all settings |
+Hedgie (native)
+Planned iOS/macOS app with CloudKit sync and expanded financial planning (“Den”).
 
-## Payload size limits
+Contributing
 
-| Resource | Warning | Limit |
-|---|---|---|
-| Active receipts | 800 | 1,000 (auto-archives) |
-| Vendor memory | 160 | 200 (auto-prunes oldest) |
-| Expense lines per category | — | 25 |
-| Sync payload | 80KB | ~100KB (JSONBin free tier) |
+Issues and PRs welcome. See CONTRIBUTING.md.
 
-The **Data health** panel in Settings shows current usage against these limits.
-
-## Browser compatibility
-
-Hedgie uses the Web Crypto API for HMAC signing, which requires a secure context (`https://` or `localhost`). Sync works from `file://` URLs but signatures are skipped.
-
-| Feature | Chrome | Safari | Firefox | Brave |
-|---|---|---|---|---|
-| Core budget app | ✓ | ✓ | ✓ | ✓ |
-| Cloud sync | ✓ | ✓ | ✓ | ✓ |
-| HMAC signing | https only | https only | https only | https only |
-
-## Deploying your own instance
-
-**Cloudflare Pages**
-1. Cloudflare dashboard → Workers & Pages → Create application → Pages → Upload assets
-2. Drag in `index.html`, name the project, deploy
-3. Live at `your-project.pages.dev`
-
-**GitHub Pages**
-1. Fork this repo
-2. Settings → Pages → Deploy from branch → main
-3. Live at `your-username.github.io/hedgie`
-
-## License
-
-MIT — see [LICENSE](LICENSE)
-
-## Roadmap
-
-**Hedgie** (coming soon) — native iOS/macOS app with CloudKit sync, SwiftUI interface, and expanded financial planning features called the Den.
-
-## Contributing
-
-Issues and pull requests welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+Recent changes (v1.5.x)
+Improved iOS install guidance (manual, platform-correct)
+Added AES-GCM encryption for sync payloads
+Introduced full dark mode with synced preference
+Fixed sync crash from malformed payloads
+Refined notification system (added info tier)
+Improved iOS install detection and visibility
+Dark mode UI refinements (including receipt log contrast)
