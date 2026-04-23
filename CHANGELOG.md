@@ -2,6 +2,22 @@
 
 All notable changes to Hedgie are documented here.
 
+## [1.4.3] — 2026-04-22
+
+### Changes
+
+**Donate button on all three tabs**
+- "Support Hedgie Open" Liberapay button now appears in the footer of Log receipt, Monthly report, and Budget planner
+- Rendered from a single `renderDonateBtns()` function called at startup — one source of truth for the button HTML
+
+**Encrypt toggle auto-sync on pull**
+- When pulling a payload that has `encrypted: true`, the "Encrypt sync payload" checkbox is now automatically checked and `settings.encryptSync` saved
+- Prevents the confusing state where a user pulls encrypted data but the toggle shows as off
+
+**Food category renamed to Shopping**
+- Default category `Food` renamed to `Shopping` in `DEFAULT_CATS`, `DEF` expense defaults, and all static HTML
+- Existing data with `cat: 'Food'` will still display correctly; new installs default to Shopping
+
 ## [1.4.2] — 2026-04-22
 
 ### Changes

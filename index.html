@@ -252,7 +252,7 @@ select{cursor:pointer}
       <ellipse cx="20" cy="48" rx="5" ry="3" fill="#c9a882"/>
       <ellipse cx="32" cy="49" rx="5" ry="3" fill="#c9a882"/>
     </svg>
-    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v1.4.2</div></div>
+    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v1.4.3</div></div>
   </div>
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('log')" id="tab-log">
@@ -304,7 +304,7 @@ select{cursor:pointer}
     <div class="quick-form">
       <div>
         <label>Category</label>
-        <select id="log-cat"><option value="Home">Home</option><option value="Transportation">Transportation</option><option value="Food" selected>Food</option><option value="Services">Services</option><option value="Debts">Debts</option><option value="Savings">Savings</option></select>
+        <select id="log-cat"><option value="Home">Home</option><option value="Transportation">Transportation</option><option value="Shopping" selected>Shopping</option><option value="Services">Services</option><option value="Debts">Debts</option><option value="Savings">Savings</option></select>
       </div>
       <div>
         <label>Amount ($)</label>
@@ -355,7 +355,7 @@ select{cursor:pointer}
       <button class="pill on" data-rc="all" onclick="setRcptFilter('all',this)">All</button>
       <button class="pill" data-rc="Home" onclick="setRcptFilter('Home',this)">Home</button>
       <button class="pill" data-rc="Transportation" onclick="setRcptFilter('Transportation',this)">Transportation</button>
-      <button class="pill" data-rc="Food" onclick="setRcptFilter('Food',this)">Food</button>
+      <button class="pill" data-rc="Shopping" onclick="setRcptFilter('Shopping',this)">Shopping</button>
       <button class="pill" data-rc="Services" onclick="setRcptFilter('Services',this)">Services</button>
       <button class="pill" data-rc="Debts" onclick="setRcptFilter('Debts',this)">Debts</button>
       <button class="pill" data-rc="Savings" onclick="setRcptFilter('Savings',this)">Savings</button>
@@ -363,6 +363,7 @@ select{cursor:pointer}
     <div id="receipt-limit-warn" style="display:none;font-size:12px;color:var(--amber);background:var(--amber-light);padding:7px 10px;border-radius:var(--radius-sm);margin-bottom:8px"></div>
     <div id="receipt-list"></div>
   </div>
+  <div class="hint" style="margin-top:8px" id="donate-btn-log"></div>
 </div>
 
 <!-- ═══ TAB 2 — REPORT ═══ -->
@@ -382,6 +383,7 @@ select{cursor:pointer}
     </div>
   </div>
   <div id="report-body"></div>
+  <div class="hint" style="margin-top:8px" id="donate-btn-report"></div>
 </div>
 
 <!-- ═══ TAB 3 — PLANNER ═══ -->
@@ -433,7 +435,7 @@ select{cursor:pointer}
     <button class="pill on" data-f="all" onclick="setPlanFilter('cat','all',this)">All</button>
     <button class="pill" data-f="Home" onclick="setPlanFilter('cat','Home',this)">Home</button>
     <button class="pill" data-f="Transportation" onclick="setPlanFilter('cat','Transportation',this)">Transportation</button>
-    <button class="pill" data-f="Food" onclick="setPlanFilter('cat','Food',this)">Food</button>
+    <button class="pill" data-f="Shopping" onclick="setPlanFilter('cat','Shopping',this)">Shopping</button>
     <button class="pill" data-f="Services" onclick="setPlanFilter('cat','Services',this)">Services</button>
     <button class="pill" data-f="Debts" onclick="setPlanFilter('cat','Debts',this)">Debts</button>
     <button class="pill" data-f="Savings" onclick="setPlanFilter('cat','Savings',this)">Savings</button>
@@ -458,13 +460,8 @@ select{cursor:pointer}
     </div>
   </div>
   <div class="hint">Use the gear icon &#x2699; to configure cloud sync, shared keys, and user settings</div>
-  <div class="hint" style="margin-top:4px">Hedgie Open · v1.4.2 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
-  <div class="hint" style="margin-top:8px">
-    <a href="https://liberapay.com/lancebramsay/donate" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:var(--parchment);border:1px solid var(--border);border-radius:var(--radius-sm);padding:5px 12px;font-size:12px;color:var(--text-mid);text-decoration:none;font-family:inherit;transition:background 0.15s" onmouseover="this.style.background='var(--tan)'" onmouseout="this.style.background='var(--parchment)'">
-      <svg width="14" height="14" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="40" cy="40" r="40" fill="#F6C915"/><path d="M27 57V23h16c4.4 0 7.8 1.1 10.2 3.2 2.4 2.1 3.6 5 3.6 8.6 0 3.7-1.2 6.6-3.6 8.7-2.4 2.1-5.8 3.2-10.2 3.2H34v10.3H27zm7-16.8h8.6c2.3 0 4-.5 5.2-1.6 1.2-1.1 1.8-2.6 1.8-4.6s-.6-3.5-1.8-4.6c-1.2-1.1-3-1.6-5.2-1.6H34v12.4z" fill="#1A1A1A"/></svg>
-      Support Hedgie Open
-    </a>
-  </div>
+  <div class="hint" style="margin-top:4px">Hedgie Open · v1.4.3 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
+  <div class="hint" style="margin-top:8px" id="donate-btn-planner"></div>
 </div>
 
 <!-- GEAR -->
@@ -648,7 +645,7 @@ const PRIS={H:'High',M:'Medium',L:'Low'};
 const DEFAULT_CATS=[
   {name:'Home',color:'#8b6340'},
   {name:'Transportation',color:'#3a6ea8'},
-  {name:'Food',color:'#4a7c59'},
+  {name:'Shopping',color:'#4a7c59'},
   {name:'Services',color:'#7c5a8b'},
   {name:'Debts',color:'#b94040'},
   {name:'Savings',color:'#b87820'}
@@ -667,7 +664,7 @@ const LIMITS={receipts:1000,vendors:200,expPerCat:25,warnAt:0.8,payloadKB:80};
 const DEF={
   Home:[{n:'Mortgage',a:0,p:'H',f:'M'},{n:'HELOC',a:0,p:'H',f:'M'},{n:'Home insurance',a:0,p:'H',f:'M'},{n:'Property tax',a:0,p:'H',f:'Y'},{n:'Electric / gas',a:0,p:'M',f:'M'},{n:'Water / sewer',a:0,p:'M',f:'M'},{n:'Internet',a:0,p:'M',f:'M'},{n:'Home maintenance',a:0,p:'L',f:'Y'}],
   Transportation:[{n:'Car payment',a:0,p:'M',f:'M'},{n:'Car insurance',a:0,p:'M',f:'M'},{n:'Gas',a:0,p:'M',f:'M'},{n:'Car tabs / registration',a:0,p:'L',f:'Y'},{n:'Maintenance',a:0,p:'L',f:'Y'}],
-  Food:[{n:'Groceries',a:0,p:'H',f:'M'},{n:'Dining out',a:0,p:'L',f:'M'},{n:'Coffee / snacks',a:0,p:'L',f:'M'}],
+  Shopping:[{n:'Groceries',a:0,p:'H',f:'M'},{n:'Dining out',a:0,p:'L',f:'M'},{n:'Coffee / snacks',a:0,p:'L',f:'M'}],
   Services:[{n:'Apple One',a:0,p:'L',f:'M'},{n:'Netflix',a:0,p:'L',f:'M'},{n:'Phone plan',a:0,p:'M',f:'M'},{n:'Kaiser (healthcare)',a:0,p:'H',f:'M'},{n:'Willamette Dental',a:0,p:'M',f:'M'},{n:'Prescriptions',a:0,p:'H',f:'M'},{n:'Vision',a:0,p:'M',f:'Y'},{n:'Cloud storage',a:0,p:'L',f:'M'}],
   Debts:[{n:'Student loan',a:0,p:'H',f:'M'},{n:'Credit card minimum',a:0,p:'H',f:'M'},{n:'Personal loan',a:0,p:'M',f:'M'}],
   Savings:[{n:'Emergency fund',a:0,p:'H',f:'M'},{n:'Retirement (401k/IRA)',a:0,p:'M',f:'M'},{n:'General savings',a:0,p:'L',f:'M'}]
@@ -1297,6 +1294,14 @@ function _applyData(d,payload){
   if(d.archives)archives=d.archives;
   if(d.recurringBills)recurringBills=d.recurringBills;
   if(d.financing)financing=d.financing; // Den financing accounts — read-only in Open
+  // If the pulled payload was encrypted, ensure the toggle reflects that
+  if(payload.encrypted&&!settings.encryptSync){
+    settings.encryptSync=true;
+    saveSettings();
+    const cb=document.getElementById('cfg-encrypt');
+    if(cb)cb.checked=true;
+    renderEncryptStatus();
+  }
   syncMeta.version=payload.version||0;
   syncMeta.lastEditedBy=payload.lastEditedBy||'';
   syncMeta.lastEditedAt=payload.lastEditedAt||'';
@@ -2623,6 +2628,14 @@ function restoreJSON(input){
   reader.readAsText(file);
 }
 
+function renderDonateBtns(){
+  const btn='<a href="https://liberapay.com/lancebramsay/donate" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:var(--parchment);border:1px solid var(--border);border-radius:var(--radius-sm);padding:5px 12px;font-size:12px;color:var(--text-mid);text-decoration:none;font-family:inherit;transition:background 0.15s" onmouseover="this.style.background=\'var(--tan)\'" onmouseout="this.style.background=\'var(--parchment)\'"><svg width="14" height="14" viewBox="0 0 80 80" fill="none"><circle cx="40" cy="40" r="40" fill="#F6C915"/><path d="M27 57V23h16c4.4 0 7.8 1.1 10.2 3.2 2.4 2.1 3.6 5 3.6 8.6 0 3.7-1.2 6.6-3.6 8.7-2.4 2.1-5.8 3.2-10.2 3.2H34v10.3H27zm7-16.8h8.6c2.3 0 4-.5 5.2-1.6 1.2-1.1 1.8-2.6 1.8-4.6s-.6-3.5-1.8-4.6c-1.2-1.1-3-1.6-5.2-1.6H34v12.4z" fill="#1A1A1A"/></svg>Support Hedgie Open</a>';
+  ['donate-btn-log','donate-btn-report','donate-btn-planner'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.innerHTML=btn;
+  });
+}
+
 function refreshAll(){initExpenses();rebuildCatUI();buildNotifications();document.getElementById('cat-count-lbl')&&(document.getElementById('cat-count-lbl').textContent=CATS().length+' categories');populateMonthSelects();renderBuffers();updatePlanner();renderLogMetrics();renderReceiptList();if(document.getElementById('panel-report').classList.contains('active'))renderReport();}
 
 function gatherRows(){
@@ -2702,6 +2715,7 @@ checkWelcome();
 loadSyncMeta();
 processRecurringBills();
 buildNotifications(); // runs after settings and syncMeta loaded
+renderDonateBtns();
 // Refresh notifications every 5 minutes while app is open
 setInterval(()=>{buildNotifications();if(notifPanelOpen)renderNotifList();}, 5*60*1000);
 </script>
