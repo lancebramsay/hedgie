@@ -2,6 +2,18 @@
 
 All notable changes to Hedgie are documented here.
 
+## [1.5.2] — 2026-04-23
+
+### Bug fixes
+
+**iOS/iPadOS install button not appearing (Safari and Brave)**
+- Root cause 1: `beforeinstallprompt` never fires on iOS — it is a Chrome/Android-only API. The previous tab-bar `📲` button was wired exclusively to that event and was therefore permanently hidden on all iOS browsers
+- Root cause 2: the iOS banner was gated behind `settings.pwaInstalled` (which could be `true` from another device's sync payload) and `hedgie_ios_banner_dismissed` (which could be set from a previous session), silently blocking the banner even on fresh iOS sessions
+- Fix: `checkIosInstallBanner()` now shows both the tab-bar `📲` button and the instruction banner whenever the UA is iOS/iPadOS AND the app is not already running in standalone mode — no sync flag, no localStorage dismissal gate
+- Added iPadOS 13+ detection: `navigator.maxTouchPoints > 1` on a macOS UA catches iPad with desktop mode
+- Banner can still be dismissed with ✕ (removes it for the current session only, reappears on next load until installed)
+- Standalone check (`window.navigator.standalone === true`) means once the app is actually installed and opened as a PWA, both the button and banner stay hidden
+
 ## [1.5.1] — 2026-04-23
 
 ### Bug fixes

@@ -267,7 +267,7 @@ select{cursor:pointer}
       <ellipse cx="20" cy="48" rx="5" ry="3" fill="#c9a882"/>
       <ellipse cx="32" cy="49" rx="5" ry="3" fill="#c9a882"/>
     </svg>
-    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v1.5.1</div></div>
+    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v1.5.2</div></div>
   </div>
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('log')" id="tab-log">
@@ -309,6 +309,12 @@ select{cursor:pointer}
     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
     Sync
   </button>
+</div>
+
+<!-- iOS PWA INSTALL BANNER -->
+<div id="ios-install-banner" style="display:none;background:var(--blue-light);border-bottom:1px solid var(--blue);padding:7px 12px;align-items:center;gap:8px">
+  <span style="font-size:13px;color:var(--blue);flex:1;line-height:1.4">&#128242; To install: tap <strong>Share &#11016;</strong> then <strong>Add to Home Screen</strong></span>
+  <button onclick="dismissIosBanner()" style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--blue);padding:0 4px;flex-shrink:0;line-height:1;opacity:0.7">&#215;</button>
 </div>
 
 <!-- ═══ TAB 1 — LOG ═══ -->
@@ -477,7 +483,7 @@ select{cursor:pointer}
     </div>
   </div>
   <div class="hint">Use the gear icon &#x2699; to configure cloud sync, shared keys, and user settings</div>
-  <div class="hint" style="margin-top:4px">Hedgie Open · v1.5.1 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
+  <div class="hint" style="margin-top:4px">Hedgie Open · v1.5.2 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
   <div class="hint" style="margin-top:8px" id="donate-btn-planner"></div>
 </div>
 
@@ -2731,13 +2737,22 @@ function toggleDarkMode(){
 // ── PWA INSTALL ──────────────────────────
 let _pwaInstallPrompt=null;
 
-// â”€â”€ iOS PWA INSTALL BANNER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// iOS Safari doesn't fire beforeinstallprompt â€” detect iOS and show a manual instruction banner
+// â”€â”€ iOS PWA INSTALL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// iOS/iPadOS (Safari, Brave, Chrome on iOS) never fire beforeinstallprompt.
+// Show the ðŸ“² tab-bar button and instruction banner whenever:
+//   - running on iOS/iPadOS  AND
+//   - NOT already in standalone mode (i.e. not already installed & open as PWA)
+// No dismissal gate, no pwaInstalled flag check â€” the only valid hide condition
+// is that the app is actually running as an installed PWA (standalone).
 function checkIosInstallBanner(){
-  const isIos=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isIos=/iphone|ipad|ipod/i.test(navigator.userAgent)||
+               (/macintosh/i.test(navigator.userAgent)&&navigator.maxTouchPoints>1); // iPad on iPadOS 13+
   const isStandalone=('standalone' in window.navigator)&&window.navigator.standalone;
-  const dismissed=localStorage.getItem('hedgie_ios_banner_dismissed');
-  if(isIos&&!isStandalone&&!settings.pwaInstalled&&!dismissed){
+  if(isIos&&!isStandalone){
+    // Show tab-bar ðŸ“² button
+    const btn=document.getElementById('pwa-install-btn');
+    if(btn)btn.style.display='block';
+    // Show instruction banner
     const banner=document.getElementById('ios-install-banner');
     if(banner)banner.style.display='flex';
   }
@@ -2745,7 +2760,6 @@ function checkIosInstallBanner(){
 function dismissIosBanner(){
   const banner=document.getElementById('ios-install-banner');
   if(banner)banner.style.display='none';
-  localStorage.setItem('hedgie_ios_banner_dismissed','1');
 }
 window.addEventListener('beforeinstallprompt',e=>{
   e.preventDefault();
