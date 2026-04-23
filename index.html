@@ -1233,6 +1233,13 @@ function triggerAutosave(source){
   autosaveTimer=setTimeout(async()=>{
     setGSB('saving','Saving…','');
     if(settings.provider!=='none'){
+      // Never push to cloud if there is no real data — protects against preference-only
+      // changes (dark mode, PWA install) overwriting a real cloud payload on a blank session
+      const localHasData=totalIncome()>0||receipts.length>0||totalExpMo()>0;
+      if(!localHasData){
+        setGSB('idle','',''); // no data, nothing to save
+        return;
+      }
       try{
         await cloudPushSilent();
         setGSB('cloud','Synced to cloud','just now');saveSyncMeta();buildNotifications();
@@ -1241,7 +1248,7 @@ function triggerAutosave(source){
       }
     }else{
       setGSB('saved','Saved locally','');
-      updateSyncStatus('idle'); // refresh the drawer status text too
+      updateSyncStatus('idle');
     }
   },2000);
 }
@@ -1374,6 +1381,9 @@ async function pushToCloud(payload){
 }
 
 async function cloudPushSilent(){
+  // Hard guard: never push if local data is empty — would overwrite real cloud data
+  const localHasData=totalIncome()>0||receipts.length>0||totalExpMo()>0;
+  if(!localHasData)throw new Error('No local data — push skipped to protect cloud');
   // Safety check — if cloud is ahead of what we last pulled, don't silently overwrite
   if(syncMeta.lastPulledVersion===0&&syncMeta.version===0){
     // Never synced this session — skip autosave push to avoid overwriting real cloud data
