@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>Hedgie — Hedge Your Spending</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#5c3d1e">
@@ -257,6 +260,16 @@ select{cursor:pointer}
   .tab-btn .tab-lbl{display:none}.tab-btn{padding:12px 12px}
 }
 </style>
+<script>
+// Strip ?v= cache-bust param from URL immediately on load (added by forceRefresh())
+(function(){
+  const u=new URL(window.location.href);
+  if(u.searchParams.has('v')){
+    u.searchParams.delete('v');
+    window.history.replaceState(null,'',u.toString());
+  }
+})();
+</script>
 </head>
 <body>
 
@@ -621,6 +634,7 @@ select{cursor:pointer}
         <div class="btn-row" style="margin-top:10px;flex-wrap:wrap">
           <button class="btn" style="font-size:12px" onclick="exportArchiveCSV()">Export archived receipts</button>
           <button class="btn" style="font-size:12px" onclick="exportDecryptedBackup()">Export decrypted backup</button>
+          <button class="btn" style="font-size:12px" onclick="forceRefresh()" title="Clears cached version and reloads the app">&#8635; Force refresh</button>
         </div>
         <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border-light)">
           <div style="font-size:11px;font-weight:600;color:var(--text-faint);letter-spacing:0.3px;margin-bottom:8px">DANGER ZONE</div>
@@ -1054,6 +1068,14 @@ function renderEncryptStatus(){
   if(!window.crypto||!window.crypto.subtle){el.textContent='Requires HTTPS to function.';el.style.color='var(--red)';return;}
   el.style.color='var(--green)';
   el.textContent='✓ Enabled — payloads encrypted with AES-256-GCM. Both household members need the same shared key.';
+}
+
+function forceRefresh(){
+  // Bust iOS Safari's PWA cache by navigating to a timestamped URL.
+  // A startup script strips the ?v= param immediately so the clean URL is restored.
+  const url=new URL(window.location.href);
+  url.searchParams.set('v',Date.now());
+  window.location.replace(url.toString());
 }
 
 async function exportDecryptedBackup(){
