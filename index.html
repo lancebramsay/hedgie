@@ -46,6 +46,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .tab-btn{display:flex;align-items:center;gap:6px;padding:12px 16px;background:transparent;border:none;border-bottom:2.5px solid transparent;color:var(--text-soft);font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all 0.15s;margin-bottom:-1.5px}
 .tab-btn:hover{color:var(--brown)}.tab-btn.active{color:var(--brown-dark);border-bottom-color:var(--brown)}
 .panel{display:none;padding:1.25rem 1rem 5rem;max-width:860px;margin:0 auto}.panel.active{display:block}
+/* Tab swipe container */
+#tab-panels-wrap{overflow:hidden;position:relative}
+#tab-panels-inner{display:flex;transition:transform 0.32s cubic-bezier(0.4,0,0.2,1);will-change:transform}
+#tab-panels-inner .panel{display:block;flex:0 0 100%;min-width:100%;box-sizing:border-box}
 .card{background:var(--warm-white);border:1px solid var(--border-light);border-radius:var(--radius-md);padding:1rem 1.25rem;margin-bottom:1rem;box-shadow:0 1px 3px var(--shadow)}
 .card-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px;flex-wrap:wrap}
 .card-title{font-size:14px;font-weight:600;color:var(--brown-dark)}.card-sub{font-size:12px;color:var(--text-soft);white-space:nowrap}
@@ -219,6 +223,7 @@ select{cursor:pointer}
 .drawer-acc-body{overflow:hidden;max-height:0;transition:max-height 0.3s ease}
 .drawer-acc-body.open{max-height:600px}
 .drawer-acc-inner{padding:12px 0 4px}
+.notif-rule-btns{padding-bottom:env(safe-area-inset-bottom,12px);margin-top:8px}
 /* hiber ref line */
 .hiber-bar-wrap{position:relative}
 .hiber-ref-line{position:absolute;left:0;right:0;border-top:1.5px dashed rgba(255,255,255,0.35);pointer-events:none}
@@ -272,7 +277,7 @@ select{cursor:pointer}
       <ellipse cx="20" cy="48" rx="5" ry="3" fill="#c9a882"/>
       <ellipse cx="32" cy="49" rx="5" ry="3" fill="#c9a882"/>
     </svg>
-    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v1.5.4</div></div>
+    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v1.5.5</div></div>
   </div>
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('log')" id="tab-log">
@@ -324,6 +329,8 @@ select{cursor:pointer}
   </span>
   <button onclick="dismissIosBanner()" style="background:none;border:none;cursor:pointer;font-size:18px;color:var(--blue);padding:0 4px;flex-shrink:0;line-height:1;opacity:0.6">&#215;</button>
 </div>
+
+<div id="tab-panels-wrap"><div id="tab-panels-inner">
 
 <!-- ═══ TAB 1 — LOG ═══ -->
 <div class="panel active" id="panel-log">
@@ -491,9 +498,10 @@ select{cursor:pointer}
     </div>
   </div>
   <div class="hint">Use the gear icon &#x2699; to configure cloud sync, shared keys, and user settings</div>
-  <div class="hint" style="margin-top:4px">Hedgie Open · v1.5.4 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
+  <div class="hint" style="margin-top:4px">Hedgie Open · v1.5.5 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
   <div class="hint" style="margin-top:8px" id="donate-btn-planner"></div>
-</div>
+</div><!-- /panel-planner -->
+</div></div><!-- /tab-panels-inner /tab-panels-wrap -->
 
 <!-- GEAR -->
 <button class="gear-btn" onclick="openDrawer()" title="Settings">
@@ -693,7 +701,7 @@ const catColor=name=>{const c=categories.find(x=>x.name===name);return c?c.color
 const MONTH_NAMES=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const USER_COLORS=['#3a6ea8','#b94040','#4a7c59','#7c5a8b','#b87820','#8b6340'];
 
-const LIMITS={receipts:1000,vendors:200,expPerCat:25,warnAt:0.8,payloadKB:80};
+const LIMITS={receipts:1000,vendors:200,expPerCat:25,warnAt:0.8,payloadKB:100};
 
 const DEF={
   Home:[{n:'Mortgage',a:0,p:'H',f:'M'},{n:'HELOC',a:0,p:'H',f:'M'},{n:'Home insurance',a:0,p:'H',f:'M'},{n:'Property tax',a:0,p:'H',f:'Y'},{n:'Electric / gas',a:0,p:'M',f:'M'},{n:'Water / sewer',a:0,p:'M',f:'M'},{n:'Internet',a:0,p:'M',f:'M'},{n:'Home maintenance',a:0,p:'L',f:'Y'}],
@@ -1697,7 +1705,7 @@ function renderCustomNotifForm(rule){
   conds.slice(0,3).forEach(function(c,i){html+=renderCondRow(id,i,c,cats);});
   html+='</div>';
   if(conds.length<3)html+='<button class="add-exp-btn" onclick="addCondRow(\''+id+'\')">+ Add condition</button>';
-  html+='<div style="display:flex;gap:8px;margin-top:10px">';
+  html+='<div class="notif-rule-btns" style="display:flex;gap:8px;margin-top:10px">';
   html+='<button class="btn primary" style="font-size:12px;padding:5px 12px" onclick="saveCustomNotif(\''+id+'\')">Save</button>';
   html+='<button class="btn" style="font-size:12px;padding:5px 12px" onclick="cancelCustomNotif()">Cancel</button>';
   html+='</div></div>';
@@ -2184,8 +2192,8 @@ function renderNotifList(){
     el.innerHTML='<div class="notif-empty">&#10003; All clear — nothing needs attention</div>';
     return;
   }
-  const urgLabels={high:'Urgent',med:'Heads up',low:'Info'};
-  const urgColors={high:'var(--red)',med:'var(--amber)',low:'var(--text-faint)'};
+  const urgLabels={high:'Urgent',med:'Heads up',low:'Info',info:'Heads up'};
+  const urgColors={high:'var(--red)',med:'var(--amber)',low:'var(--text-faint)',info:'var(--blue)'};
   let lastUrgency=null;
   let html='';
   notifs.forEach(n=>{
@@ -2193,12 +2201,12 @@ function renderNotifList(){
       html+=`<div class="notif-section-label" style="color:${urgColors[n.urgency]}">${urgLabels[n.urgency]}</div>`;
       lastUrgency=n.urgency;
     }
-    const urgBorderColor={high:'var(--red)',med:'var(--amber)',low:'var(--text-faint)'};
-    const urgBg={high:'rgba(185,64,64,0.06)',med:'rgba(184,120,32,0.06)',low:'transparent'};
-    html+=`<div class="notif-item" id="ni-${n.id}" style="border-left:3px solid ${urgBorderColor[n.urgency]};background:${urgBg[n.urgency]};padding-left:11px">
+    const urgBorderColor={high:'var(--red)',med:'var(--amber)',low:'var(--text-faint)',info:'var(--blue)'};
+    const urgBg={high:'rgba(185,64,64,0.06)',med:'rgba(184,120,32,0.06)',low:'transparent',info:'rgba(58,110,168,0.06)'};
+    html+=`<div class="notif-item" id="ni-${n.id}" style="border-left:3px solid ${urgBorderColor[n.urgency]||'var(--border)'};background:${urgBg[n.urgency]||'transparent'};padding-left:11px">
       <span class="notif-icon">${n.icon}</span>
       <div class="notif-body">
-        <div class="notif-title" style="color:${n.urgency==='high'?'var(--red)':n.urgency==='med'?'var(--amber)':'var(--text)'}">${esc(n.title)}</div>
+        <div class="notif-title" style="color:${n.urgency==='high'?'var(--red)':n.urgency==='med'?'var(--amber)':n.urgency==='info'?'var(--blue)':'var(--text)'}">${esc(n.title)}</div>
         <div class="notif-desc">${esc(n.desc)}</div>
       </div>
       <button class="notif-dismiss" onclick="dismissNotif('${n.id}')" title="Dismiss">&#215;</button>
@@ -2220,15 +2228,87 @@ function dismissAllNotifs(){
 }
 
 // ── TAB SWITCHING ─────────────────────────────
+const TAB_ORDER=['log','report','planner'];
+let currentTabIdx=0;
+
 function switchTab(tab){
+  const idx=TAB_ORDER.indexOf(tab);
+  if(idx<0)return;
+  currentTabIdx=idx;
+  // Update active states
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('panel-'+tab).classList.add('active');
   document.getElementById('tab-'+tab).classList.add('active');
-  if(tab==='log'){renderLogMetrics();renderReceiptList();}
-  if(tab==='report'){populateMonthSelects();renderReport();}
-  if(tab==='planner')updatePlanner();
+  // Slide the inner track
+  const inner=document.getElementById('tab-panels-inner');
+  if(inner)inner.style.transform=`translateX(${-idx*100}%)`;
+  if(tab==='report')renderReport();
+  if(tab==='log'){renderReceiptList();renderLogMetrics();}
 }
+
+// Touch swipe between tabs
+(function(){
+  let startX=0,startY=0,dragging=false,startTranslate=0;
+  const threshold=50; // px to commit a swipe
+  const MAX_ANGLE=40; // degrees — ignore mostly-vertical scrolls
+
+  function getInner(){return document.getElementById('tab-panels-inner');}
+
+  function onTouchStart(e){
+    if(e.touches.length!==1)return;
+    startX=e.touches[0].clientX;
+    startY=e.touches[0].clientY;
+    startTranslate=-currentTabIdx*100; // in percent — convert later
+    dragging=true;
+    const inner=getInner();
+    if(inner)inner.style.transition='none';
+  }
+
+  function onTouchMove(e){
+    if(!dragging||e.touches.length!==1)return;
+    const dx=e.touches[0].clientX-startX;
+    const dy=e.touches[0].clientY-startY;
+    // Ignore if scrolling more vertically than horizontally
+    if(Math.abs(dy)>Math.abs(dx)&&Math.abs(dx)<10)return;
+    if(Math.atan2(Math.abs(dy),Math.abs(dx))*180/Math.PI>MAX_ANGLE)return;
+    e.preventDefault(); // prevent page scroll during horizontal swipe
+    const inner=getInner();
+    if(!inner)return;
+    const wrapW=inner.parentElement.offsetWidth||window.innerWidth;
+    const pct=dx/wrapW*100;
+    const clamped=Math.max(-(TAB_ORDER.length-1)*100,Math.min(0,startTranslate+pct));
+    inner.style.transform=`translateX(${clamped}%)`;
+  }
+
+  function onTouchEnd(e){
+    if(!dragging)return;
+    dragging=false;
+    const dx=e.changedTouches[0].clientX-startX;
+    const dy=e.changedTouches[0].clientY-startY;
+    const inner=getInner();
+    if(inner)inner.style.transition='';
+    // Only commit if horizontal displacement exceeds threshold and isn\'t too vertical
+    if(Math.abs(dx)>=threshold&&Math.abs(dx)>Math.abs(dy)){
+      if(dx<0&&currentTabIdx<TAB_ORDER.length-1)switchTab(TAB_ORDER[currentTabIdx+1]);
+      else if(dx>0&&currentTabIdx>0)switchTab(TAB_ORDER[currentTabIdx-1]);
+      else switchTab(TAB_ORDER[currentTabIdx]); // snap back
+    }else{
+      switchTab(TAB_ORDER[currentTabIdx]); // snap back
+    }
+  }
+
+  // Attach to the wrap element after DOM ready — we use a slight delay to ensure it exists
+  function attachSwipe(){
+    const wrap=document.getElementById('tab-panels-wrap');
+    if(!wrap)return;
+    wrap.addEventListener('touchstart',onTouchStart,{passive:true});
+    wrap.addEventListener('touchmove',onTouchMove,{passive:false});
+    wrap.addEventListener('touchend',onTouchEnd,{passive:true});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',attachSwipe);
+  else attachSwipe();
+})();
 
 // ── REPORT VIEW TOGGLE ────────────────────────
 function setReportView(v){
