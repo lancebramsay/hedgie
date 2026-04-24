@@ -949,7 +949,7 @@ function renderHealthPanel(){
   const kb=estimatePayloadKB();
   const rc=receipts.length,arc=Object.values(archives).reduce((s,a)=>s+a.length,0);
   const pct=Math.min(100,Math.round(kb/LIMITS.payloadKB*100));
-  const barColor=pct>80?'var(--red)':pct>60?'var(--amber)':'var(--green)';
+  const barColor=pct>=100?'var(--red)':pct>=80?'var(--amber)':'var(--green)';
   let html=`<div style="margin-bottom:10px">
     <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-soft);margin-bottom:4px">
       <span>Payload size</span><span style="font-weight:600">${kb}KB / ${LIMITS.payloadKB}KB</span>
@@ -2448,7 +2448,7 @@ function renderYearlyReport(){
             const isCur=isCurrentYear&&i===nowMo;
             const isFuture=isCurrentYear&&i>nowMo;
             const h=isFuture?3:Math.max(3,Math.round((v/maxMonth)*barArea));
-            const bg=isFuture?'rgba(255,255,255,0.1)':v>monthlyBudget?'#b94040':v>monthlyBudget*0.85?'#b87820':'#4a7c59';
+            const bg=isFuture?'rgba(255,255,255,0.1)':v>monthlyBudget?'#b94040':v>=monthlyBudget*0.80?'#b87820':'#4a7c59';
             return '<div class="month-bar-wrap" style="position:relative">'
               +(isCur?'<span style=\'position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:8px;color:rgba(232,213,188,0.85);font-style:italic;white-space:nowrap\'>now</span>':'')
               +'<div class="month-bar" style="height:'+h+'px;background:'+bg+';opacity:'+(isFuture?0.5:0.85)+';'+(isCur?'outline:1.5px dashed rgba(255,255,255,0.7);outline-offset:-1px;':'')+'">'
@@ -2495,7 +2495,7 @@ function renderYearlyReport(){
           </div>
           <div class="month-bars" style="height:44px;margin-bottom:2px">
             ${monthlyTotals.map((v,i)=>`<div class="month-bar-wrap">
-              <div class="month-bar" style="height:${v>0?Math.round((v/maxCat)*38)+3:2}px;background:${v>catMo(c)?'#b94040':v>catMo(c)*0.85?'#b87820':catColor(c)};opacity:0.75;border-radius:2px 2px 0 0"></div>
+              <div class="month-bar" style="height:${v>0?Math.round((v/maxCat)*38)+3:2}px;background:${v>catMo(c)?'#b94040':v>=catMo(c)*0.80?'#b87820':catColor(c)};opacity:0.75;border-radius:2px 2px 0 0"></div>
               <div class="month-bar-lbl">${MONTH_NAMES[i].slice(0,1)}</div>
             </div>`).join('')}
           </div>
