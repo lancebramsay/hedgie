@@ -2,8 +2,8 @@
 
 A lightweight, offline-first household budget planner that runs entirely from a single HTML file.
 
-**Live:** [lancebramsay.github.io/hedgie](https://lancebramsay.github.io/hedgie). 
-**Mirror:** [hedgie.pages.dev](https://hedgie.pages.dev). 
+**Live:** [lancebramsay.github.io/hedgie](https://lancebramsay.github.io/hedgie)<br> 
+**Mirror:** [hedgie.pages.dev](https://hedgie.pages.dev)<br>
 **Current stable:** v1.5.8
 
 ---
