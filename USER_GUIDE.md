@@ -170,7 +170,7 @@ The bell icon in the tab bar shows a badge when there are active notifications. 
 | 🔴 | **Budget warning** | Med | A category has hit 80%+ of its monthly budget |
 | ☁️ | **Sync staleness** | Low | No cloud sync in 7+ days with a provider configured |
 | ↓ | **Sync prompt** | Info | Session opened with no data and a provider configured |
-| 💾 | **Local backup reminder** | Info | 1st of the month, local-only mode, data exists |
+| 💾 | **Local backup reminder** | Info | 1st of the month and budget data exists |
 | ✏️ | **Logging nudge** | Low | Past day 20 with budget data set up but no receipts logged yet |
 
 Tap **×** to dismiss a notification for the session, or **Dismiss all** to clear everything.
