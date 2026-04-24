@@ -4,7 +4,25 @@ All notable changes to Hedgie Open are documented here.
 
 ---
 
-## [1.5.5] — 2026-04-23 ← current stable
+## [1.5.6] — 2026-04-23 ← current stable
+
+### Bug fixes
+
+**`ReferenceError: can't find variable cd` on sync conflict**
+- `showConflictModal` referenced `cd` (shorthand for `cloud.data||{}`) without ever declaring it in its own scope
+- `const cd` was correctly added to `mergePayloads` and `budgetChanged` during the `toPlainPayload` patching session but was accidentally omitted from `showConflictModal`
+- Any sync that reached the conflict modal threw a ReferenceError and failed immediately
+
+**Excess scroll below content on Log receipt and Monthly report tabs**
+- Off-screen panels were contributing their full height to the document, causing the page to scroll far past the visible content
+- Inactive panels now use `height:0; overflow:hidden` to collapse out of flow; active panel restores `height:auto; overflow:visible`
+
+**Force refresh button for stale PWA cache (iOS)**
+- Added ↻ Force refresh button in Settings → Data
+- Navigates to `index.html?v=<timestamp>` to bust iOS Safari's PWA HTTP cache, then immediately strips the param via `history.replaceState` so the clean URL is restored
+- Added `no-cache, no-store, must-revalidate` meta headers so future deploys arrive fresh without needing the button
+
+## [1.5.5] — 2026-04-23
 
 ### New features
 
