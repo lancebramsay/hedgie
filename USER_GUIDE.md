@@ -88,13 +88,13 @@ The **Delete recurring bill** button (visible only on recurring receipts) remove
 
 ### Summary metrics
 
-Four cards at the top: amount logged this month, monthly budget total, remaining, and budget used percentage. Color coding: green when healthy, amber when over 85%, red when over budget.
+Four cards at the top: amount logged this month, monthly budget total, remaining, and budget used percentage. Color coding: green when healthy, amber when over 80%, red when over budget.
 
 ### Category breakdown
 
 Each category shows a progress bar:
 - **Green** — comfortably under budget
-- **Amber** — over 85% used
+- **Amber** — over 80% used
 - **Red** — over budget
 
 If multiple household members are logging, a user breakdown appears showing who spent what.
