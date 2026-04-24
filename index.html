@@ -11,7 +11,7 @@
 <meta name="theme-color" content="#5c3d1e">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Hedgie Open 🦔">
+<meta name="apple-mobile-web-app-title" content="Open Hedgie 🦔">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -513,7 +513,7 @@ select{cursor:pointer}
     </div>
   </div>
   <div class="hint">Use the gear icon &#x2699; to configure cloud sync, shared keys, and user settings</div>
-  <div class="hint" style="margin-top:4px">Hedgie Open · v1.5.7 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
+  <div class="hint" style="margin-top:4px">Open Hedgie · v1.5.7 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
   <div class="hint" style="margin-top:8px" id="donate-btn-planner"></div>
 </div><!-- /panel-planner -->
 </div></div><!-- /tab-panels-inner /tab-panels-wrap -->
@@ -2909,7 +2909,7 @@ async function triggerPwaInstall(){
 }
 
 function renderDonateBtns(){
-  const btn='<a href="https://liberapay.com/lancebramsay/donate" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:var(--parchment);border:1px solid var(--border);border-radius:var(--radius-sm);padding:5px 12px;font-size:12px;color:var(--text-mid);text-decoration:none;font-family:inherit;transition:background 0.15s" onmouseover="this.style.background=\'var(--tan)\'" onmouseout="this.style.background=\'var(--parchment)\'"><svg width="14" height="14" viewBox="0 0 80 80" fill="none"><circle cx="40" cy="40" r="40" fill="#F6C915"/><path d="M27 57V23h16c4.4 0 7.8 1.1 10.2 3.2 2.4 2.1 3.6 5 3.6 8.6 0 3.7-1.2 6.6-3.6 8.7-2.4 2.1-5.8 3.2-10.2 3.2H34v10.3H27zm7-16.8h8.6c2.3 0 4-.5 5.2-1.6 1.2-1.1 1.8-2.6 1.8-4.6s-.6-3.5-1.8-4.6c-1.2-1.1-3-1.6-5.2-1.6H34v12.4z" fill="#1A1A1A"/></svg>Support Hedgie Open</a>';
+  const btn='<a href="https://liberapay.com/lancebramsay/donate" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:var(--parchment);border:1px solid var(--border);border-radius:var(--radius-sm);padding:5px 12px;font-size:12px;color:var(--text-mid);text-decoration:none;font-family:inherit;transition:background 0.15s" onmouseover="this.style.background=\'var(--tan)\'" onmouseout="this.style.background=\'var(--parchment)\'"><svg width="14" height="14" viewBox="0 0 80 80" fill="none"><circle cx="40" cy="40" r="40" fill="#F6C915"/><path d="M27 57V23h16c4.4 0 7.8 1.1 10.2 3.2 2.4 2.1 3.6 5 3.6 8.6 0 3.7-1.2 6.6-3.6 8.7-2.4 2.1-5.8 3.2-10.2 3.2H34v10.3H27zm7-16.8h8.6c2.3 0 4-.5 5.2-1.6 1.2-1.1 1.8-2.6 1.8-4.6s-.6-3.5-1.8-4.6c-1.2-1.1-3-1.6-5.2-1.6H34v12.4z" fill="#1A1A1A"/></svg>Support Open Hedgie</a>';
   ['donate-btn-log','donate-btn-report','donate-btn-planner'].forEach(id=>{
     const el=document.getElementById(id);
     if(el)el.innerHTML=btn;

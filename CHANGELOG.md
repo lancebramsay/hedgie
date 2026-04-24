@@ -1,6 +1,6 @@
-# Changelog
+﻿# Changelog
 
-All notable changes to Hedgie Open are documented here.
+All notable changes to Open Hedgie are documented here.
 
 ---
 
@@ -129,7 +129,7 @@ All notable changes to Hedgie Open are documented here.
 - Receipt log card (`quick-log`) uses a dedicated dark espresso override so it doesn't appear too bright
 
 **PWA / home screen install**
-- `manifest.json` with 192×192 and 512×512 hedgehog PNG icons, app name "Hedgie Open 🦔"
+- `manifest.json` with 192×192 and 512×512 hedgehog PNG icons, app name "Open Hedgie 🦔"
 - 📲 install button in tab bar — visible on Android/desktop via `beforeinstallprompt`; visible on iOS via UA detection with Share → Add to Home Screen instruction banner
 - Apple meta tags for iOS home screen compatibility
 - `pwaInstalled` flag synced in cloud payload
@@ -180,7 +180,7 @@ All notable changes to Hedgie Open are documented here.
 ## [1.4.3] — 2026-04-22
 
 **Donate button on all three tabs**
-- "Support Hedgie Open" Liberapay button in Log receipt, Monthly report, and Budget planner footers
+- "Support Open Hedgie" Liberapay button in Log receipt, Monthly report, and Budget planner footers
 - Rendered from a single `renderDonateBtns()` function — one source of truth
 
 **Encrypt toggle auto-checked on pull**
@@ -195,7 +195,7 @@ All notable changes to Hedgie Open are documented here.
 ## [1.4.2] — 2026-04-22
 
 **Donation button**
-- Liberapay "Support Hedgie Open" button in Budget planner footer
+- Liberapay "Support Open Hedgie" button in Budget planner footer
 - Inline SVG logo — no external script, consistent with zero-dependency philosophy
 
 **First-session sync notification fix**
@@ -212,16 +212,16 @@ All notable changes to Hedgie Open are documented here.
 ### Schema additions *(backward compatible, all fields optional)*
 
 **`financing[]` array**
-- Top-level field in payload `data` — empty in Hedgie Open, populated by Hedgie native (Den features)
+- Top-level field in payload `data` — empty in Open Hedgie, populated by Hedgie native (Den features)
 - Preserved through all sync, merge, conflict resolution, and restore operations
 
 **`category.financing` flag**
 - Optional boolean on category objects — signals Den linking eligibility
-- No effect in Hedgie Open
+- No effect in Open Hedgie
 
 **`expense.financeId` / `recurringBill.financeId`**
 - Optional string linking an expense or recurring bill to a Den financing account
-- No effect in Hedgie Open
+- No effect in Open Hedgie
 
 ---
 
@@ -272,7 +272,7 @@ All notable changes to Hedgie Open are documented here.
 
 ## [1.1.0] — 2026-04-21
 
-### Hedgie Open edition established
+### Open Hedgie edition established
 
 - Custom notifications (11 fields, AND/OR, 3 conditions, Low/Med/High urgency)
 - Sync reliability guards (empty-state pull, first-sync confirm dialog)

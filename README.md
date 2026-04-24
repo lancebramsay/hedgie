@@ -1,4 +1,4 @@
-# 🦔 Hedgie Open
+﻿# 🦔 Open Hedgie
 
 A lightweight, offline-first household budget planner that runs entirely from a single HTML file.
 
@@ -10,7 +10,7 @@ A lightweight, offline-first household budget planner that runs entirely from a 
 
 ## What it is
 
-Hedgie Open is a self-contained budgeting app. No accounts, no backend, no build step, no dependencies. Download one file and open it in a browser.
+Open Hedgie is a self-contained budgeting app. No accounts, no backend, no build step, no dependencies. Download one file and open it in a browser.
 
 Optional cloud sync lets multiple household members share data with signed and optionally encrypted payloads across any device.
 
@@ -152,7 +152,7 @@ Upload `index.html` (and `manifest.json`, `icon-192.png`, `icon-512.png` for PWA
 
 ## Roadmap
 
-A future **Hedgie** native app (iOS/macOS, SwiftUI, CloudKit sync) is planned with expanded financial planning features including debt tracking and financing management ("Den features"). The Hedgie Open schema already includes forward-compatible fields (`financing[]`, `category.financing`, `financeId`) that Den will populate.
+A future **Hedgie** native app (iOS/macOS, SwiftUI, CloudKit sync) is planned with expanded financial planning features including debt tracking and financing management ("Den features"). The Open Hedgie schema already includes forward-compatible fields (`financing[]`, `category.financing`, `financeId`) that Den will populate.
 
 ---
 
