@@ -4,7 +4,23 @@ All notable changes to Hedgie Open are documented here.
 
 ---
 
-## [1.5.6] — 2026-04-23 ← current stable
+## [1.5.7] — 2026-04-23 ← current stable
+
+### Bug fixes
+
+**Form fields unresponsive to touch after sync**
+- The swipe gesture handler was calling `e.preventDefault()` too aggressively — any touch that started on or near a form element could get intercepted before the input received focus
+- `onTouchStart` now exits immediately (sets `dragging=false`) if the touch originates on an `INPUT`, `SELECT`, `TEXTAREA`, or `BUTTON` element
+- `onTouchMove` also bails out early on those elements and additionally requires >8px of horizontal movement before calling `preventDefault` — short taps on fields are never cancelled
+- Swipe still works everywhere else in the tab content area
+
+**Category dropdown arrow black and hard to see**
+- Browser-native select arrows inherit OS default styling (black) and ignore CSS `color`
+- Added `-webkit-appearance:none; appearance:none` to strip the native arrow
+- Replaced with a custom SVG chevron via `background-image` in the same white/semi-transparent colour as the form labels (`rgba(255,255,255,0.65)`)
+- Applied to `.quick-form select` so the log form's category and recurring pickers both benefit
+
+## [1.5.6] — 2026-04-23
 
 ### Bug fixes
 
