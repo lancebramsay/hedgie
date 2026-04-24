@@ -2,6 +2,31 @@
 
 All notable changes to Hedgie are documented here.
 
+## [1.5.5] — 2026-04-23
+
+### New features
+
+**Tab swipe gestures (iOS, Android, any touch screen)**
+- Swipe left/right anywhere in the tab content area to move between Log, Report, and Planner
+- Panels slide with a smooth `cubic-bezier` transition; during drag they follow your finger in real time then snap on release
+- Vertical scroll is fully preserved — swipe is only committed when horizontal displacement exceeds 50px and the gesture angle is within 40° of horizontal
+- Uses `passive: false` on `touchmove` only (to allow `preventDefault` during horizontal drags), `passive: true` on start/end for maximum scroll performance
+- Works in Safari, Brave, Chrome, and any WebKit/Blink touch browser
+
+### Bug fixes
+
+**Notification urgency `info` showed as "undefined"**
+- `urgLabels`, `urgColors`, `urgBorderColor`, and `urgBg` maps in `renderNotifList` were missing the `info` key introduced in v1.5.0
+- `info` notifications now render with a blue left border, blue title, and the section header reads "Heads up"
+- Added `||` fallbacks so any future unknown urgency level also degrades gracefully
+
+**Custom notification save/cancel buttons cut off**
+- Button row now has `padding-bottom: env(safe-area-inset-bottom, 12px)` via `.notif-rule-btns` class
+- Ensures buttons clear the home indicator on iPhone and the drawer bottom edge on all devices
+
+**Payload limit updated to 100 KB**
+- `LIMITS.payloadKB` changed from 80 to 100 to match actual JSONBin/Gist limits
+
 ## [1.5.4] — 2026-04-23
 
 ### Fix
