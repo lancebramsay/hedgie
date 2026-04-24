@@ -4,7 +4,7 @@ A lightweight, offline-first household budget planner that runs entirely from a 
 
 **Live:** [hedgie.pages.dev](https://hedgie.pages.dev)
 **Mirror:** [lancebramsay.github.io/hedgie](https://lancebramsay.github.io/hedgie)
-**Current stable:** v1.5.5
+**Current stable:** v1.5.7
 
 ---
 
@@ -146,7 +146,7 @@ Once installed and opened as a PWA, both the button and banner are hidden automa
 Fork the repo and enable Pages on the `main` branch — no configuration needed.
 
 ### Cloudflare Pages
-Upload `index.html` (and `manifest.json`, `icon-192.png`, `icon-512.png` for PWA support).
+Upload `index.html` to the root folder (and `manifest.json`, `icon-192.png`, `icon-512.png` for PWA support).
 
 ---
 
