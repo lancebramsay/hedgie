@@ -292,7 +292,7 @@ select{cursor:pointer}
       <ellipse cx="20" cy="48" rx="5" ry="3" fill="#c9a882"/>
       <ellipse cx="32" cy="49" rx="5" ry="3" fill="#c9a882"/>
     </svg>
-    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v1.5.7</div></div>
+    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v1.5.8</div></div>
   </div>
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('log')" id="tab-log">
@@ -513,7 +513,7 @@ select{cursor:pointer}
     </div>
   </div>
   <div class="hint">Use the gear icon &#x2699; to configure cloud sync, shared keys, and user settings</div>
-  <div class="hint" style="margin-top:4px">Open Hedgie · v1.5.7 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
+  <div class="hint" style="margin-top:4px">Open Hedgie · v1.5.8 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
   <div class="hint" style="margin-top:8px" id="donate-btn-planner"></div>
 </div><!-- /panel-planner -->
 </div></div><!-- /tab-panels-inner /tab-panels-wrap -->
@@ -2284,7 +2284,7 @@ function switchTab(tab){
     if(e.touches.length!==1)return;
     // Don't hijack touches that start on interactive elements
     const tag=(e.target&&e.target.tagName)||'';
-    if(/INPUT|SELECT|TEXTAREA|BUTTON/i.test(tag)){dragging=false;return;}
+    if(/INPUT|SELECT|TEXTAREA|BUTTON|A/i.test(tag)){dragging=false;return;}
     startX=e.touches[0].clientX;
     startY=e.touches[0].clientY;
     startTranslate=-currentTabIdx*100;
@@ -2299,7 +2299,7 @@ function switchTab(tab){
     const dy=e.touches[0].clientY-startY;
     // Never intercept touches on interactive form elements
     const tag=(e.target&&e.target.tagName)||'';
-    if(/INPUT|SELECT|TEXTAREA|BUTTON/i.test(tag))return;
+    if(/INPUT|SELECT|TEXTAREA|BUTTON|A/i.test(tag))return;
     // Only prevent default after clearly horizontal movement (>8px horiz, angle <40deg)
     const absDx=Math.abs(dx),absDy=Math.abs(dy);
     if(absDx<8)return; // too small to judge yet

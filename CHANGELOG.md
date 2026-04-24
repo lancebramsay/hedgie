@@ -4,7 +4,16 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
-## [1.5.7] — 2026-04-23 ← current stable
+## [1.5.8] — 2026-04-23 ← current stable
+
+### Bug fix
+
+**Support Open Hedgie donate button unresponsive after cloud sync**
+- Same root cause as the v1.5.7 form field fix — the swipe gesture handler was intercepting taps that originated on or near the donate button
+- `<a>` anchor tags were not in the blocklist, so touches on links entered the drag state and `preventDefault` cancelled the tap before the browser could follow the link
+- Added `A` to the element blocklist in both `onTouchStart` and `onTouchMove` — touches on any anchor now pass straight through to the browser
+
+## [1.5.7] — 2026-04-23
 
 ### Bug fixes
 
