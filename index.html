@@ -2176,7 +2176,7 @@ function buildNotifications(){
   });
 
   // ── 7. Local save reminder — 1st of month, local-only mode ──
-  if(settings.notifs?.localSave!==false&&settings.provider==='none'&&dayOfMonth===1){
+  if(settings.notifs?.localSave!==false&&dayOfMonth===1){
     const hasBudgetData=totalIncome()>0||totalExpMo()>0||receipts.length>0;
     if(hasBudgetData){
       const id='local-save-'+thisMonth;
