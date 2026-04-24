@@ -1522,6 +1522,7 @@ async function cloudPush(){
 
 // ── CONFLICT MODAL ────────────────────────────
 function showConflictModal(cloud){
+  const cd=cloud.data||{};
   document.getElementById('conflict-detail').innerHTML=`<strong>Cloud:</strong> v${cloud.version} · ${fmtAgo(cloud.lastEditedAt)} by <strong>${esc(cloud.lastEditedBy||'someone')}</strong><br><strong>Yours:</strong> v${syncMeta.version} · last pushed ${syncMeta.lastEditedAt?fmtAgo(syncMeta.lastEditedAt):'never'}<br><strong>Receipts:</strong> Cloud ${(cd.receipts||[]).length}, you ${receipts.length} — will merge automatically<br><strong>Budget plan:</strong> Differences detected`;
   document.getElementById('conflict-modal').classList.add('open');
 }
