@@ -2530,6 +2530,7 @@ function renderYearlyReport(){
     <div class="card">
       <div class="card-hdr"><span class="card-title">Year by category</span><span class="card-sub">${recs.length} transactions</span></div>
       <div style="display:flex;gap:12px;font-size:10px;color:var(--text-soft);margin-bottom:8px;flex-wrap:wrap">
+        <span style="display:inline-flex;align-items:center;gap:4px"><span style="display:inline-block;width:8px;height:8px;outline:1.5px dashed #4a7c59;outline-offset:1px"></span>Under budget</span>
         <span style="display:inline-flex;align-items:center;gap:4px"><span style="display:inline-block;width:8px;height:8px;outline:1.5px dashed #b87820;outline-offset:1px"></span>Near limit</span>
         <span style="display:inline-flex;align-items:center;gap:4px"><span style="display:inline-block;width:8px;height:8px;outline:1.5px dashed #b94040;outline-offset:1px"></span>Over budget</span>
       </div>
@@ -2552,7 +2553,7 @@ function renderYearlyReport(){
           </div>
           <div class="month-bars" style="height:44px;margin-bottom:2px">
             ${monthlyTotals.map((v,i)=>`<div class="month-bar-wrap">
-              <div class="month-bar" style="height:${v>0?Math.round((v/maxCat)*38)+3:2}px;background:${catColor(c)};opacity:0.75;border-radius:2px 2px 0 0;${v>0?(v>catMo(c)?'outline:1.5px dashed #b94040;outline-offset:1px':v>=catMo(c)*0.80?'outline:1.5px dashed #b87820;outline-offset:1px':''):''}"></div>
+              <div class="month-bar" style="height:${v>0?Math.round((v/maxCat)*38)+3:2}px;background:${catColor(c)};opacity:0.75;border-radius:2px 2px 0 0;${v>0?(v>catMo(c)?'outline:1.5px dashed #b94040;outline-offset:1px':v>=catMo(c)*0.80?'outline:1.5px dashed #b87820;outline-offset:1px':'outline:1.5px dashed #4a7c59;outline-offset:1px'):''}"></div>
               <div class="month-bar-lbl">${MONTH_NAMES[i].slice(0,1)}</div>
             </div>`).join('')}
           </div>
