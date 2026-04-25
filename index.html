@@ -2432,7 +2432,7 @@ function renderMonthlyReport(){
   const rem=inc-spent;
   const visRecs=rptFilterCat==='all'?recs:recs.filter(r=>r.cat===rptFilterCat);
   const rptTotal=visRecs.reduce((s,r)=>s+r.amt,0);
-  const rptPills='<div class="pills" id="rpt-filters" style="margin:4px 0 8px">'+['all',...CATS()].map(c=>c==='all'?`<button class="pill${rptFilterCat==='all'?' on':''}" onclick="setRptFilter('all')">All</button>`:`<button class="pill${rptFilterCat===c?' on':''}" onclick="setRptFilter(${JSON.stringify(c)})">${esc(c)}</button>`).join('')+'</div>';
+  const rptPills='<div class="pills" id="rpt-filters" style="margin:4px 0 8px">'+['all',...CATS()].map(c=>`<button class="pill${(c==='all'?rptFilterCat==='all':rptFilterCat===c)?' on':''}" data-rp="${esc(c)}" onclick="setRptFilter(this.dataset.rp)">${c==='all'?'All':esc(c)}</button>`).join('')+'</div>';
   const body=document.getElementById('report-body');
   body.innerHTML=`
     <div class="metrics-row">
