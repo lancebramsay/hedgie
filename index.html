@@ -349,6 +349,7 @@ select{cursor:pointer}
 
 <!-- NEW USER WIKI BANNER -->
 <div id="new-user-banner" style="display:none;background:var(--parchment);border-bottom:1px solid var(--border);padding:8px 12px;align-items:center;gap:10px">
+  <span style="font-size:16px;flex-shrink:0">&#128214;</span>
   <span style="font-size:12px;color:var(--text-mid);flex:1;line-height:1.4">New to Open Hedgie? Read the wiki to get the most out of the app.</span>
   <a href="https://github.com/lancebramsay/hedgie/wiki" target="_blank" style="font-size:12px;color:var(--brown);font-weight:600;text-decoration:none;white-space:nowrap;flex-shrink:0">Get started &#8594;</a>
   <button onclick="dismissNewUserBanner()" style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--text-soft);padding:0 4px;flex-shrink:0;line-height:1">&#215;</button>
@@ -444,6 +445,7 @@ select{cursor:pointer}
       <select id="rpt-year-sel" style="width:auto;height:32px;font-size:12px;display:none" onchange="renderReport()"></select>
     </div>
   </div>
+  <div id="report-body"></div>
   <div class="hint" style="margin-top:8px" id="donate-btn-report"></div>
 </div>
 
@@ -482,6 +484,7 @@ select{cursor:pointer}
         <span style="font-size:12px;color:var(--text-soft)" id="cat-mgr-arrow">&#9656;</span>
       </div>
     </div>
+    <div id="cat-manager-body" style="display:none;margin-top:10px">
       <div id="cat-manager-rows"></div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:8px;border-top:1px solid var(--border-light)">
         <button class="add-exp-btn" onclick="addCategory()">+ Add category</button>
@@ -541,7 +544,9 @@ select{cursor:pointer}
     <span class="drawer-title">Settings</span>
     <button class="drawer-close" onclick="closeDrawer()">&#215;</button>
   </div>
+  <div class="drawer-body" style="padding:0 1.25rem 1.5rem">
 
+    <!-- IDENTITY -->
     <!-- WIKI LINK -->
     <a href="https://github.com/lancebramsay/hedgie/wiki" target="_blank"
        style="display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border-light);text-decoration:none;margin-bottom:8px">
@@ -550,11 +555,11 @@ select{cursor:pointer}
       <span style="font-size:13px;color:var(--text-faint)">&#8594;</span>
     </a>
 
-    <!-- IDENTITY -->
     <div class="drawer-acc-hdr" onclick="toggleAcc('acc-identity')">
       <span class="drawer-acc-title">&#128100; Identity</span>
       <span class="drawer-acc-arrow" id="arr-acc-identity">&#9656;</span>
     </div>
+    <div class="drawer-acc-body" id="acc-identity">
       <div class="drawer-acc-inner">
         <div class="drawer-field">
           <label>Display name <span style="color:var(--text-faint);font-weight:400">(stamps your receipts)</span></label>
@@ -588,6 +593,7 @@ select{cursor:pointer}
       <span class="drawer-acc-title">&#9729; Cloud sync</span>
       <span class="drawer-acc-arrow" id="arr-acc-cloud">&#9656;</span>
     </div>
+    <div class="drawer-acc-body" id="acc-cloud">
       <div class="drawer-acc-inner">
         <div class="sync-status" id="sync-status-row">
           <div class="sync-dot" id="sync-dot"></div>
@@ -617,6 +623,7 @@ select{cursor:pointer}
       <span class="drawer-acc-title">&#128276; Notifications</span>
       <span class="drawer-acc-arrow" id="arr-acc-notifs">&#9656;</span>
     </div>
+    <div class="drawer-acc-body" id="acc-notifs">
       <div class="drawer-acc-inner">
         <div style="font-size:11px;color:var(--text-soft);margin-bottom:10px;line-height:1.5">Choose which notifications appear in the bell menu.</div>
         <div id="notif-toggles"></div>
@@ -642,6 +649,7 @@ select{cursor:pointer}
       <span class="drawer-acc-title">&#128202; Data</span>
       <span class="drawer-acc-arrow" id="arr-acc-data">&#9656;</span>
     </div>
+    <div class="drawer-acc-body" id="acc-data">
       <div class="drawer-acc-inner">
         <div id="health-panel"></div>
         <div class="btn-row" style="margin-top:10px;flex-wrap:wrap">
@@ -672,6 +680,7 @@ select{cursor:pointer}
         Sync conflict detected
       </div>
     </div>
+    <div class="modal-body">
       <p style="font-size:13px;color:var(--text-mid);line-height:1.6">The cloud has changes you haven't seen. Receipts will be merged automatically. The budget plan has differences — choose how to handle them:</p>
       <div class="conflict-detail" id="conflict-detail"></div>
     </div>
@@ -1072,7 +1081,7 @@ function toggleEncryption(enabled){
   settings.encryptSync=enabled;
   saveSettings();
   renderEncryptStatus();
-  renderSyncTimestamps();
+
 }
 
 function renderEncryptStatus(){
@@ -1184,7 +1193,7 @@ async function quickSync(){
       );
       if(pullInstead){
         const vr=await verifyPayload(cloudCheck);
-        if(vr.ok){await applyPayloadAsync(cloudCheck);syncMeta.lastPulledAt=new Date().toISOString();saveSyncMeta();setGSB('cloud','Pulled from cloud','v'+(cloudCheck.version||'?'));renderSyncTimestamps();}
+        if(vr.ok){await applyPayloadAsync(cloudCheck);syncMeta.lastPulledAt=new Date().toISOString();saveSyncMeta();setGSB('cloud','Pulled from cloud','v'+(cloudCheck.version||'?'));}
         else{setGSB('err','Signature mismatch — check shared key','',false);}
         if(btn){btn.style.opacity='1';btn.style.pointerEvents='';}
         return;
@@ -1247,7 +1256,7 @@ async function quickSync(){
     syncMeta.lastPulledVersion=resolved.version;
     saveSyncMeta();
     updateSyncStatus('ok','Synced');
-    syncMeta.lastSyncedAt=new Date().toISOString();saveSyncMeta();setGSB('cloud','Synced','just now');renderSyncTimestamps();
+    syncMeta.lastSyncedAt=new Date().toISOString();saveSyncMeta();setGSB('cloud','Synced ↑↓','just now');renderSyncTimestamps();
   } catch(e){
     setGSB('err','Sync failed: '+e.message,'',false);
   }
@@ -1528,7 +1537,7 @@ async function cloudPush(){
         let plainCloud2;try{plainCloud2=await toPlainPayload(cloud);}catch(e){updateSyncStatus('err',e.message);setGSB('err',e.message,'',true);return;}
         if(budgetChanged(localPayload,plainCloud2)){pendingCloudData=plainCloud2;showConflictModal(plainCloud2);updateSyncStatus('conflict');return;}
         const merged=mergePayloads(localPayload,plainCloud2);
-        await pushToCloud(merged);await applyPayloadAsync(merged);syncMeta.lastPushedAt=new Date().toISOString();updateSyncStatus('ok','Merged and pushed');setGSB('cloud','Synced to cloud - receipts merged','');renderSyncTimestamps();return;
+        await pushToCloud(merged);await applyPayloadAsync(merged);updateSyncStatus('ok','Merged and pushed');setGSB('cloud','Synced to cloud — receipts merged','');return;
       }
     }
     const payload=await buildPayload();
@@ -1552,7 +1561,7 @@ async function resolveConflict(choice){
   if(choice==="theirs"){const cd2=cloud.data||{};resolved.data.income=cd2.income||income;resolved.data.expenses=cd2.expenses||expenses;resolved.data.bufferPct=cd2.bufferPct;}
   resolved.signature=await signPayload(resolved);
   await applyPayloadAsync(resolved);
-  try{await pushToCloud(resolved);syncMeta.lastPushedAt=new Date().toISOString();updateSyncStatus('ok','Conflict resolved');setGSB('cloud','Conflict resolved - synced','just now');renderSyncTimestamps();}
+  try{await pushToCloud(resolved);syncMeta.lastPushedAt=new Date().toISOString();updateSyncStatus('ok','Conflict resolved');renderSyncTimestamps();setGSB('cloud','Conflict resolved — synced ↑↓','just now');}
   catch(e){updateSyncStatus('err','Resolved locally, push failed: '+e.message);setGSB('err','Resolved locally — push failed','');}
   pendingCloudData=null;
 }
@@ -2246,6 +2255,7 @@ function renderNotifList(){
     const urgBg={high:'rgba(185,64,64,0.06)',med:'rgba(184,120,32,0.06)',low:'transparent',info:'rgba(58,110,168,0.06)'};
     html+=`<div class="notif-item" id="ni-${n.id}" style="border-left:3px solid ${urgBorderColor[n.urgency]||'var(--border)'};background:${urgBg[n.urgency]||'transparent'};padding-left:11px">
       <span class="notif-icon">${n.icon}</span>
+      <div class="notif-body">
         <div class="notif-title" style="color:${n.urgency==='high'?'var(--red)':n.urgency==='med'?'var(--amber)':n.urgency==='info'?'var(--blue)':'var(--text)'}">${esc(n.title)}</div>
         <div class="notif-desc">${esc(n.desc)}</div>
       </div>
@@ -2883,6 +2893,7 @@ let _pwaInstallPrompt=null;
 // No dismissal gate, no pwaInstalled flag check â€” the only valid hide condition
 // is that the app is actually running as an installed PWA (standalone).
 function checkIosInstallBanner(){
+checkNewUserBanner(); // show wiki banner for first 3 sessions
   const isIos=/iphone|ipad|ipod/i.test(navigator.userAgent)||
                (/macintosh/i.test(navigator.userAgent)&&navigator.maxTouchPoints>1);
   const isStandalone=('standalone' in window.navigator)&&window.navigator.standalone;
@@ -2892,7 +2903,7 @@ function checkIosInstallBanner(){
   const banner=document.getElementById('ios-install-banner');
   if(banner)banner.style.display='flex';
 }
-// â”€â”€ NEW USER WIKI BANNER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- NEW USER WIKI BANNER -----------------------------------
 const NEW_USER_MAX_SESSIONS=3;
 function checkNewUserBanner(){
   const dismissed=localStorage.getItem('hedgie_new_user_dismissed');
@@ -2909,12 +2920,12 @@ function dismissNewUserBanner(){
   localStorage.setItem('hedgie_new_user_dismissed','1');
 }
 
-// â”€â”€ SYNC TIMESTAMPS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// -- SYNC TIMESTAMPS ----------------------------------------
 function renderSyncTimestamps(){
   const el=document.getElementById('sync-timestamps');
   if(!el)return;
   function fmt(iso){
-    if(!iso)return '<span style="color:var(--text-faint)">â€”</span>';
+    if(!iso)return '<span style="color:var(--text-faint)">&#8212;</span>';
     const diff=Date.now()-new Date(iso).getTime();
     const label=diff<86400000?fmtAgo(iso):(()=>{
       const d=new Date(iso);
@@ -2922,10 +2933,7 @@ function renderSyncTimestamps(){
     })();
     return '<span style="color:var(--text-soft)">'+label+'</span>';
   }
-  el.innerHTML=
-    '<div>Last push: '+fmt(syncMeta.lastPushedAt)+'</div>'+
-    '<div>Last pull: '+fmt(syncMeta.lastPulledAt)+'</div>'+
-    '<div>Last sync: '+fmt(syncMeta.lastSyncedAt)+'</div>';
+  el.innerHTML='<div>Last push: '+fmt(syncMeta.lastPushedAt)+'</div>'+'<div>Last pull: '+fmt(syncMeta.lastPulledAt)+'</div>'+'<div>Last sync: '+fmt(syncMeta.lastSyncedAt)+'</div>';
 }
 
 function dismissIosBanner(){
@@ -3047,7 +3055,6 @@ renderReceiptList();
 checkWelcome();
 applyDarkMode(); // apply saved dark mode preference after settings loaded
 checkIosInstallBanner(); // show iOS install banner if on iOS Safari without standalone mode
-checkNewUserBanner(); // show wiki banner for first 3 sessions
 loadSyncMeta();
 processRecurringBills();
 updateSyncStatus('idle'); // seed GSB with correct local/cloud state
