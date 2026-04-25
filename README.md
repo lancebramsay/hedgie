@@ -152,7 +152,12 @@ Upload `index.html` to the root folder (and `manifest.json`, `icon-192.png`, `ic
 
 ## Roadmap
 
-A future **Hedgie** native app (iOS/macOS, SwiftUI, CloudKit sync) is planned with expanded financial planning features including debt tracking and financing management ("Den features"). The Open Hedgie schema already includes forward-compatible fields (`financing[]`, `category.financing`, `financeId`) that Den will populate.
+A future **Hedgie** native app (iOS/macOS, SwiftUI, CloudKit sync) is planned with expanded financial planning features ("Den features"). The Open Hedgie schema already includes forward-compatible fields (`financing[]`, `category.financing`, `financeId`) that Den will populate.
+
+Planned Den features include:
+
+- **Debt tracking & financing management** — track balances, interest, and payoff timelines alongside monthly budgets
+- **Special event planning** — budget for vacations, trips, and one-off events separately from the monthly budget, with support for drawing from savings or temporary funding sources so planned splurges don't distort regular spending reports
 
 ---
 
