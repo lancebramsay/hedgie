@@ -4,7 +4,22 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
-## [1.6.1] — 2026-04-25 ← current stable
+## [1.6.2] — 2026-04-25 ← current stable
+
+### New features
+
+**Receipt totals on log and monthly report tabs**
+- A running total row now appears at the bottom of the receipt list on the Log a Purchase tab, showing item count and sum for the active month/filter
+- The Transactions card on the Monthly Report tab also shows a total row at the bottom
+
+**Category filter pills on monthly report tab**
+- The same category filter pills from the Log a Purchase tab are now available in the Transactions card on the Monthly Report tab
+- Selecting a category filters the transaction list and updates both the item count in the card header and the total row
+- Filter persists when switching between months; resets independently of the log tab filter
+
+---
+
+## [1.6.1] — 2026-04-25
 
 ### Bug fixes
 
