@@ -158,6 +158,7 @@ Planned Den features include:
 
 - **Debt tracking & financing management** — track balances, interest, and payoff timelines alongside monthly budgets
 - **Special event planning** — budget for vacations, trips, and one-off events separately from the monthly budget, with support for drawing from savings or temporary funding sources so planned splurges don't distort regular spending reports
+- **Surplus allocation** — automatically suggest or apply end-of-month leftover funds toward savings goals and portfolio contributions, helping turn consistent under-spending into deliberate wealth building
 
 ---
 
