@@ -300,7 +300,7 @@ select{cursor:pointer}
       <ellipse cx="20" cy="48" rx="5" ry="3" fill="#c9a882"/>
       <ellipse cx="32" cy="49" rx="5" ry="3" fill="#c9a882"/>
     </svg>
-    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v1.6.3</div></div>
+    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v1.7.0</div></div>
   </div>
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('log')" id="tab-log">
@@ -411,6 +411,18 @@ select{cursor:pointer}
       <div class="full" id="recur-day-row" style="display:none">
         <label>Day of month (bill due date)</label>
         <input type="number" id="log-recur-day" placeholder="e.g. 1" min="1" max="31" step="1" style="text-align:left">
+      </div>
+      <div class="full" id="den-log-fields" style="display:none">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div>
+            <label>Event <span style="opacity:0.5;font-weight:400">(Den)</span></label>
+            <select id="log-event-id"><option value="">None</option></select>
+          </div>
+          <div>
+            <label>Funding source <span style="opacity:0.5;font-weight:400">(Den)</span></label>
+            <select id="log-funding-src"><option value="">Regular income</option><option value="savings">From savings</option></select>
+          </div>
+        </div>
       </div>
       <div class="full" style="display:flex;justify-content:flex-end;gap:8px;margin-top:4px">
         <button class="btn primary" style="height:40px;min-width:140px;font-size:14px" onclick="addReceipt()">Add to log</button>
@@ -536,7 +548,7 @@ select{cursor:pointer}
     </div>
   </div>
   <div class="hint">Use the gear icon &#x2699; to configure cloud sync, shared keys, and user settings</div>
-  <div class="hint" style="margin-top:4px">Open Hedgie · v1.6.3 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
+  <div class="hint" style="margin-top:4px">Open Hedgie · v1.7.0 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
   <div class="hint" style="margin-top:8px" id="donate-btn-planner"></div>
 </div><!-- /panel-planner -->
 </div></div><!-- /tab-panels-inner /tab-panels-wrap -->
@@ -681,6 +693,29 @@ select{cursor:pointer}
       </div>
     </div>
 
+    <!-- DEN PREVIEW -->
+    <div class="drawer-acc-hdr" onclick="toggleAcc('acc-den')">
+      <span class="drawer-acc-title">&#9672; Den Preview</span>
+      <span class="drawer-acc-arrow" id="arr-acc-den">&#9656;</span>
+    </div>
+    <div class="drawer-acc-body" id="acc-den">
+      <div class="drawer-acc-inner">
+        <div style="font-size:12px;color:var(--text-soft);margin-bottom:10px;line-height:1.5">Tag receipts with events and funding sources, manage savings goals, and assign category types. Data is stored now and will be read natively by the Hedgie app when released.</div>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:0">
+          <input type="checkbox" id="cfg-den-preview" onchange="toggleDenPreview(this.checked)">
+          <span style="font-size:13px;font-weight:500">Enable Den Preview features</span>
+        </label>
+        <div id="den-preview-content" style="display:none;margin-top:14px">
+          <div style="font-size:11px;font-weight:600;color:var(--text-faint);letter-spacing:0.4px;margin-bottom:6px">EVENTS &amp; TRIPS</div>
+          <div id="den-events-list"></div>
+          <button class="btn" style="font-size:12px;margin-bottom:14px" onclick="addDenEvent()">+ Add event</button>
+          <div style="font-size:11px;font-weight:600;color:var(--text-faint);letter-spacing:0.4px;margin-bottom:6px">SAVINGS GOALS</div>
+          <div id="den-goals-list"></div>
+          <button class="btn" style="font-size:12px" onclick="addSavingsGoal()">+ Add goal</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -787,8 +822,15 @@ let financing=[]; // Den feature: financing accounts (loans, lines of credit, et
 // Financing account shape (populated by Hedgie native, read-only in Open):
 // {id, name, type ('loan'|'credit'|'lease'|'other'), originalBalance, currentBalance,
 //  interestRate, termMonths, startDate, endDate, linkedCategoryName, linkedExpenseIds[]}
+let events=[]; // Den feature: special events / trips
+// Event shape: {id, name, startDate?, endDate?, budget?, notes?}
+// receipt.eventId? links a receipt to an event (set via Den Preview)
+// receipt.fundingSource? ('savings'|'event:{id}') marks off-budget funding
+let savingsGoals=[]; // Den feature: savings / portfolio targets
+// Savings goal shape: {id, name, targetAmt?, priority?}
+// category.type? ('expense'|'savings'|'investment') set via Den Preview
 let currentRecurring='none';
-let settings={username:'',provider:'none',jsonbinId:'',jsonbinKey:'',gistId:'',gistToken:'',selfUrl:'',selfToken:'',dropboxToken:'',sharedKey:'',encryptSync:false,darkMode:false,pwaInstalled:false,reminderDays:7,notifs:{bills:true,budget:true,yearly:true,sync:true,firstSync:true,localSave:true,nudge:true},customNotifs:[]};
+let settings={username:'',provider:'none',jsonbinId:'',jsonbinKey:'',gistId:'',gistToken:'',selfUrl:'',selfToken:'',dropboxToken:'',sharedKey:'',encryptSync:false,darkMode:false,pwaInstalled:false,reminderDays:7,notifs:{bills:true,budget:true,yearly:true,sync:true,firstSync:true,localSave:true,nudge:true},customNotifs:[],denPreview:false};
 let planFilterCat='all',planFilterPri='all',rcptFilterCat='all',rptFilterCat='all';
 let reportView='monthly';
 let pendingCloudData=null;
@@ -961,7 +1003,7 @@ async function decryptData(ciphertext,iv,secret){
 
 // ── LIMITS & HEALTH ──────────────────────────
 function estimatePayloadKB(){
-  const state={categories,income,expenses,receipts,vendors,archives,recurringBills,financing};
+  const state={categories,income,expenses,receipts,vendors,archives,recurringBills,financing,events,savingsGoals};
   return Math.round(JSON.stringify(state).length/1024);
 }
 
@@ -1119,7 +1161,7 @@ function forceRefresh(){
 }
 
 async function exportDecryptedBackup(){
-  const data={categories,income,expenses,receipts,vendors,archives,recurringBills,financing};
+  const data={categories,income,expenses,receipts,vendors,archives,recurringBills,financing,events,savingsGoals};
   const payload={_hedgie:true,version:syncMeta.version,lastEditedBy:syncMeta.lastEditedBy,lastEditedAt:syncMeta.lastEditedAt,data};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
   const a=document.createElement('a');
@@ -1240,7 +1282,7 @@ async function quickSync(){
 
     // Step 3 - decrypt + decide direction
     cloud=await toPlainPayload(cloud);
-    const localPayload={version:syncMeta.version,lastEditedBy:settings.username,lastEditedAt:new Date().toISOString(),data:{categories,income,expenses,receipts,vendors,archives,recurringBills,financing}};
+    const localPayload={version:syncMeta.version,lastEditedBy:settings.username,lastEditedAt:new Date().toISOString(),data:{categories,income,expenses,receipts,vendors,archives,recurringBills,financing,events,savingsGoals}};
     const cloudAhead=(cloud.version||0)>(syncMeta.lastPulledVersion||0);
 
     let resolved;
@@ -1340,7 +1382,7 @@ function triggerAutosave(source){
 
 // ── CLOUD PAYLOAD ─────────────────────────────
 async function buildPayload(){
-  const rawData={categories,income,expenses,receipts,vendors,archives,recurringBills,financing,darkMode:settings.darkMode,pwaInstalled:settings.pwaInstalled};
+  const rawData={categories,income,expenses,receipts,vendors,archives,recurringBills,financing,events,savingsGoals,darkMode:settings.darkMode,pwaInstalled:settings.pwaInstalled};
   const base={_hedgie:true,version:(syncMeta.version||0)+1,lastEditedBy:settings.username||'Unknown',lastEditedAt:new Date().toISOString()};
   if(settings.encryptSync&&settings.sharedKey){
     try{
@@ -1411,6 +1453,8 @@ function _applyData(d,payload){
   if(d.archives)archives=d.archives;
   if(d.recurringBills)recurringBills=d.recurringBills;
   if(d.financing)financing=d.financing;
+  if(d.events)events=d.events;
+  if(d.savingsGoals)savingsGoals=d.savingsGoals;
   // Restore preference flags from payload
   if(d.darkMode!==undefined&&settings.darkMode!==d.darkMode){settings.darkMode=d.darkMode;applyDarkMode();}
   if(d.pwaInstalled!==undefined)settings.pwaInstalled=d.pwaInstalled;
@@ -1466,7 +1510,7 @@ async function toPlainPayload(payload){
     }
   }
   // Ensure .data always exists even for a malformed/empty payload
-  if(!payload.data)return {...payload,data:{income:[],expenses:{},receipts:[],vendors:{},archives:{},recurringBills:[],categories:DEFAULT_CATS,financing:[]}};
+  if(!payload.data)return {...payload,data:{income:[],expenses:{},receipts:[],vendors:{},archives:{},recurringBills:[],categories:DEFAULT_CATS,financing:[],events:[],savingsGoals:[]}};
   return payload;
 }
 
@@ -1516,7 +1560,7 @@ async function cloudPull(){
     if(vr.unsigned&&settings.sharedKey){setGSB('warn','Cloud payload has no signature — push to sign it','');}
         // Decrypt before any .data access
     let plainCloud;try{plainCloud=await toPlainPayload(cloud);}catch(e){updateSyncStatus('err',e.message);setGSB('err',e.message,'',true);return;}
-    const localPayload={version:syncMeta.version,data:{categories,income,expenses,receipts,vendors,archives,recurringBills,financing}};
+    const localPayload={version:syncMeta.version,data:{categories,income,expenses,receipts,vendors,archives,recurringBills,financing,events,savingsGoals}};
     const cloudVer=plainCloud.version||0;
     const isFirstSync=syncMeta.lastPulledVersion===0&&syncMeta.version===0;
     if(cloudVer>(syncMeta.lastPulledVersion||0)){
@@ -1546,7 +1590,7 @@ async function cloudPush(){
       if(!vr.ok){updateSyncStatus('err','Remote signature mismatch — wrong shared key?');setGSB('err','Remote signature invalid — check shared key','',true);return;}
       if(vr.unsigned&&settings.sharedKey){setGSB('warn','Remote payload unsigned — will be signed on push','');}
       if((cloud.version||0)>syncMeta.lastPulledVersion){
-        const localPayload={version:syncMeta.version,data:{categories,income,expenses,receipts,vendors,archives,recurringBills,financing}};
+        const localPayload={version:syncMeta.version,data:{categories,income,expenses,receipts,vendors,archives,recurringBills,financing,events,savingsGoals}};
         let plainCloud2;try{plainCloud2=await toPlainPayload(cloud);}catch(e){updateSyncStatus('err',e.message);setGSB('err',e.message,'',true);return;}
         if(budgetChanged(localPayload,plainCloud2)){pendingCloudData=plainCloud2;showConflictModal(plainCloud2);updateSyncStatus('conflict');return;}
         const merged=mergePayloads(localPayload,plainCloud2);
@@ -1569,7 +1613,7 @@ function showConflictModal(cloud){
 async function resolveConflict(choice){
   document.getElementById('conflict-modal').classList.remove('open');
   const cloud=pendingCloudData;if(!cloud)return;
-  const local={version:syncMeta.version,lastEditedBy:settings.username,lastEditedAt:new Date().toISOString(),data:{categories,income,expenses,receipts,vendors,archives,recurringBills,financing}};
+  const local={version:syncMeta.version,lastEditedBy:settings.username,lastEditedAt:new Date().toISOString(),data:{categories,income,expenses,receipts,vendors,archives,recurringBills,financing,events,savingsGoals}};
   let resolved=mergePayloads(local,cloud);
   if(choice==="theirs"){const cd2=cloud.data||{};resolved.data.income=cd2.income||income;resolved.data.expenses=cd2.expenses||expenses;resolved.data.bufferPct=cd2.bufferPct;}
   resolved.signature=await signPayload(resolved);
@@ -2037,6 +2081,7 @@ function renderCatManager(){
         style="width:26px;height:26px;padding:1px;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;background:transparent;flex-shrink:0"
         onchange="updateCatColor('${esc(cat.name)}',this.value)">
       <span style="flex:1;font-size:13px;color:var(--text-mid);font-weight:500">${esc(cat.name)}</span>
+      ${settings.denPreview?`<select style="font-size:11px;padding:2px 4px;height:24px;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--parchment);color:var(--text-soft)" onchange="updateCatType('${esc(cat.name)}',this.value)"><option value="expense"${(!cat.type||cat.type==='expense')?' selected':''}>Expense</option><option value="savings"${cat.type==='savings'?' selected':''}>Savings</option><option value="investment"${cat.type==='investment'?' selected':''}>Investment</option></select>`:''}
       <span style="font-size:10px;color:var(--text-faint);padding:2px 7px;border:1px solid var(--border-light);border-radius:8px">locked</span>
     </div>`).join('');
   // Extras section
@@ -2053,6 +2098,7 @@ function renderCatManager(){
           style="flex:1;font-size:13px;padding:3px 8px;height:26px;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--parchment);color:var(--text)"
           onblur="updateCatName('${esc(cat.name)}',this.value)"
           onkeydown="if(event.key==='Enter')this.blur()">
+        ${settings.denPreview?`<select style="font-size:11px;padding:2px 4px;height:26px;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--parchment);color:var(--text-soft)" onchange="updateCatType('${esc(cat.name)}',this.value)"><option value="expense"${(!cat.type||cat.type==='expense')?' selected':''}>Expense</option><option value="savings"${cat.type==='savings'?' selected':''}>Savings</option><option value="investment"${cat.type==='investment'?' selected':''}>Investment</option></select>`:''}
         <div style="display:flex;gap:3px;flex-shrink:0">
           <button class="del-btn" title="Move up" onclick="moveCat('${esc(cat.name)}',-1)" ${isFirst?'disabled style="opacity:0.3"':''}>&#8679;</button>
           <button class="del-btn" title="Move down" onclick="moveCat('${esc(cat.name)}',1)" ${isLast?'disabled style="opacity:0.3"':''}>&#8681;</button>
@@ -2464,7 +2510,7 @@ function renderMonthlyReport(){
       <div class="card-hdr"><span class="card-title">Transactions</span><span class="card-sub">${rptFilterCat==='all'?recs.length:visRecs.length+'/'+recs.length} transaction${recs.length!==1?'s':''}</span></div>
       ${rptPills}
       ${renderUserBreakdown(visRecs)}
-      ${visRecs.length?visRecs.map(r=>`<div class="receipt-row"><div class="cat-dot" style="background:${catColor(r.cat)}"></div><div class="receipt-info"><div class="receipt-store">${esc(r.vendor||r.cat)}</div><div class="receipt-meta">${esc(r.cat)} &middot; ${fmtDate(r.date)}</div>${r.note?`<div class="receipt-note">${esc(r.note)}</div>`:''}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><div class="receipt-amt">${fmtDec(r.amt)}</div>${r.by?`<div class="receipt-by" style="color:${getUserColor(r.by)}">${esc(r.by)}</div>`:''}</div></div>`).join('')+`<div class="receipt-total"><span>${visRecs.length} item${visRecs.length!==1?'s':''}</span><span>${fmtDec(rptTotal)}</span></div>`:`<div class="empty-state"><div style="font-size:24px;margin-bottom:6px">&#128467;</div><div>No transactions${rptFilterCat!=='all'?' for '+rptFilterCat:' for '+monthLabel(ym)}</div></div>`}
+      ${visRecs.length?visRecs.map(r=>`<div class="receipt-row"><div class="cat-dot" style="background:${catColor(r.cat)}"></div><div class="receipt-info"><div class="receipt-store">${esc(r.vendor||r.cat)}</div><div class="receipt-meta">${esc(r.cat)} &middot; ${fmtDate(r.date)}</div>${r.note?`<div class="receipt-note">${esc(r.note)}</div>`:``}${r.eventId&&getEventName(r.eventId)?`<div class="receipt-note" style="color:var(--brown-light)">&#128197; ${esc(getEventName(r.eventId))}</div>`:''}${r.fundingSource?`<div class="receipt-note" style="color:var(--text-soft)">&#9670; ${esc(getFundingLabel(r.fundingSource))}</div>`:''}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><div class="receipt-amt">${fmtDec(r.amt)}</div>${r.by?`<div class="receipt-by" style="color:${getUserColor(r.by)}">${esc(r.by)}</div>`:''}</div></div>`).join('')+`<div class="receipt-total"><span>${visRecs.length} item${visRecs.length!==1?'s':''}</span><span>${fmtDec(rptTotal)}</span></div>`:`<div class="empty-state"><div style="font-size:24px;margin-bottom:6px">&#128467;</div><div>No transactions${rptFilterCat!=='all'?' for '+rptFilterCat:' for '+monthLabel(ym)}</div></div>`}
     </div>`;
 }
 
@@ -2628,20 +2674,24 @@ function addReceipt(){
   const date=document.getElementById('log-date').value||todayStr();
   if(amt<=0){document.getElementById('log-amt').focus();return;}
   saveVendor(vendor,cat);
+  const eventId=settings.denPreview?(document.getElementById('log-event-id')?.value||''):'';
+  const fundingSrc=settings.denPreview?(document.getElementById('log-funding-src')?.value||''):'';
+  const denMeta=Object.assign({},eventId&&{eventId},fundingSrc&&{fundingSource:fundingSrc});
   // Handle recurring bill
   if(currentRecurring==='monthly'){
     const day=parseInt(document.getElementById('log-recur-day').value)||new Date().getDate();
     const billId=uid();
     recurringBills.push({id:billId,cat,amt,vendor,note,freq:'monthly',day,by:settings.username||''});
-    receipts.push({id:uid(),cat,amt,vendor,note,date,by:settings.username||'',recurring:true,recurId:billId});
+    receipts.push({id:uid(),cat,amt,vendor,note,date,by:settings.username||'',recurring:true,recurId:billId,...denMeta});
   } else {
-    receipts.push({id:uid(),cat,amt,vendor,note,date,by:settings.username||''});
+    receipts.push({id:uid(),cat,amt,vendor,note,date,by:settings.username||'',...denMeta});
   }
   receipts.sort((a,b)=>b.date.localeCompare(a.date));
   document.getElementById('log-amt').value='';
   document.getElementById('log-vendor').value='';
   document.getElementById('log-note').value='';
   document.getElementById('log-date').value=todayStr();
+  if(settings.denPreview){const evSel=document.getElementById('log-event-id');const fsSel=document.getElementById('log-funding-src');if(evSel)evSel.value='';if(fsSel)fsSel.value='';}
   setRecurring('none');
   populateMonthSelects();renderLogMetrics();renderReceiptList();
   triggerAutosave('log');
@@ -2671,7 +2721,7 @@ function renderReceiptList(){
   const logTotal=recs.reduce((s,r)=>s+r.amt,0);
   el.innerHTML=recs.map(r=>{
     if(editingReceiptId===r.id) return renderReceiptEditForm(r);
-    return `<div class="receipt-row"><div class="cat-dot" style="background:${catColor(r.cat)}"></div><div class="receipt-info"><div class="receipt-store" style="display:flex;align-items:center;gap:5px">${esc(r.vendor||r.cat)}${r.recurring?'<span class="recur-badge">&#8635; recurring</span>':''}</div><div class="receipt-meta">${esc(r.cat)} &middot; ${fmtDate(r.date)}</div>${r.note?`<div class="receipt-note">${esc(r.note)}</div>`:''}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><div class="receipt-amt">${fmtDec(r.amt)}</div>${r.by?`<div class="receipt-by" style="color:${getUserColor(r.by)}">${esc(r.by)}</div>`:''}</div><button class="receipt-edit" onclick="startEditReceipt('${r.id}')" title="Edit">&#9998;</button><button class="receipt-del" onclick="deleteReceipt('${r.id}')">&#215;</button></div>`;
+    return `<div class="receipt-row"><div class="cat-dot" style="background:${catColor(r.cat)}"></div><div class="receipt-info"><div class="receipt-store" style="display:flex;align-items:center;gap:5px">${esc(r.vendor||r.cat)}${r.recurring?'<span class="recur-badge">&#8635; recurring</span>':''}</div><div class="receipt-meta">${esc(r.cat)} &middot; ${fmtDate(r.date)}</div>${r.note?`<div class="receipt-note">${esc(r.note)}</div>`:``}${r.eventId&&getEventName(r.eventId)?`<div class="receipt-note" style="color:var(--brown-light)">&#128197; ${esc(getEventName(r.eventId))}</div>`:''}${r.fundingSource?`<div class="receipt-note" style="color:var(--text-soft)">&#9670; ${esc(getFundingLabel(r.fundingSource))}</div>`:''}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><div class="receipt-amt">${fmtDec(r.amt)}</div>${r.by?`<div class="receipt-by" style="color:${getUserColor(r.by)}">${esc(r.by)}</div>`:''}</div><button class="receipt-edit" onclick="startEditReceipt('${r.id}')" title="Edit">&#9998;</button><button class="receipt-del" onclick="deleteReceipt('${r.id}')">&#215;</button></div>`;
   }).join('')+`<div class="receipt-total"><span>${recs.length} item${recs.length!==1?'s':''}</span><span>${fmtDec(logTotal)}</span></div>`;
 }
 
@@ -2874,7 +2924,7 @@ function setPlanFilter(type,val,btn){
 
 // ── SAVE / RESTORE ────────────────────────────
 async function getFullState(){
-  const p={_hedgie:true,version:syncMeta.version,lastEditedBy:settings.username||'',lastEditedAt:new Date().toISOString(),data:{categories,income,expenses,receipts,vendors,archives,recurringBills,financing}};
+  const p={_hedgie:true,version:syncMeta.version,lastEditedBy:settings.username||'',lastEditedAt:new Date().toISOString(),data:{categories,income,expenses,receipts,vendors,archives,recurringBills,financing,events,savingsGoals}};
   p.signature=await signPayload(p);return p;
 }
 
@@ -3010,7 +3060,91 @@ function renderDonateBtns(){
   });
 }
 
-function refreshAll(){initExpenses();rebuildCatUI();buildNotifications();document.getElementById('cat-count-lbl')&&(document.getElementById('cat-count-lbl').textContent=CATS().length+' categories');populateMonthSelects();renderBuffers();updatePlanner();renderLogMetrics();renderReceiptList();if(document.getElementById('panel-report').classList.contains('active'))renderReport();}
+// ── DEN PREVIEW ──────────────────────────────
+function toggleDenPreview(on){settings.denPreview=!!on;saveSettings();applyDenPreview();}
+
+function applyDenPreview(){
+  const on=!!settings.denPreview;
+  const cb=document.getElementById('cfg-den-preview');if(cb)cb.checked=on;
+  const fields=document.getElementById('den-log-fields');if(fields)fields.style.display=on?'block':'none';
+  const content=document.getElementById('den-preview-content');if(content)content.style.display=on?'block':'none';
+  renderCatManager();
+  renderDenAccordion();
+}
+
+function renderDenAccordion(){renderDenEvents();renderDenGoals();populateDenLogFields();}
+
+function renderDenEvents(){
+  const el=document.getElementById('den-events-list');if(!el)return;
+  if(!events.length){el.innerHTML='<div style="font-size:12px;color:var(--text-faint);margin-bottom:8px">No events yet.</div>';return;}
+  el.innerHTML=events.map(e=>`<div style="display:grid;grid-template-columns:1fr 110px 80px auto;gap:6px;align-items:center;margin-bottom:6px">
+    <input type="text" value="${esc(e.name)}" placeholder="Event name" style="font-size:12px;padding:3px 6px;height:26px;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--parchment);color:var(--text)" onblur="updateDenEvent('${e.id}','name',this.value)">
+    <input type="date" value="${e.startDate||''}" style="font-size:11px;height:26px;padding:2px 4px;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--parchment);color:var(--text);color-scheme:dark" onchange="updateDenEvent('${e.id}','startDate',this.value)">
+    <input type="number" value="${e.budget||''}" placeholder="Budget $" style="font-size:12px;padding:3px 6px;height:26px;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--parchment);color:var(--text);text-align:left" onblur="updateDenEvent('${e.id}','budget',this.value)">
+    <button class="receipt-del" onclick="deleteDenEvent('${e.id}')">&#215;</button>
+  </div>`).join('')+'<div style="margin-bottom:8px"></div>';
+}
+
+function renderDenGoals(){
+  const el=document.getElementById('den-goals-list');if(!el)return;
+  if(!savingsGoals.length){el.innerHTML='<div style="font-size:12px;color:var(--text-faint);margin-bottom:8px">No goals yet.</div>';return;}
+  el.innerHTML=savingsGoals.map(g=>`<div style="display:grid;grid-template-columns:1fr 90px auto;gap:6px;align-items:center;margin-bottom:6px">
+    <input type="text" value="${esc(g.name)}" placeholder="Goal name" style="font-size:12px;padding:3px 6px;height:26px;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--parchment);color:var(--text)" onblur="updateSavingsGoal('${g.id}','name',this.value)">
+    <input type="number" value="${g.targetAmt||''}" placeholder="Target $" style="font-size:12px;padding:3px 6px;height:26px;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--parchment);color:var(--text);text-align:left" onblur="updateSavingsGoal('${g.id}','targetAmt',this.value)">
+    <button class="receipt-del" onclick="deleteSavingsGoal('${g.id}')">&#215;</button>
+  </div>`).join('')+'<div style="margin-bottom:8px"></div>';
+}
+
+function populateDenLogFields(){
+  const evSel=document.getElementById('log-event-id');
+  const fsSel=document.getElementById('log-funding-src');
+  if(!evSel||!fsSel)return;
+  evSel.innerHTML='<option value="">None</option>'+events.map(e=>`<option value="${e.id}">${esc(e.name)}</option>`).join('');
+  fsSel.innerHTML='<option value="">Regular income</option><option value="savings">From savings</option>'+events.filter(e=>e.budget>0).map(e=>`<option value="event:${e.id}">From ${esc(e.name)} budget</option>`).join('');
+}
+
+function addDenEvent(){
+  events.push({id:uid(),name:'New event',startDate:'',endDate:'',budget:0,notes:''});
+  triggerAutosave('den');renderDenAccordion();
+}
+function deleteDenEvent(id){
+  if(!confirm('Delete this event?'))return;
+  events=events.filter(e=>e.id!==id);
+  triggerAutosave('den');renderDenAccordion();
+}
+function updateDenEvent(id,field,value){
+  const e=events.find(e=>e.id===id);if(!e)return;
+  e[field]=field==='budget'?parseFloat(value)||0:value;
+  triggerAutosave('den');
+  if(field==='budget'||field==='name')populateDenLogFields();
+}
+function addSavingsGoal(){
+  savingsGoals.push({id:uid(),name:'New goal',targetAmt:0,priority:savingsGoals.length+1});
+  triggerAutosave('den');renderDenGoals();
+}
+function deleteSavingsGoal(id){
+  if(!confirm('Delete this goal?'))return;
+  savingsGoals=savingsGoals.filter(g=>g.id!==id);
+  triggerAutosave('den');renderDenGoals();
+}
+function updateSavingsGoal(id,field,value){
+  const g=savingsGoals.find(g=>g.id===id);if(!g)return;
+  g[field]=field==='targetAmt'||field==='priority'?parseFloat(value)||0:value;
+  triggerAutosave('den');
+}
+function updateCatType(name,type){
+  const cat=categories.find(c=>c.name===name);if(!cat)return;
+  cat.type=type;triggerAutosave('den');
+}
+function getEventName(id){const e=events.find(e=>e.id===id);return e?e.name:'';}
+function getFundingLabel(src){
+  if(!src)return'';
+  if(src==='savings')return'From savings';
+  if(src.startsWith('event:')){const id=src.slice(6);const e=events.find(ev=>ev.id===id);return e?'From '+e.name+' budget':'Event budget';}
+  return src;
+}
+
+function refreshAll(){initExpenses();rebuildCatUI();buildNotifications();document.getElementById('cat-count-lbl')&&(document.getElementById('cat-count-lbl').textContent=CATS().length+' categories');populateMonthSelects();renderBuffers();updatePlanner();renderLogMetrics();renderReceiptList();if(document.getElementById('panel-report').classList.contains('active'))renderReport();applyDenPreview();}
 
 function gatherRows(){
   let rows=[];
@@ -3062,7 +3196,7 @@ function resetBudgetAndReceipts(){
   bufferPct={};
   receipts=[];
   vendors={};
-  recurringBills=[];financing=[];
+  recurringBills=[];financing=[];events=[];savingsGoals=[];
   archives={};
   syncMeta={version:0,lastEditedBy:'',lastEditedAt:'',lastPulledVersion:0,lastPushedAt:'',lastPulledAt:'',lastSyncedAt:''};
   localStorage.removeItem('hedgie_syncmeta');
