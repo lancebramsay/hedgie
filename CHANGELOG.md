@@ -4,7 +4,18 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
-## [1.6.2] — 2026-04-25 ← current stable
+## [1.6.3] — 2026-04-25 ← current stable
+
+### New features
+
+**Hibernation view: category-colored bars with budget-status outlines**
+- Per-category mini bar charts in "Year by category" now always render in each category's own color instead of budget-status colors
+- Budget status is indicated by a dotted outline: amber for near limit (≥80%), red for over budget, no outline for under budget
+- A small legend beneath the "Year by category" card header explains the outline meanings
+
+---
+
+## [1.6.2] — 2026-04-25
 
 ### New features
 
