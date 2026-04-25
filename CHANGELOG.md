@@ -11,6 +11,8 @@ All notable changes to Open Hedgie are documented here.
 **Upcoming bill notifications use correct days-in-month**
 - Bill due-day is now clamped to the actual number of days in the current month before computing days-away, so months shorter than 31 days (April, June, etc.) no longer report an incorrect countdown
 - The next-month look-ahead also clamps to that month's real length, correctly handling February and other short months
+- When a bill's due day is clamped, the notification title now appends the actual date (e.g. "· Apr 30") so the exact fall date is visible
+- Day counts are derived dynamically from the real calendar year, so leap year Februaries (29 days) are handled automatically
 
 ---
 
