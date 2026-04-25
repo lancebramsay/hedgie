@@ -4,7 +4,48 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
-## [1.5.8] — 2026-04-23 ← current stable
+## [1.6.0] — 2026-04-24 ← current stable
+
+### New features
+
+**New user wiki banner**
+- Soft parchment-toned banner appears below the tab bar for the first 3 sessions
+- Links to the Open Hedgie GitHub wiki with "Get started →"
+- Dismissible with × (persisted in localStorage, never reappears after dismiss)
+- Automatically stops appearing after 3 sessions without any user action
+- Uses only CSS variables — renders correctly in both light and dark mode
+
+**Wiki link in Settings drawer**
+- Tappable "📖 Open Hedgie Wiki & User Guide →" row at the top of the Settings drawer, above all accordions
+- Always accessible regardless of scroll position
+
+**Wiki link on welcome splash**
+- Muted "📖 Read the wiki before you begin" text link below the Get started button
+- Targets first-time users at exactly the right moment
+
+**Sync timestamp history in Cloud sync drawer**
+- Three persistent timestamps in the Cloud sync accordion: Last push, Last pull, Last sync
+- Recent times shown as relative ("2 hours ago"), older times as absolute ("Apr 23 at 3:14 PM")
+- Updates live whenever the drawer is open during a sync operation
+- Timestamps stored in syncMeta and persisted to localStorage
+- Shows — when an operation has never been performed
+
+### Fixes
+
+**Gear button too bright in dark mode**
+- Settings gear button background darkened to `#352b1f` in dark mode
+- Consistent with the dark espresso tones used elsewhere in the dark theme
+
+**Vendor autocomplete unresponsive after sync**
+- Swipe handler was intercepting touches on vendor suggestion dropdown items
+- Added `element.closest()` check to bail out for touches inside `.quick-form` or `#vendor-dd`
+- Future-proofs against any new interactive elements inside the log form
+
+**Settings drawer accordions default closed**
+- Identity accordion (and all others) now start collapsed on every drawer open
+- Drawer presents a clean list of sections rather than jumping straight into Identity
+
+## [1.5.8] — 2026-04-23
 
 ### Bug fix
 
