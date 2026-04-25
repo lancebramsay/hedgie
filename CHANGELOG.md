@@ -4,7 +4,17 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
-## [1.6.0] — 2026-04-24 ← current stable
+## [1.6.1] — 2026-04-25 ← current stable
+
+### Bug fixes
+
+**Upcoming bill notifications use correct days-in-month**
+- Bill due-day is now clamped to the actual number of days in the current month before computing days-away, so months shorter than 31 days (April, June, etc.) no longer report an incorrect countdown
+- The next-month look-ahead also clamps to that month's real length, correctly handling February and other short months
+
+---
+
+## [1.6.0] — 2026-04-24
 
 ### New features
 
