@@ -10,8 +10,9 @@ All notable changes to Open Hedgie are documented here.
 
 **Hibernation view: category-colored bars with budget-status outlines**
 - Per-category mini bar charts in "Year by category" now always render in each category's own color instead of budget-status colors
-- Budget status is indicated by a dotted outline: amber for near limit (≥80%), red for over budget, no outline for under budget
+- Budget status is indicated by a dotted outline: green for under budget, amber for near limit (≥80%), red for over budget
 - A small legend beneath the "Year by category" card header explains the outline meanings
+- Savings category is excluded from budget-status outlines — saving more than budgeted is not a warning, so no outline is applied
 
 ---
 

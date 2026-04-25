@@ -2553,7 +2553,7 @@ function renderYearlyReport(){
           </div>
           <div class="month-bars" style="height:44px;margin-bottom:2px">
             ${monthlyTotals.map((v,i)=>`<div class="month-bar-wrap">
-              <div class="month-bar" style="height:${v>0?Math.round((v/maxCat)*38)+3:2}px;background:${catColor(c)};opacity:0.75;border-radius:2px 2px 0 0;${v>0?(v>catMo(c)?'outline:1.5px dashed #b94040;outline-offset:1px':v>=catMo(c)*0.80?'outline:1.5px dashed #b87820;outline-offset:1px':'outline:1.5px dashed #4a7c59;outline-offset:1px'):''}"></div>
+              <div class="month-bar" style="height:${v>0?Math.round((v/maxCat)*38)+3:2}px;background:${catColor(c)};opacity:0.75;border-radius:2px 2px 0 0;${v>0&&c!=='Savings'?(v>catMo(c)?'outline:1.5px dashed #b94040;outline-offset:1px':v>=catMo(c)*0.80?'outline:1.5px dashed #b87820;outline-offset:1px':'outline:1.5px dashed #4a7c59;outline-offset:1px'):''}"></div>
               <div class="month-bar-lbl">${MONTH_NAMES[i].slice(0,1)}</div>
             </div>`).join('')}
           </div>
