@@ -2106,13 +2106,19 @@ function buildNotifications(){
     // Look ahead: due this month (and not past) or due early next month within window
     const nextMonthDays=new Date(today.getFullYear(),today.getMonth()+2,0).getDate();
     const effectiveDueNext=Math.min(due,nextMonthDays);
-    let daysAway=daysUntil>=0?daysUntil:(daysInMonth-dayOfMonth+effectiveDueNext);
+    const isNext=daysUntil<0;
+    let daysAway=isNext?(daysInMonth-dayOfMonth+effectiveDueNext):daysUntil;
     if(daysAway<=reminderDays){
       const id='recur-'+bill.id+'-'+thisMonth;
       if(!dismissedNotifs.has(id)){
+        const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const shownDay=isNext?effectiveDueNext:effectiveDue;
+        const shownMon=months[isNext?(today.getMonth()+1)%12:today.getMonth()];
+        const clamped=isNext?(effectiveDueNext!==due):(effectiveDue!==due);
+        const dateTag=clamped?` · ${shownMon} ${shownDay}`:'';
         notifs.push({
           id,type:'bill',icon:'&#128197;',
-          title:`${bill.vendor||bill.cat} due ${daysAway===0?'today':daysAway===1?'tomorrow':'in '+daysAway+' days'}`,
+          title:`${bill.vendor||bill.cat} due ${daysAway===0?'today':daysAway===1?'tomorrow':'in '+daysAway+' days'}${dateTag}`,
           desc:`${bill.cat} · ${fmt(bill.amt)} · day ${due} of every month`,
           urgency:daysAway<=2?'high':daysAway<=5?'med':'low'
         });
