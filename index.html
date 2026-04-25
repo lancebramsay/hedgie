@@ -43,8 +43,11 @@ body.dark{
   --text:#e8d5bc;--text-mid:#c4a882;--text-soft:#9b7a54;--text-faint:#5c4030;
   --shadow:rgba(0,0,0,0.3);
 }
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--cream);color:var(--text);min-height:100vh;font-size:15px;line-height:1.5}
-.tab-bar{position:sticky;top:0;z-index:100;background:var(--warm-white);border-bottom:1.5px solid var(--border)}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--cream);background-image:radial-gradient(var(--border-light) 1px,transparent 1px);background-size:22px 22px;color:var(--text);min-height:100vh;font-size:15px;line-height:1.5}
+.content-column{max-width:860px;margin:0 auto}
+.header-wrap{position:sticky;top:0;z-index:100;width:100%;border-radius:0 0 var(--radius-md) var(--radius-md);overflow:hidden;box-shadow:inset 1px 0 0 var(--border),inset -1px 0 0 var(--border),inset 0 -1px 0 var(--border),0 4px 6px -3px var(--shadow)}
+@media(max-width:900px){.header-wrap{border-radius:0;box-shadow:none}}
+.tab-bar{background:var(--warm-white);border-bottom:1.5px solid var(--border)}
 .tab-bar-inner{display:flex;align-items:stretch;padding:0 1rem;max-width:860px;margin:0 auto;box-sizing:border-box;width:100%}
 .tab-logo{display:flex;align-items:center;gap:8px;padding:8px 14px 8px 0;border-right:1px solid var(--border-light);margin-right:4px;flex-shrink:0}
 .tab-logo-text{font-size:15px;font-weight:700;color:var(--brown-dark);letter-spacing:-0.3px}
@@ -54,7 +57,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .tab-btn:hover{color:var(--brown)}.tab-btn.active{color:var(--brown-dark);border-bottom-color:var(--brown)}
 .panel{padding:1.25rem 1rem 5rem;height:0;overflow:hidden}.panel.active{display:block;height:auto;overflow:visible}
 /* Tab swipe container */
-#tab-panels-wrap{overflow:hidden;max-width:860px;margin:0 auto}
+#tab-panels-wrap{overflow:hidden}
 #tab-panels-inner{display:flex;align-items:flex-start;transition:transform 0.32s cubic-bezier(0.4,0,0.2,1);will-change:transform}
 #tab-panels-inner .panel{display:block;flex:0 0 100%;min-width:100%;box-sizing:border-box}
 .card{background:var(--warm-white);border:1px solid var(--border-light);border-radius:var(--radius-md);padding:1rem 1.25rem;margin-bottom:1rem;box-shadow:0 1px 3px var(--shadow)}
@@ -278,6 +281,8 @@ select{cursor:pointer}
 </head>
 <body>
 
+<div class="content-column">
+<div class="header-wrap">
 <div class="tab-bar">
 <div class="tab-bar-inner">
   <div class="tab-logo">
@@ -363,7 +368,7 @@ select{cursor:pointer}
     <button onclick="dismissNewUserBanner()" style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--text-soft);padding:0 4px;flex-shrink:0;line-height:1">&#215;</button>
   </div>
 </div>
-
+</div><!-- /header-wrap -->
 <div id="tab-panels-wrap"><div id="tab-panels-inner">
 
 <!-- ═══ TAB 1 — LOG ═══ -->
@@ -536,6 +541,7 @@ select{cursor:pointer}
   <div class="hint" style="margin-top:8px" id="donate-btn-planner"></div>
 </div><!-- /panel-planner -->
 </div></div><!-- /tab-panels-inner /tab-panels-wrap -->
+</div><!-- /content-column -->
 
 <!-- GEAR -->
 <button class="gear-btn" onclick="openDrawer()" title="Settings">
