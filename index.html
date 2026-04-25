@@ -347,15 +347,14 @@ select{cursor:pointer}
   <button onclick="dismissIosBanner()" style="background:none;border:none;cursor:pointer;font-size:18px;color:var(--blue);padding:0 4px;flex-shrink:0;line-height:1;opacity:0.6">&#215;</button>
 </div>
 
-<div id="tab-panels-wrap"><div id="tab-panels-inner">
-
 <!-- NEW USER WIKI BANNER -->
 <div id="new-user-banner" style="display:none;background:var(--parchment);border-bottom:1px solid var(--border);padding:8px 12px;align-items:center;gap:10px">
-  <span style="font-size:16px;flex-shrink:0">&#128214;</span>
   <span style="font-size:12px;color:var(--text-mid);flex:1;line-height:1.4">New to Open Hedgie? Read the wiki to get the most out of the app.</span>
   <a href="https://github.com/lancebramsay/hedgie/wiki" target="_blank" style="font-size:12px;color:var(--brown);font-weight:600;text-decoration:none;white-space:nowrap;flex-shrink:0">Get started &#8594;</a>
   <button onclick="dismissNewUserBanner()" style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--text-soft);padding:0 4px;flex-shrink:0;line-height:1">&#215;</button>
 </div>
+
+<div id="tab-panels-wrap"><div id="tab-panels-inner">
 
 <!-- ═══ TAB 1 — LOG ═══ -->
 <div class="panel active" id="panel-log">
@@ -445,7 +444,6 @@ select{cursor:pointer}
       <select id="rpt-year-sel" style="width:auto;height:32px;font-size:12px;display:none" onchange="renderReport()"></select>
     </div>
   </div>
-  <div id="report-body"></div>
   <div class="hint" style="margin-top:8px" id="donate-btn-report"></div>
 </div>
 
@@ -484,7 +482,6 @@ select{cursor:pointer}
         <span style="font-size:12px;color:var(--text-soft)" id="cat-mgr-arrow">&#9656;</span>
       </div>
     </div>
-    <div id="cat-manager-body" style="display:none;margin-top:10px">
       <div id="cat-manager-rows"></div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:8px;border-top:1px solid var(--border-light)">
         <button class="add-exp-btn" onclick="addCategory()">+ Add category</button>
@@ -544,14 +541,13 @@ select{cursor:pointer}
     <span class="drawer-title">Settings</span>
     <button class="drawer-close" onclick="closeDrawer()">&#215;</button>
   </div>
-  <div class="drawer-body" style="padding:0 1.25rem 1.5rem">
 
     <!-- WIKI LINK -->
     <a href="https://github.com/lancebramsay/hedgie/wiki" target="_blank"
        style="display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border-light);text-decoration:none;margin-bottom:8px">
-      <span style="font-size:16px;flex-shrink:0">ðŸ“–</span>
+      <span style="font-size:16px;flex-shrink:0">&#128214;</span>
       <span style="font-size:13px;color:var(--text-mid);flex:1">Open Hedgie Wiki &amp; User Guide</span>
-      <span style="font-size:13px;color:var(--text-faint)">â†’</span>
+      <span style="font-size:13px;color:var(--text-faint)">&#8594;</span>
     </a>
 
     <!-- IDENTITY -->
@@ -559,7 +555,6 @@ select{cursor:pointer}
       <span class="drawer-acc-title">&#128100; Identity</span>
       <span class="drawer-acc-arrow" id="arr-acc-identity">&#9656;</span>
     </div>
-    <div class="drawer-acc-body" id="acc-identity">
       <div class="drawer-acc-inner">
         <div class="drawer-field">
           <label>Display name <span style="color:var(--text-faint);font-weight:400">(stamps your receipts)</span></label>
@@ -593,7 +588,6 @@ select{cursor:pointer}
       <span class="drawer-acc-title">&#9729; Cloud sync</span>
       <span class="drawer-acc-arrow" id="arr-acc-cloud">&#9656;</span>
     </div>
-    <div class="drawer-acc-body" id="acc-cloud">
       <div class="drawer-acc-inner">
         <div class="sync-status" id="sync-status-row">
           <div class="sync-dot" id="sync-dot"></div>
@@ -623,7 +617,6 @@ select{cursor:pointer}
       <span class="drawer-acc-title">&#128276; Notifications</span>
       <span class="drawer-acc-arrow" id="arr-acc-notifs">&#9656;</span>
     </div>
-    <div class="drawer-acc-body" id="acc-notifs">
       <div class="drawer-acc-inner">
         <div style="font-size:11px;color:var(--text-soft);margin-bottom:10px;line-height:1.5">Choose which notifications appear in the bell menu.</div>
         <div id="notif-toggles"></div>
@@ -649,7 +642,6 @@ select{cursor:pointer}
       <span class="drawer-acc-title">&#128202; Data</span>
       <span class="drawer-acc-arrow" id="arr-acc-data">&#9656;</span>
     </div>
-    <div class="drawer-acc-body" id="acc-data">
       <div class="drawer-acc-inner">
         <div id="health-panel"></div>
         <div class="btn-row" style="margin-top:10px;flex-wrap:wrap">
@@ -680,7 +672,6 @@ select{cursor:pointer}
         Sync conflict detected
       </div>
     </div>
-    <div class="modal-body">
       <p style="font-size:13px;color:var(--text-mid);line-height:1.6">The cloud has changes you haven't seen. Receipts will be merged automatically. The budget plan has differences — choose how to handle them:</p>
       <div class="conflict-detail" id="conflict-detail"></div>
     </div>
@@ -2255,7 +2246,6 @@ function renderNotifList(){
     const urgBg={high:'rgba(185,64,64,0.06)',med:'rgba(184,120,32,0.06)',low:'transparent',info:'rgba(58,110,168,0.06)'};
     html+=`<div class="notif-item" id="ni-${n.id}" style="border-left:3px solid ${urgBorderColor[n.urgency]||'var(--border)'};background:${urgBg[n.urgency]||'transparent'};padding-left:11px">
       <span class="notif-icon">${n.icon}</span>
-      <div class="notif-body">
         <div class="notif-title" style="color:${n.urgency==='high'?'var(--red)':n.urgency==='med'?'var(--amber)':n.urgency==='info'?'var(--blue)':'var(--text)'}">${esc(n.title)}</div>
         <div class="notif-desc">${esc(n.desc)}</div>
       </div>
