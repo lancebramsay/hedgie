@@ -8,7 +8,7 @@ All notable changes to Open Hedgie are documented here.
 
 ### Bug fixes
 
-- **Custom category name field on mobile** — the name input in the category manager no longer gets squished on narrow screens; on mobile it wraps to its own full-width line below the color picker and action buttons
+- **Custom category name field on mobile** — the name input in the category manager no longer gets squished on narrow screens; on mobile it fills the full first line, with the color picker, type selector, and arrow/delete buttons grouped together on the line below
 
 ---
 
