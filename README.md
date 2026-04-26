@@ -24,7 +24,7 @@ Optional cloud sync lets multiple household members share data with signed and o
 - Yearly spending overview (Hibernation View)
 - Budget planner with monthly/yearly expense frequency support
 - Custom categories — add, rename, reorder, color, remove; assign type (Expense, Savings, Investment)
-- Income remaining reflects expense spending only — savings and investment receipts don't reduce the figure
+- Income remaining excludes savings contributions — savings receipts stay liquid so they don't reduce the figure; investment receipts (CDs, retirement, etc.) still count against it
 - Rainy day buffer distribution weighted by category priority
 
 ### Insights & notifications
