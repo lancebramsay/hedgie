@@ -2693,8 +2693,8 @@ function setRptFilter(cat){rptFilterCat=cat;renderMonthlyReport();}
 function renderLogMetrics(){
   const ym=document.getElementById('log-month-sel')?.value||currentMonth();
   const recs=receiptsForMonth(ym),spent=recs.reduce((s,r)=>s+r.amt,0);
-  const budget=totalExpMo(),rem=budget-spent,pct=budget>0?Math.round(spent/budget*100):0;
-  document.getElementById('log-metrics').innerHTML=`<div class="metric"><div class="metric-label">Logged ${monthLabel(ym)}</div><div class="metric-val">${fmt(spent)}</div></div><div class="metric"><div class="metric-label">Monthly budget</div><div class="metric-val">${fmt(budget)}</div></div><div class="metric"><div class="metric-label">Remaining</div><div class="metric-val ${rem>=0?'pos':'neg'}">${rem<0?'-':''}${fmt(rem)}</div></div><div class="metric"><div class="metric-label">Budget used</div><div class="metric-val ${pct>100?'neg':pct>85?'warn':'pos'}">${pct}%</div></div>`;
+  const budget=totalExpMo(),inc=totalIncome(),rem=inc-spent,pct=budget>0?Math.round(spent/budget*100):0;
+  document.getElementById('log-metrics').innerHTML=`<div class="metric"><div class="metric-label">Logged ${monthLabel(ym)}</div><div class="metric-val">${fmt(spent)}</div></div><div class="metric"><div class="metric-label">Monthly budget</div><div class="metric-val">${fmt(budget)}</div></div><div class="metric"><div class="metric-label">Income remaining</div><div class="metric-val ${rem>=0?'pos':'neg'}">${rem<0?'-':''}${fmt(Math.abs(rem))}</div></div><div class="metric"><div class="metric-label">Budget used</div><div class="metric-val ${pct>=100?'neg':pct>=80?'warn':'pos'}">${pct}%</div></div>`;
 }
 
 let editingReceiptId=null;
