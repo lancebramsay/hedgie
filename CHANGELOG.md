@@ -57,6 +57,16 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
+## [1.7.1] — 2026-04-25 ← current stable
+
+### Changes
+
+**Den payment picklist scoped to Debts and Savings categories**
+- The "Payment towards" Den field in Log receipt now only appears when the selected category is Debts or Savings
+- Previously visible for all categories when Den Preview was enabled — this aligns the feature with its intended use (debt payments and savings contributions)
+- The field hides/shows dynamically as the user changes category
+- Also hidden correctly after a receipt is saved and the form resets
+
 ## [1.6.0] — 2026-04-24
 
 ### New features

@@ -380,7 +380,7 @@ select{cursor:pointer}
     <div class="quick-form">
       <div>
         <label>Category</label>
-        <select id="log-cat"><option value="Home">Home</option><option value="Transportation">Transportation</option><option value="Shopping" selected>Shopping</option><option value="Services">Services</option><option value="Debts">Debts</option><option value="Savings">Savings</option></select>
+        <select id="log-cat" onchange="updateDenLogFieldVisibility()"><option value="Home">Home</option><option value="Transportation">Transportation</option><option value="Shopping" selected>Shopping</option><option value="Services">Services</option><option value="Debts">Debts</option><option value="Savings">Savings</option></select>
       </div>
       <div>
         <label>Amount ($)</label>
@@ -2680,6 +2680,7 @@ function addReceipt(){
   document.getElementById('log-note').value='';
   document.getElementById('log-date').value=todayStr();
   if(settings.denPreview){const fSel=document.getElementById('log-finance-id');if(fSel)fSel.value='';}
+  updateDenLogFieldVisibility();
   setRecurring('none');
   populateMonthSelects();renderLogMetrics();renderReceiptList();
   triggerAutosave('log');
@@ -3054,10 +3055,17 @@ function toggleDenPreview(on){settings.denPreview=!!on;saveSettings();applyDenPr
 function applyDenPreview(){
   const on=!!settings.denPreview;
   const cb=document.getElementById('cfg-den-preview');if(cb)cb.checked=on;
-  const fields=document.getElementById('den-log-fields');if(fields)fields.style.display=on?'block':'none';
+  // Den log fields only show for Debts/Savings when Den Preview is on
+  updateDenLogFieldVisibility();
   const content=document.getElementById('den-preview-content');if(content)content.style.display=on?'block':'none';
-  renderCatManager();
   renderDenAccordion();
+}
+
+function updateDenLogFieldVisibility(){
+  const fields=document.getElementById('den-log-fields');if(!fields)return;
+  if(!settings.denPreview){fields.style.display='none';return;}
+  const cat=document.getElementById('log-cat')?.value||'';
+  fields.style.display=(cat==='Debts'||cat==='Savings')?'block':'none';
 }
 
 function renderDenAccordion(){renderDenFinancing();renderDenGoals();populateDenLogFields();}
