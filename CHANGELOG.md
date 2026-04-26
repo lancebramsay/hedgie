@@ -25,6 +25,53 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
+## [1.7.2] — 2026-04-25
+
+### Changes
+
+**Log receipt metric card order adjusted**
+- Swapped Budget used and Income remaining: order now reads Logged → Monthly budget → Budget used → Income remaining
+- Budget used sits next to Monthly budget where it is more directly comparable
+
+**Custom category financing flag visible in category manager**
+- A "Financing" checkbox now appears on custom categories in the category manager when Den Preview is enabled
+- Checking it adds the category to the "Payment towards" picklist in Log receipt, alongside the built-in Debts and Savings categories
+- The picklist updates immediately when the checkbox is toggled
+- Already implemented in `updateCatFinancing` and `updateDenLogFieldVisibility` — this release wires it correctly to the startup sequence
+
+**Den fields hidden until Den Preview is enabled**
+- `applyDenPreview()` now runs at startup after settings are loaded from localStorage
+- Previously `rebuildCatUI()` ran before `checkWelcome()` (which loads settings), so the Den UI could appear briefly in an incorrect state
+- Both the Log receipt payment field and the category manager financing controls are now reliably hidden until the Den Preview toggle is explicitly enabled
+
+### Bug fixes
+
+**Log receipt Income remaining matches monthly report**
+- Income remaining on the log tab was using a different calculation than the monthly report
+- Now consistently computed as total income minus actual receipts logged for the selected month
+
+**Den Preview preference synced in cloud payload**
+- `denPreview` setting now included in the cloud payload alongside `darkMode` and `pwaInstalled`
+- Toggling Den Preview on one device now carries through to synced devices
+
+---
+
+## [1.7.1] — 2026-04-25
+
+### Changes
+
+**Den Preview: financing account tagging replaces events and funding sources**
+- Den Preview receipt form updated to tag receipts against a financing account (loan, credit line, or lease) rather than events and funding sources
+- Provides a direct link to Den's debt tracking features and ensures payment history is readable by the native app on day one
+
+**Den payment picklist scoped to Debts and Savings categories**
+- The "Payment towards" Den field in Log receipt now only appears when the selected category is Debts or Savings
+- Previously visible for all categories when Den Preview was enabled — this aligns the feature with its intended use (debt payments and savings contributions)
+- The field hides/shows dynamically as the user changes category
+- Also hidden correctly after a receipt is saved and the form resets
+
+---
+
 ## [1.7.0] — 2026-04-25
 
 ### New features
@@ -77,37 +124,6 @@ All notable changes to Open Hedgie are documented here.
 - Day counts are derived dynamically from the real calendar year, so leap year Februaries (29 days) are handled automatically
 
 ---
-
-## [1.7.2] â† current stable — 2026-04-25
-
-### Changes
-
-**Log receipt metric card order adjusted**
-- Swapped Budget used and Income remaining: order now reads Logged → Monthly budget → Budget used → Income remaining
-- Budget used sits next to Monthly budget where it is more directly comparable
-
-### Changes
-
-**Custom category financing flag visible in category manager**
-- A "Financing" checkbox now appears on custom categories in the category manager when Den Preview is enabled
-- Checking it adds the category to the "Payment towards" picklist in Log receipt, alongside the built-in Debts and Savings categories
-- The picklist updates immediately when the checkbox is toggled
-- Already implemented in `updateCatFinancing` and `updateDenLogFieldVisibility` — this release wires it correctly to the startup sequence
-
-**Den fields hidden until Den Preview is enabled**
-- `applyDenPreview()` now runs at startup after settings are loaded from localStorage
-- Previously `rebuildCatUI()` ran before `checkWelcome()` (which loads settings), so the Den UI could appear briefly in an incorrect state
-- Both the Log receipt payment field and the category manager financing controls are now reliably hidden until the Den Preview toggle is explicitly enabled
-
-## [1.7.1] — 2026-04-25
-
-### Changes
-
-**Den payment picklist scoped to Debts and Savings categories**
-- The "Payment towards" Den field in Log receipt now only appears when the selected category is Debts or Savings
-- Previously visible for all categories when Den Preview was enabled — this aligns the feature with its intended use (debt payments and savings contributions)
-- The field hides/shows dynamically as the user changes category
-- Also hidden correctly after a receipt is saved and the form resets
 
 ## [1.6.0] — 2026-04-24
 
