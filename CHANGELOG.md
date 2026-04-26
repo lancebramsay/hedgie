@@ -20,6 +20,8 @@ All notable changes to Open Hedgie are documented here.
 - Settings drawer accordions are now mutually exclusive — opening one closes the previously open section
 - Accordion open/close animation replaced: height no longer animates (eliminating drawer bounce), inner content fades in/out at 0.18s instead
 - Settings drawer section order resequenced: Identity → Cloud sync → Data → Notifications → Den Preview (Data promoted above Notifications as the more safety-critical action)
+- Budget planner line items in savings and investment categories now labelled "Contribution" instead of "Expense" — column header, row placeholder, and add button all reflect the category type
+- Removed default "Retirement (401k/IRA)" example line from the Savings category — investment products belong under an investment-typed category
 
 ---
 

@@ -792,7 +792,7 @@ const DEF={
   Shopping:[{n:'Groceries',a:0,p:'H',f:'M'},{n:'Dining out',a:0,p:'L',f:'M'},{n:'Coffee / snacks',a:0,p:'L',f:'M'}],
   Services:[{n:'Apple One',a:0,p:'L',f:'M'},{n:'Netflix',a:0,p:'L',f:'M'},{n:'Phone plan',a:0,p:'M',f:'M'},{n:'Kaiser (healthcare)',a:0,p:'H',f:'M'},{n:'Willamette Dental',a:0,p:'M',f:'M'},{n:'Prescriptions',a:0,p:'H',f:'M'},{n:'Vision',a:0,p:'M',f:'Y'},{n:'Cloud storage',a:0,p:'L',f:'M'}],
   Debts:[{n:'Student loan',a:0,p:'H',f:'M'},{n:'Credit card minimum',a:0,p:'H',f:'M'},{n:'Personal loan',a:0,p:'M',f:'M'}],
-  Savings:[{n:'Emergency fund',a:0,p:'H',f:'M'},{n:'Retirement (401k/IRA)',a:0,p:'M',f:'M'},{n:'General savings',a:0,p:'L',f:'M'}]
+  Savings:[{n:'Emergency fund',a:0,p:'H',f:'M'},{n:'General savings',a:0,p:'L',f:'M'}]
 };
 
 let income=[{n:'Primary salary',a:0},{n:'Side income',a:0}];
@@ -2846,13 +2846,13 @@ function renderExpenses(){
     const ct=catMo(c),hasYr=expenses[c].some(r=>r.f==='Y');
     const wrap=document.createElement('div');wrap.className='card';
     wrap.innerHTML=`<div class="card-hdr"><span class="card-title" style="color:${catColor(c)}">${esc(c)}${hasYr?' <span style="font-size:11px;color:var(--text-faint);font-weight:400">· yearly items</span>':''}</span><span class="card-sub">${fmt(ct)}/mo &middot; ${fmt(ct*12)}/yr</span></div>
-    <div class="exp-grid" style="margin-bottom:4px"><span class="col-hdr">Expense</span><span class="col-hdr r">Amount</span><span class="col-hdr c">Freq</span><span class="col-hdr">Priority</span><span class="col-hdr r yr-col">Mo equiv</span><span></span></div>
-    <div id="erows-${c}"></div><button class="add-exp-btn" onclick="addExpense('${c}')">+ Add expense</button>`;
+    <div class="exp-grid" style="margin-bottom:4px"><span class="col-hdr">${isExpenseCat(c)?'Expense':'Contribution'}</span><span class="col-hdr r">Amount</span><span class="col-hdr c">Freq</span><span class="col-hdr">Priority</span><span class="col-hdr r yr-col">Mo equiv</span><span></span></div>
+    <div id="erows-${c}"></div><button class="add-exp-btn" onclick="addExpense('${c}')">${isExpenseCat(c)?'+ Add expense':'+ Add contribution'}</button>`;
     sec.appendChild(wrap);
     const rc=document.getElementById('erows-'+c);
     visRows.forEach(r=>{const ri=expenses[c].indexOf(r),mo=moAmt(r);
       const rd=document.createElement('div');rd.className='exp-grid';rd.style.cssText='padding:4px 0;border-top:1px solid var(--border-light)';
-      rd.innerHTML=`<input class="exp-inp-name" type="text" value="${esc(r.n)}" placeholder="Expense name" onchange="expenses['${c}'][${ri}].n=this.value;plannerChanged()">
+      rd.innerHTML=`<input class="exp-inp-name" type="text" value="${esc(r.n)}" placeholder="${isExpenseCat(c)?'Expense name':'Contribution name'}" onchange="expenses['${c}'][${ri}].n=this.value;plannerChanged()">
       <input class="exp-inp-amt" type="number" value="${r.a||''}" placeholder="0" min="0" step="1" onchange="expenses['${c}'][${ri}].a=parseFloat(this.value)||0;updatePlanner()">
       <div class="freq-tog"><button class="${r.f==='M'?'on':''}" onclick="expenses['${c}'][${ri}].f='M';updatePlanner()">Mo</button><button class="${r.f==='Y'?'on':''}" onclick="expenses['${c}'][${ri}].f='Y';updatePlanner()">Yr</button></div>
       <select class="exp-sel" onchange="expenses['${c}'][${ri}].p=this.value;plannerChanged()"><option value="H"${r.p==='H'?' selected':''}>High</option><option value="M"${r.p==='M'?' selected':''}>Med</option><option value="L"${r.p==='L'?' selected':''}>Low</option></select>
