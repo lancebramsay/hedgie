@@ -23,11 +23,12 @@ Optional cloud sync lets multiple household members share data with signed and o
 - Monthly budget vs actual tracking per category
 - Yearly spending overview (Hibernation View)
 - Budget planner with monthly/yearly expense frequency support
-- Custom categories — add, rename, reorder, color, remove
+- Custom categories — add, rename, reorder, color, remove; assign type (Expense, Savings, Investment)
+- Income remaining reflects expense spending only — savings and investment receipts don't reduce the figure
 - Rainy day buffer distribution weighted by category priority
 
 ### Insights & notifications
-- Built-in notifications: upcoming bills, budget warnings, sync staleness, monthly logging nudge, first-session sync prompt, monthly local backup reminder
+- Built-in notifications: upcoming bills, budget warnings (expense categories only), sync staleness, monthly logging nudge, first-session sync prompt, monthly local backup reminder
 - Four urgency tiers: high (red), med (amber), low (green), info (blue)
 - Bell badge color reflects highest-priority active notification
 - Custom notification rule builder: 11 queryable fields, AND/OR logic, up to 3 conditions per rule
@@ -152,7 +153,9 @@ Upload `index.html` to the root folder (and `manifest.json`, `icon-192.png`, `ic
 
 ## Roadmap
 
-A future **Hedgie** native app (iOS/macOS, SwiftUI, CloudKit sync) is planned with expanded financial planning features ("Den features"). The Open Hedgie schema already includes forward-compatible fields (`financing[]`, `category.financing`, `financeId`) that Den will populate.
+A future **Hedgie** native app (iOS/macOS, SwiftUI, CloudKit sync) is planned with expanded financial planning features ("Den features"). The Open Hedgie schema already includes forward-compatible fields (`financing[]`, `savingsGoals[]`, `category.type`, `category.financing`, `financeId`) that Den will populate.
+
+A **Den Preview** toggle in Settings enables early Den data features in Open Hedgie today — financing account tagging on receipts, savings goals, and category type assignments. All data is stored immediately and will be read natively by the Hedgie app on day one.
 
 Planned Den features include:
 
