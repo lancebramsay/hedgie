@@ -18,6 +18,7 @@ All notable changes to Open Hedgie are documented here.
 - Financing Accounts type dropdown clipped at the bottom — bumped select height from 26px to 28px
 - Settings drawer now matches the top banner width on wide screens — constrained to 860px and centered using `left:50%;width:min(860px,100%)` instead of stretching edge-to-edge
 - Settings drawer accordions are now mutually exclusive — opening one closes the previously open section
+- Accordion open/close animation replaced: height no longer animates (eliminating drawer bounce), inner content fades in/out at 0.18s instead
 
 ---
 

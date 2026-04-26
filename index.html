@@ -231,9 +231,10 @@ select{cursor:pointer}
 .drawer-acc-title{font-size:12px;font-weight:600;color:var(--text-mid);letter-spacing:0.3px}
 .drawer-acc-arrow{font-size:12px;color:var(--text-faint);transition:transform 0.2s}
 .drawer-acc-arrow.open{transform:rotate(90deg)}
-.drawer-acc-body{overflow:hidden;max-height:0;transition:max-height 0.3s ease}
+.drawer-acc-body{overflow:hidden;max-height:0}
 .drawer-acc-body.open{max-height:2400px}
-.drawer-acc-inner{padding:12px 0 4px}
+.drawer-acc-inner{padding:12px 0 4px;opacity:0;transition:opacity 0.18s ease}
+.drawer-acc-body.open .drawer-acc-inner{opacity:1}
 .notif-rule-btns{padding-bottom:env(safe-area-inset-bottom,12px);margin-top:8px}
 /* hiber ref line */
 .hiber-bar-wrap{position:relative}
@@ -1055,12 +1056,11 @@ function toggleAcc(id){
   if(!body)return;
   const opening=!body.classList.contains('open');
   const ACC_IDS=['acc-identity','acc-cloud','acc-notifs','acc-data','acc-den'];
-  const anyOpen=ACC_IDS.some(aid=>aid!==id&&document.getElementById(aid)?.classList.contains('open'));
   ACC_IDS.forEach(aid=>{
     document.getElementById(aid)?.classList.remove('open');
     document.getElementById('arr-'+aid)?.classList.remove('open');
   });
-  if(opening)setTimeout(()=>{body.classList.add('open');if(arrow)arrow.classList.add('open');},anyOpen?300:0);
+  if(opening){body.classList.add('open');if(arrow)arrow.classList.add('open');}
 }
 
 
