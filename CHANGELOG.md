@@ -61,6 +61,12 @@ All notable changes to Open Hedgie are documented here.
 
 ### Changes
 
+**Log receipt metric card order adjusted**
+- Swapped Budget used and Income remaining: order now reads Logged → Monthly budget → Budget used → Income remaining
+- Budget used sits next to Monthly budget where it is more directly comparable
+
+### Changes
+
 **Custom category financing flag visible in category manager**
 - A "Financing" checkbox now appears on custom categories in the category manager when Den Preview is enabled
 - Checking it adds the category to the "Payment towards" picklist in Log receipt, alongside the built-in Debts and Savings categories
