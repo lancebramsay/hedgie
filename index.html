@@ -303,7 +303,7 @@ select{cursor:pointer}
       <ellipse cx="20" cy="48" rx="5" ry="3" fill="#c9a882"/>
       <ellipse cx="32" cy="49" rx="5" ry="3" fill="#c9a882"/>
     </svg>
-    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v1.7.3</div></div>
+    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v1.7.4</div></div>
   </div>
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('log')" id="tab-log">
@@ -543,7 +543,7 @@ select{cursor:pointer}
     </div>
   </div>
   <div class="hint">Use the gear icon &#x2699; to configure cloud sync, shared keys, and user settings</div>
-  <div class="hint" style="margin-top:4px">Open Hedgie · v1.7.3 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
+  <div class="hint" style="margin-top:4px">Open Hedgie · v1.7.4 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
   <div class="hint" style="margin-top:8px" id="donate-btn-planner"></div>
 </div><!-- /panel-planner -->
 </div></div><!-- /tab-panels-inner /tab-panels-wrap -->
@@ -781,6 +781,7 @@ let categories=DEFAULT_CATS.map(c=>({...c})); // mutable, persisted
 // Derived helpers — always read from categories array
 const CATS=()=>categories.map(c=>c.name);
 const catColor=name=>{const c=categories.find(x=>x.name===name);return c?c.color:'#888888';};
+const isExpenseCat=name=>{const c=categories.find(x=>x.name===name);return !c?.type||c.type==='expense';};
 const MONTH_NAMES=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const USER_COLORS=['#3a6ea8','#b94040','#4a7c59','#7c5a8b','#b87820','#8b6340'];
 
@@ -2169,6 +2170,7 @@ function buildNotifications(){
   const monthRecs=receiptsForMonth(thisMonth);
   if(settings.notifs?.budget!==false){
   CATS().forEach(name=>{
+    if(!isExpenseCat(name))return;
     const budget=catMo(name);
     if(budget<=0)return;
     const spent=monthRecs.filter(r=>r.cat===name).reduce((s,r)=>s+r.amt,0);
@@ -2467,7 +2469,7 @@ function renderMonthlyReport(){
   const recs=receiptsForMonth(ym);
   const spent=recs.reduce((s,r)=>s+r.amt,0);
   const budgetMo=totalExpMo(),inc=totalIncome(),pct=budgetMo>0?Math.min(200,Math.round(spent/budgetMo*100)):0;
-  const rem=inc-spent;
+  const rem=inc-recs.filter(r=>isExpenseCat(r.cat)).reduce((s,r)=>s+r.amt,0);
   const visRecs=rptFilterCat==='all'?recs:recs.filter(r=>r.cat===rptFilterCat);
   const rptTotal=visRecs.reduce((s,r)=>s+r.amt,0);
   const rptPills='<div class="pills" id="rpt-filters" style="margin:4px 0 8px">'+['all',...CATS()].map(c=>`<button class="pill${(c==='all'?rptFilterCat==='all':rptFilterCat===c)?' on':''}" data-rp="${esc(c)}" onclick="setRptFilter(this.dataset.rp)">${c==='all'?'All':esc(c)}</button>`).join('')+'</div>';
@@ -2514,7 +2516,7 @@ function renderYearlyReport(){
   const totalSpent=recs.reduce((s,r)=>s+r.amt,0);
   const annualBudget=totalExpMo()*12;
   const inc=totalIncome()*12;
-  const rem=inc-totalSpent;
+  const rem=inc-recs.filter(r=>isExpenseCat(r.cat)).reduce((s,r)=>s+r.amt,0);
   const nowYr=new Date().getFullYear().toString();
   const nowMo=new Date().getMonth();
   const isCurrentYear=(yr===nowYr);
@@ -2582,7 +2584,8 @@ function renderYearlyReport(){
         });
         const maxCat=Math.max(...monthlyTotals,catMo(c),1);
         const cpct=annBudget>0?Math.min(200,Math.round(actual/annBudget*100)):0;
-        const over=actual>annBudget&&annBudget>0,warn=cpct>80&&cpct<=100;
+        const expCat=isExpenseCat(c);
+        const over=expCat&&actual>annBudget&&annBudget>0,warn=expCat&&cpct>80&&cpct<=100;
         const cls=over?'over':warn?'warn':'',ncls=over?'rpt-over':warn?'rpt-warn':'rpt-under';
         return`<div class="hiber-cat-section">
           <div class="hiber-cat-title" style="color:${catColor(c)}">
@@ -2591,7 +2594,7 @@ function renderYearlyReport(){
           </div>
           <div class="month-bars" style="height:44px;margin-bottom:2px">
             ${monthlyTotals.map((v,i)=>`<div class="month-bar-wrap">
-              <div class="month-bar" style="height:${v>0?Math.round((v/maxCat)*38)+3:2}px;background:${catColor(c)};opacity:0.75;border-radius:2px 2px 0 0;${v>0&&c!=='Savings'?(v>catMo(c)?'outline:1.5px dashed #b94040;outline-offset:1px':v>=catMo(c)*0.80?'outline:1.5px dashed #b87820;outline-offset:1px':'outline:1.5px dashed #4a7c59;outline-offset:1px'):''}"></div>
+              <div class="month-bar" style="height:${v>0?Math.round((v/maxCat)*38)+3:2}px;background:${catColor(c)};opacity:0.75;border-radius:2px 2px 0 0;${v>0&&expCat?(v>catMo(c)?'outline:1.5px dashed #b94040;outline-offset:1px':v>=catMo(c)*0.80?'outline:1.5px dashed #b87820;outline-offset:1px':'outline:1.5px dashed #4a7c59;outline-offset:1px'):''}"></div>
               <div class="month-bar-lbl">${MONTH_NAMES[i].slice(0,1)}</div>
             </div>`).join('')}
           </div>
@@ -2695,7 +2698,8 @@ function setRptFilter(cat){rptFilterCat=cat;renderMonthlyReport();}
 function renderLogMetrics(){
   const ym=document.getElementById('log-month-sel')?.value||currentMonth();
   const recs=receiptsForMonth(ym),spent=recs.reduce((s,r)=>s+r.amt,0);
-  const budget=totalExpMo(),inc=totalIncome(),rem=inc-spent,pct=budget>0?Math.round(spent/budget*100):0;
+  const budget=totalExpMo(),inc=totalIncome(),pct=budget>0?Math.round(spent/budget*100):0;
+  const rem=inc-recs.filter(r=>isExpenseCat(r.cat)).reduce((s,r)=>s+r.amt,0);
   document.getElementById('log-metrics').innerHTML=`<div class="metric"><div class="metric-label">Logged ${monthLabel(ym)}</div><div class="metric-val">${fmt(spent)}</div></div><div class="metric"><div class="metric-label">Monthly budget</div><div class="metric-val">${fmt(budget)}</div></div><div class="metric"><div class="metric-label">Budget used</div><div class="metric-val ${pct>=100?'neg':pct>=80?'warn':'pos'}">${pct}%</div></div><div class="metric"><div class="metric-label">Income remaining</div><div class="metric-val ${rem>=0?'pos':'neg'}">${rem<0?'-':''}${fmt(Math.abs(rem))}</div></div>`;
 }
 

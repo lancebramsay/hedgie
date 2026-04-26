@@ -4,6 +4,18 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
+## [1.7.4] — 2026-04-26
+
+### Changes
+
+**Category type awareness across reporting and notifications**
+- **Income remaining** (log receipt, monthly report, and hibernation view) now only subtracts expense-typed spending — savings and investment receipts no longer reduce the figure, giving a true picture of discretionary income left
+- **Budget-warning notifications** no longer fire for savings or investment categories — exceeding a savings budget is a good thing, not a warning
+- **Hibernation view** budget-status outlines and progress bar colors on per-category bars now respect category type — savings and investment categories show plain bars with no red/amber status indicators
+- All three changes use the new `isExpenseCat()` helper that reads `category.type`, so any custom category typed as savings or investment automatically inherits the correct behavior
+
+---
+
 ## [1.7.3] — 2026-04-25
 
 ### Bug fixes
