@@ -176,8 +176,8 @@ select{cursor:pointer}
 /* drawer */
 .drawer-overlay{position:fixed;inset:0;z-index:400;background:rgba(45,31,14,0.35);opacity:0;pointer-events:none;transition:opacity 0.25s}
 .drawer-overlay.open{opacity:1;pointer-events:all}
-.drawer{position:fixed;bottom:0;left:0;right:0;z-index:401;background:var(--warm-white);border-radius:var(--radius-lg) var(--radius-lg) 0 0;border-top:1.5px solid var(--border);box-shadow:0 -4px 24px rgba(61,42,16,0.15);transform:translateY(100%);transition:transform 0.3s cubic-bezier(0.32,0.72,0,1);max-height:90vh;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom,16px)}
-.drawer.open{transform:translateY(0)}
+.drawer{position:fixed;bottom:0;left:50%;width:min(860px,100%);z-index:401;background:var(--warm-white);border-radius:var(--radius-lg) var(--radius-lg) 0 0;border-top:1.5px solid var(--border);box-shadow:0 -4px 24px rgba(61,42,16,0.15);transform:translate(-50%,100%);transition:transform 0.3s cubic-bezier(0.32,0.72,0,1);max-height:90vh;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom,16px)}
+.drawer.open{transform:translate(-50%,0)}
 .drawer-handle{width:36px;height:4px;border-radius:2px;background:var(--tan);margin:12px auto 0}
 .drawer-hdr{padding:12px 1.25rem 0;display:flex;justify-content:space-between;align-items:center}
 .drawer-title{font-size:16px;font-weight:700;color:var(--brown-dark)}
@@ -3081,7 +3081,7 @@ function renderDenFinancing(){
   const inputStyle='font-size:12px;padding:3px 6px;height:26px;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--parchment);color:var(--text)';
   el.innerHTML=financing.map(f=>`<div style="display:grid;grid-template-columns:1fr 90px auto;gap:6px;align-items:center;margin-bottom:6px">
     <input type="text" value="${esc(f.name)}" placeholder="Account name" style="${inputStyle}" onblur="updateFinancingAcct('${f.id}','name',this.value)">
-    <select style="font-size:11px;height:26px;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--parchment);color:var(--text-soft)" onchange="updateFinancingAcct('${f.id}','type',this.value)">
+    <select style="font-size:11px;height:28px;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--parchment);color:var(--text-soft)" onchange="updateFinancingAcct('${f.id}','type',this.value)">
       <option value="loan"${f.type==='loan'?' selected':''}>Loan</option>
       <option value="credit"${f.type==='credit'?' selected':''}>Credit</option>
       <option value="lease"${f.type==='lease'?' selected':''}>Lease</option>

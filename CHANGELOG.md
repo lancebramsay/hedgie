@@ -14,6 +14,10 @@ All notable changes to Open Hedgie are documented here.
 **Dark mode fix**
 - Settings drawer text that uses `--text-faint` (sub-labels, helper text, accordion arrows) was rendering as very dark brown and hard to read in dark mode — lightened from `#5c4030` to `#7a6048`
 
+**UI fixes**
+- Financing Accounts type dropdown clipped at the bottom — bumped select height from 26px to 28px
+- Settings drawer now matches the top banner width on wide screens — constrained to 860px and centered using `left:50%;width:min(860px,100%)` instead of stretching edge-to-edge
+
 ---
 
 ## [1.7.4] — 2026-04-26
