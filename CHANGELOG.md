@@ -9,6 +9,7 @@ All notable changes to Open Hedgie are documented here.
 ### Bug fixes
 
 - **Custom category name field on mobile** — the name input in the category manager no longer gets squished on narrow screens; on mobile it fills the full first line, with the color picker, type selector, and arrow/delete buttons grouped together on the line below
+- **Default category types** — all six default categories now carry a pre-assigned type: Home, Transportation, Shopping, Services, and Debts are typed as Expense; Savings is typed as Savings; existing users get the defaults applied on next load if they haven't set a type manually
 
 ---
 

@@ -768,12 +768,12 @@ select{cursor:pointer}
 <script>
 const PRIS={H:'High',M:'Medium',L:'Low'};
 const DEFAULT_CATS=[
-  {name:'Home',color:'#8b6340'},
-  {name:'Transportation',color:'#3a6ea8'},
-  {name:'Shopping',color:'#4a7c59'},
-  {name:'Services',color:'#7c5a8b'},
-  {name:'Debts',color:'#b94040'},
-  {name:'Savings',color:'#b87820'}
+  {name:'Home',color:'#8b6340',type:'expense'},
+  {name:'Transportation',color:'#3a6ea8',type:'expense'},
+  {name:'Shopping',color:'#4a7c59',type:'expense'},
+  {name:'Services',color:'#7c5a8b',type:'expense'},
+  {name:'Debts',color:'#b94040',type:'expense'},
+  {name:'Savings',color:'#b87820',type:'savings'}
 ];
 let categories=DEFAULT_CATS.map(c=>({...c})); // mutable, persisted
 // Category object shape: {name, color, financing?: boolean}
@@ -1428,7 +1428,7 @@ function _applyData(d,payload){
     // Merge: keep locked defaults with potentially updated colors, append custom cats
     const locked=DEFAULT_CATS.map(dc=>{
       const saved=d.categories.find(sc=>sc.name===dc.name);
-      return saved||dc;
+      return saved?{type:dc.type,...saved}:dc;
     });
     const custom=d.categories.filter(sc=>!LOCKED_CATS.includes(sc.name));
     categories=[...locked,...custom];
