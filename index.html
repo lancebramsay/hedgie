@@ -1054,11 +1054,13 @@ function toggleAcc(id){
   const arrow=document.getElementById('arr-'+id);
   if(!body)return;
   const opening=!body.classList.contains('open');
-  ['acc-identity','acc-cloud','acc-notifs','acc-data','acc-den'].forEach(aid=>{
+  const ACC_IDS=['acc-identity','acc-cloud','acc-notifs','acc-data','acc-den'];
+  const anyOpen=ACC_IDS.some(aid=>aid!==id&&document.getElementById(aid)?.classList.contains('open'));
+  ACC_IDS.forEach(aid=>{
     document.getElementById(aid)?.classList.remove('open');
     document.getElementById('arr-'+aid)?.classList.remove('open');
   });
-  if(opening){body.classList.add('open');if(arrow)arrow.classList.add('open');}
+  if(opening)setTimeout(()=>{body.classList.add('open');if(arrow)arrow.classList.add('open');},anyOpen?300:0);
 }
 
 
