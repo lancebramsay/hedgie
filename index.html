@@ -266,6 +266,8 @@ select{cursor:pointer}
   .quick-form{grid-template-columns:1fr}
   .quick-form input[type=date]{width:100%;font-size:12px}
   .tab-btn .tab-lbl{display:none}.tab-btn{padding:12px 12px}
+  .cat-edit-row{flex-wrap:wrap}
+  .cat-edit-row input[type=text]{order:5;flex:1 1 100%;min-width:0}
 }
 </style>
 <script>
@@ -300,7 +302,7 @@ select{cursor:pointer}
       <ellipse cx="20" cy="48" rx="5" ry="3" fill="#c9a882"/>
       <ellipse cx="32" cy="49" rx="5" ry="3" fill="#c9a882"/>
     </svg>
-    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v1.7.2</div></div>
+    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v1.7.3</div></div>
   </div>
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('log')" id="tab-log">
@@ -540,7 +542,7 @@ select{cursor:pointer}
     </div>
   </div>
   <div class="hint">Use the gear icon &#x2699; to configure cloud sync, shared keys, and user settings</div>
-  <div class="hint" style="margin-top:4px">Open Hedgie · v1.7.2 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
+  <div class="hint" style="margin-top:4px">Open Hedgie · v1.7.3 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
   <div class="hint" style="margin-top:8px" id="donate-btn-planner"></div>
 </div><!-- /panel-planner -->
 </div></div><!-- /tab-panels-inner /tab-panels-wrap -->
@@ -2079,7 +2081,7 @@ function renderCatManager(){
     html+=extras.map((cat,i)=>{
       const globalIdx=categories.findIndex(c=>c.name===cat.name);
       const isFirst=i===0;const isLast=i===extras.length-1;
-      return`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border-light)">
+      return`<div class="cat-edit-row" style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border-light)">
         <input type="color" value="${cat.color}" title="Pick color"
           style="width:26px;height:26px;padding:1px;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;background:transparent;flex-shrink:0"
           onchange="updateCatColor('${esc(cat.name)}',this.value)">

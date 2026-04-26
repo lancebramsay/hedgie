@@ -4,6 +4,14 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
+## [1.7.3] — 2026-04-25
+
+### Bug fixes
+
+- **Custom category name field on mobile** — the name input in the category manager no longer gets squished on narrow screens; on mobile it wraps to its own full-width line below the color picker and action buttons
+
+---
+
 ## [1.7.0] — 2026-04-25
 
 ### New features
