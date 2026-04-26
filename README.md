@@ -162,7 +162,7 @@ Deploys from the `stable` branch. Updated manually once a release is confirmed s
 
 A future **Hedgie** native app (iOS/macOS, SwiftUI, CloudKit sync) is planned with expanded financial planning features ("Den features"). The Open Hedgie schema already includes forward-compatible fields (`financing[]`, `savingsGoals[]`, `category.type`, `category.financing`, `financeId`) that Den will populate.
 
-A **Den Preview** toggle in Settings enables early Den data features in Open Hedgie today — financing account tagging on receipts, savings goals, and category type assignments. All data is stored immediately and will be read natively by the Hedgie app on day one.
+A **Den Preview** toggle in Settings enables early Den data features in Open Hedgie today — financing account tagging on receipts and category type assignments. All data is stored immediately and will be read natively by the Hedgie app on day one.
 
 Planned Den features include:
 
