@@ -639,6 +639,30 @@ select{cursor:pointer}
       </div>
     </div>
 
+    <!-- DATA -->
+    <div class="drawer-acc-hdr" onclick="toggleAcc('acc-data')">
+      <span class="drawer-acc-title">&#128202; Data</span>
+      <span class="drawer-acc-arrow" id="arr-acc-data">&#9656;</span>
+    </div>
+    <div class="drawer-acc-body" id="acc-data">
+      <div class="drawer-acc-inner">
+        <div id="health-panel"></div>
+        <div class="btn-row" style="margin-top:10px;flex-wrap:wrap">
+          <button class="btn" style="font-size:12px" onclick="exportArchiveCSV()">Export archived receipts</button>
+          <button class="btn" style="font-size:12px" onclick="exportDecryptedBackup()">Export decrypted backup</button>
+          <button class="btn" style="font-size:12px" onclick="forceRefresh()" title="Clears cached version and reloads the app">&#8635; Force refresh</button>
+        </div>
+        <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border-light)">
+          <div style="font-size:11px;font-weight:600;color:var(--text-faint);letter-spacing:0.3px;margin-bottom:8px">DANGER ZONE</div>
+          <div class="btn-row" style="flex-wrap:wrap;gap:6px">
+            <button class="btn danger" style="font-size:12px" onclick="resetIdentity()">Erase identity &amp; sync</button>
+            <button class="btn danger" style="font-size:12px" onclick="resetBudgetAndReceipts()">Erase budget &amp; receipts</button>
+            <button class="btn danger" style="font-size:12px;font-weight:700" onclick="resetAll()">Erase everything</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- NOTIFICATIONS -->
     <div class="drawer-acc-hdr" onclick="toggleAcc('acc-notifs')">
       <span class="drawer-acc-title">&#128276; Notifications</span>
@@ -661,30 +685,6 @@ select{cursor:pointer}
             <button class="btn" style="font-size:11px;padding:3px 10px" onclick="addCustomNotif()">+ Add</button>
           </div>
           <div id="custom-notif-list"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- DATA -->
-    <div class="drawer-acc-hdr" onclick="toggleAcc('acc-data')">
-      <span class="drawer-acc-title">&#128202; Data</span>
-      <span class="drawer-acc-arrow" id="arr-acc-data">&#9656;</span>
-    </div>
-    <div class="drawer-acc-body" id="acc-data">
-      <div class="drawer-acc-inner">
-        <div id="health-panel"></div>
-        <div class="btn-row" style="margin-top:10px;flex-wrap:wrap">
-          <button class="btn" style="font-size:12px" onclick="exportArchiveCSV()">Export archived receipts</button>
-          <button class="btn" style="font-size:12px" onclick="exportDecryptedBackup()">Export decrypted backup</button>
-          <button class="btn" style="font-size:12px" onclick="forceRefresh()" title="Clears cached version and reloads the app">&#8635; Force refresh</button>
-        </div>
-        <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border-light)">
-          <div style="font-size:11px;font-weight:600;color:var(--text-faint);letter-spacing:0.3px;margin-bottom:8px">DANGER ZONE</div>
-          <div class="btn-row" style="flex-wrap:wrap;gap:6px">
-            <button class="btn danger" style="font-size:12px" onclick="resetIdentity()">Erase identity &amp; sync</button>
-            <button class="btn danger" style="font-size:12px" onclick="resetBudgetAndReceipts()">Erase budget &amp; receipts</button>
-            <button class="btn danger" style="font-size:12px;font-weight:700" onclick="resetAll()">Erase everything</button>
-          </div>
         </div>
       </div>
     </div>

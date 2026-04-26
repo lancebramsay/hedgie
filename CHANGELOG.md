@@ -19,6 +19,7 @@ All notable changes to Open Hedgie are documented here.
 - Settings drawer now matches the top banner width on wide screens — constrained to 860px and centered using `left:50%;width:min(860px,100%)` instead of stretching edge-to-edge
 - Settings drawer accordions are now mutually exclusive — opening one closes the previously open section
 - Accordion open/close animation replaced: height no longer animates (eliminating drawer bounce), inner content fades in/out at 0.18s instead
+- Settings drawer section order resequenced: Identity → Cloud sync → Data → Notifications → Den Preview (Data promoted above Notifications as the more safety-critical action)
 
 ---
 
