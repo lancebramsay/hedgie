@@ -4,7 +4,7 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
-## [1.7.0] — 2026-04-25 ← current stable
+## [1.7.0] — 2026-04-25
 
 ### New features
 
@@ -57,7 +57,7 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
-## [1.7.2] — 2026-04-25 ← current stable
+## [1.7.2] â† current stable — 2026-04-25
 
 ### Changes
 
