@@ -57,7 +57,22 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
-## [1.7.1] — 2026-04-25 ← current stable
+## [1.7.2] — 2026-04-25 ← current stable
+
+### Changes
+
+**Custom category financing flag visible in category manager**
+- A "Financing" checkbox now appears on custom categories in the category manager when Den Preview is enabled
+- Checking it adds the category to the "Payment towards" picklist in Log receipt, alongside the built-in Debts and Savings categories
+- The picklist updates immediately when the checkbox is toggled
+- Already implemented in `updateCatFinancing` and `updateDenLogFieldVisibility` — this release wires it correctly to the startup sequence
+
+**Den fields hidden until Den Preview is enabled**
+- `applyDenPreview()` now runs at startup after settings are loaded from localStorage
+- Previously `rebuildCatUI()` ran before `checkWelcome()` (which loads settings), so the Den UI could appear briefly in an incorrect state
+- Both the Log receipt payment field and the category manager financing controls are now reliably hidden until the Den Preview toggle is explicitly enabled
+
+## [1.7.1] — 2026-04-25
 
 ### Changes
 
