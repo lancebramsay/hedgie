@@ -2,8 +2,8 @@
 
 A lightweight, offline-first household budget planner that runs entirely from a single HTML file.
 
-**Live:** [lancebramsay.github.io/hedgie](https://lancebramsay.github.io/hedgie)<br> 
-**Mirror:** [hedgie.pages.dev](https://hedgie.pages.dev)<br>
+**Stable:** [hedgie.pages.dev](https://hedgie.pages.dev) — Cloudflare Pages, fully tested releases<br>
+**Pilot:** [lancebramsay.github.io/hedgie](https://lancebramsay.github.io/hedgie) — GitHub Pages, latest updates<br>
 **Current stable:** v1.7.4
 
 ---
@@ -143,11 +143,18 @@ Once installed and opened as a PWA, both the button and banner are hidden automa
 
 ## Deployment
 
-### GitHub Pages
-Fork the repo and enable Pages on the `main` branch — no configuration needed.
+Open Hedgie uses a two-channel release model:
 
-### Cloudflare Pages
-Upload `index.html` to the root folder (and `manifest.json`, `icon-192.png`, `icon-512.png` for PWA support).
+| Channel | URL | Source | Purpose |
+|---|---|---|---|
+| **Stable** | [hedgie.pages.dev](https://hedgie.pages.dev) | Cloudflare Pages — `stable` branch | Fully tested, recommended for everyday use |
+| **Pilot** | [lancebramsay.github.io/hedgie](https://lancebramsay.github.io/hedgie) | GitHub Pages — `main` branch | Latest updates, may include changes still being validated |
+
+### GitHub Pages (Pilot)
+Deploys automatically from the `main` branch on every push. Always reflects the latest changes.
+
+### Cloudflare Pages (Stable)
+Deploys from the `stable` branch. Updated manually once a release is confirmed stable after pilot testing.
 
 ---
 
