@@ -782,6 +782,7 @@ let categories=DEFAULT_CATS.map(c=>({...c})); // mutable, persisted
 const CATS=()=>categories.map(c=>c.name);
 const catColor=name=>{const c=categories.find(x=>x.name===name);return c?c.color:'#888888';};
 const isExpenseCat=name=>{const c=categories.find(x=>x.name===name);return !c?.type||c.type==='expense';};
+const isSavingsCat=name=>{const c=categories.find(x=>x.name===name);return c?.type==='savings';};
 const MONTH_NAMES=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const USER_COLORS=['#3a6ea8','#b94040','#4a7c59','#7c5a8b','#b87820','#8b6340'];
 
@@ -2469,7 +2470,7 @@ function renderMonthlyReport(){
   const recs=receiptsForMonth(ym);
   const spent=recs.reduce((s,r)=>s+r.amt,0);
   const budgetMo=totalExpMo(),inc=totalIncome(),pct=budgetMo>0?Math.min(200,Math.round(spent/budgetMo*100)):0;
-  const rem=inc-recs.filter(r=>isExpenseCat(r.cat)).reduce((s,r)=>s+r.amt,0);
+  const rem=inc-recs.filter(r=>!isSavingsCat(r.cat)).reduce((s,r)=>s+r.amt,0);
   const visRecs=rptFilterCat==='all'?recs:recs.filter(r=>r.cat===rptFilterCat);
   const rptTotal=visRecs.reduce((s,r)=>s+r.amt,0);
   const rptPills='<div class="pills" id="rpt-filters" style="margin:4px 0 8px">'+['all',...CATS()].map(c=>`<button class="pill${(c==='all'?rptFilterCat==='all':rptFilterCat===c)?' on':''}" data-rp="${esc(c)}" onclick="setRptFilter(this.dataset.rp)">${c==='all'?'All':esc(c)}</button>`).join('')+'</div>';
@@ -2516,7 +2517,7 @@ function renderYearlyReport(){
   const totalSpent=recs.reduce((s,r)=>s+r.amt,0);
   const annualBudget=totalExpMo()*12;
   const inc=totalIncome()*12;
-  const rem=inc-recs.filter(r=>isExpenseCat(r.cat)).reduce((s,r)=>s+r.amt,0);
+  const rem=inc-recs.filter(r=>!isSavingsCat(r.cat)).reduce((s,r)=>s+r.amt,0);
   const nowYr=new Date().getFullYear().toString();
   const nowMo=new Date().getMonth();
   const isCurrentYear=(yr===nowYr);
@@ -2699,7 +2700,7 @@ function renderLogMetrics(){
   const ym=document.getElementById('log-month-sel')?.value||currentMonth();
   const recs=receiptsForMonth(ym),spent=recs.reduce((s,r)=>s+r.amt,0);
   const budget=totalExpMo(),inc=totalIncome(),pct=budget>0?Math.round(spent/budget*100):0;
-  const rem=inc-recs.filter(r=>isExpenseCat(r.cat)).reduce((s,r)=>s+r.amt,0);
+  const rem=inc-recs.filter(r=>!isSavingsCat(r.cat)).reduce((s,r)=>s+r.amt,0);
   document.getElementById('log-metrics').innerHTML=`<div class="metric"><div class="metric-label">Logged ${monthLabel(ym)}</div><div class="metric-val">${fmt(spent)}</div></div><div class="metric"><div class="metric-label">Monthly budget</div><div class="metric-val">${fmt(budget)}</div></div><div class="metric"><div class="metric-label">Budget used</div><div class="metric-val ${pct>=100?'neg':pct>=80?'warn':'pos'}">${pct}%</div></div><div class="metric"><div class="metric-label">Income remaining</div><div class="metric-val ${rem>=0?'pos':'neg'}">${rem<0?'-':''}${fmt(Math.abs(rem))}</div></div>`;
 }
 
