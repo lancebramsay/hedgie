@@ -1053,8 +1053,12 @@ function toggleAcc(id){
   const body=document.getElementById(id);
   const arrow=document.getElementById('arr-'+id);
   if(!body)return;
-  body.classList.toggle('open');
-  if(arrow)arrow.classList.toggle('open');
+  const opening=!body.classList.contains('open');
+  ['acc-identity','acc-cloud','acc-notifs','acc-data','acc-den'].forEach(aid=>{
+    document.getElementById(aid)?.classList.remove('open');
+    document.getElementById('arr-'+aid)?.classList.remove('open');
+  });
+  if(opening){body.classList.add('open');if(arrow)arrow.classList.add('open');}
 }
 
 
