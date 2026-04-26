@@ -40,7 +40,7 @@ body.dark{
   --amber:#c89030;--amber-light:#2a2010;--blue:#5a8ec8;--blue-light:#101d2a;
   --purple:#8a6fc0;--purple-light:#1a152a;
   --border:#3d3025;--border-light:#2e2418;
-  --text:#e8d5bc;--text-mid:#c4a882;--text-soft:#9b7a54;--text-faint:#5c4030;
+  --text:#e8d5bc;--text-mid:#c4a882;--text-soft:#9b7a54;--text-faint:#7a6048;
   --shadow:rgba(0,0,0,0.3);
 }
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--cream);background-image:radial-gradient(var(--border-light) 1px,transparent 1px);background-size:22px 22px;color:var(--text);min-height:100vh;font-size:15px;line-height:1.5}
@@ -303,7 +303,7 @@ select{cursor:pointer}
       <ellipse cx="20" cy="48" rx="5" ry="3" fill="#c9a882"/>
       <ellipse cx="32" cy="49" rx="5" ry="3" fill="#c9a882"/>
     </svg>
-    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v1.7.4</div></div>
+    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v1.7.5</div></div>
   </div>
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('log')" id="tab-log">
@@ -543,7 +543,7 @@ select{cursor:pointer}
     </div>
   </div>
   <div class="hint">Use the gear icon &#x2699; to configure cloud sync, shared keys, and user settings</div>
-  <div class="hint" style="margin-top:4px">Open Hedgie · v1.7.4 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
+  <div class="hint" style="margin-top:4px">Open Hedgie · v1.7.5 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
   <div class="hint" style="margin-top:8px" id="donate-btn-planner"></div>
 </div><!-- /panel-planner -->
 </div></div><!-- /tab-panels-inner /tab-panels-wrap -->
@@ -695,7 +695,7 @@ select{cursor:pointer}
     </div>
     <div class="drawer-acc-body" id="acc-den">
       <div class="drawer-acc-inner">
-        <div style="font-size:12px;color:var(--text-soft);margin-bottom:10px;line-height:1.5">Tag receipts with events and funding sources, manage savings goals, and assign category types. Data is stored now and will be read natively by the Hedgie app when released.</div>
+        <div style="font-size:12px;color:var(--text-soft);margin-bottom:10px;line-height:1.5">Tag receipts with financing accounts and assign category types. Data is stored now and will be read natively by the Hedgie app when released.</div>
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:0">
           <input type="checkbox" id="cfg-den-preview" onchange="toggleDenPreview(this.checked)">
           <span style="font-size:13px;font-weight:500">Enable Den Preview features</span>
@@ -705,9 +705,6 @@ select{cursor:pointer}
           <div style="font-size:12px;color:var(--text-soft);margin-bottom:8px;line-height:1.5">Add loans, credit lines, or leases. Tag receipts as payments towards them so native Hedgie can read your history on day one.</div>
           <div id="den-financing-list"></div>
           <button class="btn" style="font-size:12px;margin-bottom:14px" onclick="addFinancingAcct()">+ Add account</button>
-          <div style="font-size:11px;font-weight:600;color:var(--text-faint);letter-spacing:0.4px;margin-bottom:6px">SAVINGS GOALS</div>
-          <div id="den-goals-list"></div>
-          <button class="btn" style="font-size:12px" onclick="addSavingsGoal()">+ Add goal</button>
         </div>
       </div>
     </div>
@@ -3076,7 +3073,7 @@ function updateDenLogFieldVisibility(){
   fields.style.display=(cat==='Debts'||cat==='Savings')?'block':'none';
 }
 
-function renderDenAccordion(){renderDenFinancing();renderDenGoals();populateDenLogFields();}
+function renderDenAccordion(){renderDenFinancing();populateDenLogFields();}
 
 function renderDenFinancing(){
   const el=document.getElementById('den-financing-list');if(!el)return;
@@ -3094,16 +3091,6 @@ function renderDenFinancing(){
   </div>`).join('')+'<div style="margin-bottom:8px"></div>';
 }
 
-function renderDenGoals(){
-  const el=document.getElementById('den-goals-list');if(!el)return;
-  if(!savingsGoals.length){el.innerHTML='<div style="font-size:12px;color:var(--text-faint);margin-bottom:8px">No goals yet.</div>';return;}
-  const inputStyle='font-size:12px;padding:3px 6px;height:26px;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--parchment);color:var(--text)';
-  el.innerHTML=savingsGoals.map(g=>`<div style="display:grid;grid-template-columns:1fr 90px auto;gap:6px;align-items:center;margin-bottom:6px">
-    <input type="text" value="${esc(g.name)}" placeholder="Goal name" style="${inputStyle}" onblur="updateSavingsGoal('${g.id}','name',this.value)">
-    <input type="number" value="${g.targetAmt||''}" placeholder="Target $" style="${inputStyle};text-align:left" onblur="updateSavingsGoal('${g.id}','targetAmt',this.value)">
-    <button class="receipt-del" onclick="deleteSavingsGoal('${g.id}')">&#215;</button>
-  </div>`).join('')+'<div style="margin-bottom:8px"></div>';
-}
 
 function populateDenLogFields(){
   const fSel=document.getElementById('log-finance-id');if(!fSel)return;
@@ -3125,20 +3112,7 @@ function updateFinancingAcct(id,field,value){
   triggerAutosave('den');
   if(field==='name')populateDenLogFields();
 }
-function addSavingsGoal(){
-  savingsGoals.push({id:uid(),name:'New goal',targetAmt:0,priority:savingsGoals.length+1});
-  triggerAutosave('den');renderDenGoals();
-}
-function deleteSavingsGoal(id){
-  if(!confirm('Delete this goal?'))return;
-  savingsGoals=savingsGoals.filter(g=>g.id!==id);
-  triggerAutosave('den');renderDenGoals();
-}
-function updateSavingsGoal(id,field,value){
-  const g=savingsGoals.find(g=>g.id===id);if(!g)return;
-  g[field]=field==='targetAmt'||field==='priority'?parseFloat(value)||0:value;
-  triggerAutosave('den');
-}
+
 function updateCatType(name,type){
   const cat=categories.find(c=>c.name===name);if(!cat)return;
   cat.type=type;triggerAutosave('den');

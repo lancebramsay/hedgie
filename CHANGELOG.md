@@ -4,6 +4,18 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
+## [1.7.5] — 2026-04-25
+
+### Changes
+
+**Den Preview cleanup**
+- Removed savings goals UI from Den Preview settings — goals will be introduced with the full native Hedgie release; the `savingsGoals[]` schema field and data layer remain intact so any stored goals are preserved and will be read by the native app on day one
+
+**Dark mode fix**
+- Settings drawer text that uses `--text-faint` (sub-labels, helper text, accordion arrows) was rendering as very dark brown and hard to read in dark mode — lightened from `#5c4030` to `#7a6048`
+
+---
+
 ## [1.7.4] — 2026-04-26
 
 ### Changes
