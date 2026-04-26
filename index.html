@@ -1372,7 +1372,7 @@ function triggerAutosave(source){
 
 // ── CLOUD PAYLOAD ─────────────────────────────
 async function buildPayload(){
-  const rawData={categories,income,expenses,receipts,vendors,archives,recurringBills,financing,savingsGoals,darkMode:settings.darkMode,pwaInstalled:settings.pwaInstalled};
+  const rawData={categories,income,expenses,receipts,vendors,archives,recurringBills,financing,savingsGoals,darkMode:settings.darkMode,pwaInstalled:settings.pwaInstalled,denPreview:settings.denPreview};
   const base={_hedgie:true,version:(syncMeta.version||0)+1,lastEditedBy:settings.username||'Unknown',lastEditedAt:new Date().toISOString()};
   if(settings.encryptSync&&settings.sharedKey){
     try{
@@ -1447,6 +1447,7 @@ function _applyData(d,payload){
   // Restore preference flags from payload
   if(d.darkMode!==undefined&&settings.darkMode!==d.darkMode){settings.darkMode=d.darkMode;applyDarkMode();}
   if(d.pwaInstalled!==undefined)settings.pwaInstalled=d.pwaInstalled;
+  if(d.denPreview!==undefined&&settings.denPreview!==d.denPreview){settings.denPreview=d.denPreview;applyDenPreview();}
   // If the pulled payload was encrypted, ensure the toggle reflects that
   if(payload.encrypted&&!settings.encryptSync){
     settings.encryptSync=true;
