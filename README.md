@@ -125,7 +125,7 @@ Once installed and opened as a PWA, both the button and banner are hidden automa
 
 | Resource | Warning at | Hard limit |
 |---|---|---|
-| Active receipts | 800 | 1,000 (auto-archives) |
+| Active receipts | 1,600 | 2,000 (auto-archives) |
 | Vendor memory | 160 | 200 (auto-prunes oldest) |
 | Expense lines per category | — | 25 |
 | Sync payload (JSONBin) | 80 KB | 100 KB |

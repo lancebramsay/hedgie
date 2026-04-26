@@ -28,6 +28,11 @@ All notable changes to Open Hedgie are documented here.
 - GitHub Gist promoted to first option in the provider dropdown (after None)
 - Provider setup notes updated to include payload limits for each service
 
+**Active receipt limit raised to 2,000**
+- Limit raised from 1,000 to 2,000 — households logging ~78 receipts/month would have hit the old limit around month 13, before the auto-archive cycle could clear any data; 2,000 comfortably covers the 24-month active window (current + prior year) at that rate
+- Warning threshold updated to 1,600 (80%)
+- Fixed O(n²) duplicate check in the hibernation view — replaced `receipts.find()` loop over archived receipts with a Set lookup, keeping hibernation view rendering fast as data grows
+
 **Log receipt / Monthly report alignment**
 - Log tab metric "Logged [month]" renamed to "Spent [month]" — consistent with "Actually spent" label used in the monthly report
 - Log tab metric "Monthly budget" renamed to "Total budgeted" — matches the monthly report label

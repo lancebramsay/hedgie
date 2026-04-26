@@ -784,7 +784,7 @@ const isSavingsCat=name=>{const c=categories.find(x=>x.name===name);return c?.ty
 const MONTH_NAMES=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const USER_COLORS=['#3a6ea8','#b94040','#4a7c59','#7c5a8b','#b87820','#8b6340'];
 
-const LIMITS={receipts:1000,vendors:200,expPerCat:25,warnAt:0.8};
+const LIMITS={receipts:2000,vendors:200,expPerCat:25,warnAt:0.8};
 const PROVIDER_LIMITS={none:Infinity,jsonbin:100,gist:102400,dropbox:2097152,self:null};
 function fmtLimitKB(kb){
   if(!isFinite(kb))return'No limit';
@@ -2553,7 +2553,8 @@ function renderMonthlyReport(){
 function renderYearlyReport(){
   const yr=document.getElementById('rpt-year-sel')?.value||currentYear();
   const archiveRecs=(archives[yr]||[]);
-  const recs=[...receiptsForYear(yr),...archiveRecs.filter(a=>!receipts.find(r=>r.id===a.id))];
+  const activeIds=new Set(receipts.map(r=>r.id));
+  const recs=[...receiptsForYear(yr),...archiveRecs.filter(a=>!activeIds.has(a.id))];
   const totalSpent=recs.reduce((s,r)=>s+r.amt,0);
   const annualBudget=totalExpMo()*12;
   const inc=totalIncome()*12;
