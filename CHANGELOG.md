@@ -4,6 +4,37 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
+## [1.7.6] — 2026-04-26
+
+### Changes
+
+**Custom notification: note keyword total**
+- New `note.total` condition field — sums amounts for all receipts whose note contains a keyword, and triggers when that total exceeds or is under a threshold
+- Example: keyword `groceries`, operator `exceeds`, value `$500` fires when receipts tagged "groceries" in the note field collectively exceed $500 for the month
+- Keyword matching is case-insensitive substring search
+- Adds a second input to the condition row (keyword + dollar threshold)
+
+**Dynamic payload size limits per sync provider**
+- Payload limit is now derived from the active sync provider instead of a fixed 100 KB constant
+  - JSONBin.io: 100 KB
+  - GitHub Gist: 100 MB
+  - Dropbox: 2 GB
+  - Self-hosted: user-configurable (new "Payload size limit (KB)" field in provider settings, default 10 MB)
+  - None / local-only: no limit shown
+- Health panel progress bar, percentage, and warning notifications all reflect the active provider's limit
+- Health panel updates immediately when provider or custom limit changes
+
+**Cloud sync provider order**
+- GitHub Gist promoted to first option in the provider dropdown (after None)
+- Provider setup notes updated to include payload limits for each service
+
+**Log receipt / Monthly report alignment**
+- Log tab metric "Logged [month]" renamed to "Spent [month]" — consistent with "Actually spent" label used in the monthly report
+- Log tab metric "Monthly budget" renamed to "Total budgeted" — matches the monthly report label
+- Monthly report transaction list now shows the ↺ recurring badge on recurring receipts, matching the log tab's appearance
+
+---
+
 ## [1.7.5] — 2026-04-25
 
 ### Changes

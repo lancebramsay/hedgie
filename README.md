@@ -4,7 +4,7 @@ A lightweight, offline-first household budget planner that runs entirely from a 
 
 **Stable:** [hedgie.pages.dev](https://hedgie.pages.dev) — Cloudflare Pages, fully tested releases<br>
 **Pilot:** [lancebramsay.github.io/hedgie](https://lancebramsay.github.io/hedgie) — GitHub Pages, latest updates<br>
-**Current stable:** v1.7.5
+**Current stable:** v1.7.6
 
 ---
 
@@ -31,7 +31,7 @@ Optional cloud sync lets multiple household members share data with signed and o
 - Built-in notifications: upcoming bills, budget warnings (expense categories only), sync staleness, monthly logging nudge, first-session sync prompt, monthly local backup reminder
 - Four urgency tiers: high (red), med (amber), low (green), info (blue)
 - Bell badge color reflects highest-priority active notification
-- Custom notification rule builder: 11 queryable fields, AND/OR logic, up to 3 conditions per rule
+- Custom notification rule builder: 12 queryable fields, AND/OR logic, up to 3 conditions per rule
 
 ### Sync & data
 - Cloud providers: JSONBin.io, GitHub Gist, self-hosted endpoint, Dropbox
@@ -63,22 +63,26 @@ Works fully offline. No internet required for core features.
 
 ## Cloud sync (optional)
 
-### JSONBin.io (easiest)
+### GitHub Gist (recommended)
+
+1. Create a private Gist at [gist.github.com](https://gist.github.com) with a file named `hedgie.json`
+2. Generate a Personal Access Token with `gist` scope
+3. Gear → Cloud sync → GitHub Gist → paste Gist ID and token → **Push**
+
+100 MB per-file limit — effectively unlimited for household budget data.
+
+### JSONBin.io
 
 1. Create a free account at [jsonbin.io](https://jsonbin.io)
 2. Create a bin — initialize with `{"_hedgie":true,"version":0}`
 3. Copy the Bin ID and Master Key
 4. Gear → Cloud sync → JSONBin → paste both → **Push**
 
-### GitHub Gist
-
-1. Create a private Gist at [gist.github.com](https://gist.github.com) with a file named `hedgie.json`
-2. Generate a Personal Access Token with `gist` scope
-3. Gear → Cloud sync → GitHub Gist → paste Gist ID and token
+100 KB payload limit — suitable for the first ~6 months of typical use.
 
 ### Self-hosted
 
-Expects GET (returns JSON) and PUT (stores JSON) on one URL. Optional Bearer token auth.
+Expects GET (returns JSON) and PUT (stores JSON) on one URL. Optional Bearer token auth. Set your own payload limit in Settings → Cloud sync.
 
 ```bash
 npm install express
@@ -124,7 +128,10 @@ Once installed and opened as a PWA, both the button and banner are hidden automa
 | Active receipts | 800 | 1,000 (auto-archives) |
 | Vendor memory | 160 | 200 (auto-prunes oldest) |
 | Expense lines per category | — | 25 |
-| Sync payload | 80 KB | 100 KB |
+| Sync payload (JSONBin) | 80 KB | 100 KB |
+| Sync payload (GitHub Gist) | 80 MB | 100 MB |
+| Sync payload (Dropbox) | 1.6 GB | 2 GB |
+| Sync payload (self-hosted) | 80% of configured limit | User-defined |
 
 ---
 
