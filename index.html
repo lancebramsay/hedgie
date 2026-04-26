@@ -304,7 +304,7 @@ select{cursor:pointer}
       <ellipse cx="20" cy="48" rx="5" ry="3" fill="#c9a882"/>
       <ellipse cx="32" cy="49" rx="5" ry="3" fill="#c9a882"/>
     </svg>
-    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v1.7.5</div></div>
+    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v1.7.6</div></div>
   </div>
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('log')" id="tab-log">
@@ -544,7 +544,7 @@ select{cursor:pointer}
     </div>
   </div>
   <div class="hint">Use the gear icon &#x2699; to configure cloud sync, shared keys, and user settings</div>
-  <div class="hint" style="margin-top:4px">Open Hedgie · v1.7.5 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
+  <div class="hint" style="margin-top:4px">Open Hedgie · v1.7.6 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
   <div class="hint" style="margin-top:8px" id="donate-btn-planner"></div>
 </div><!-- /panel-planner -->
 </div></div><!-- /tab-panels-inner /tab-panels-wrap -->
@@ -624,8 +624,8 @@ select{cursor:pointer}
           <label>Sync provider</label>
           <select id="cfg-provider" onchange="onProviderChange()">
             <option value="none">None (local only)</option>
-            <option value="jsonbin">JSONBin.io</option>
             <option value="gist">GitHub Gist (private)</option>
+            <option value="jsonbin">JSONBin.io</option>
             <option value="self">Self-hosted endpoint</option>
             <option value="dropbox">Dropbox</option>
           </select>
@@ -784,7 +784,19 @@ const isSavingsCat=name=>{const c=categories.find(x=>x.name===name);return c?.ty
 const MONTH_NAMES=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const USER_COLORS=['#3a6ea8','#b94040','#4a7c59','#7c5a8b','#b87820','#8b6340'];
 
-const LIMITS={receipts:1000,vendors:200,expPerCat:25,warnAt:0.8,payloadKB:100};
+const LIMITS={receipts:1000,vendors:200,expPerCat:25,warnAt:0.8};
+const PROVIDER_LIMITS={none:Infinity,jsonbin:100,gist:102400,dropbox:2097152,self:null};
+function fmtLimitKB(kb){
+  if(!isFinite(kb))return'No limit';
+  if(kb>=1024*1024)return(kb/1024/1024).toFixed(0)+'GB';
+  if(kb>=1024)return(kb/1024).toFixed(0)+'MB';
+  return kb+'KB';
+}
+function getProviderPayloadKB(){
+  const p=settings.provider||'none';
+  if(p==='self'){const v=parseFloat(settings.selfPayloadKB);return v>0?v:10240;}
+  return PROVIDER_LIMITS[p]??Infinity;
+}
 
 const DEF={
   Home:[{n:'Mortgage',a:0,p:'H',f:'M'},{n:'HELOC',a:0,p:'H',f:'M'},{n:'Home insurance',a:0,p:'H',f:'M'},{n:'Property tax',a:0,p:'H',f:'Y'},{n:'Electric / gas',a:0,p:'M',f:'M'},{n:'Water / sewer',a:0,p:'M',f:'M'},{n:'Internet',a:0,p:'M',f:'M'},{n:'Home maintenance',a:0,p:'L',f:'Y'}],
@@ -823,7 +835,7 @@ let savingsGoals=[]; // Den feature: savings / portfolio targets
 // Savings goal shape: {id, name, targetAmt?, priority?}
 // category.type? ('expense'|'savings'|'investment') set via Den Preview
 let currentRecurring='none';
-let settings={username:'',provider:'none',jsonbinId:'',jsonbinKey:'',gistId:'',gistToken:'',selfUrl:'',selfToken:'',dropboxToken:'',sharedKey:'',encryptSync:false,darkMode:false,pwaInstalled:false,reminderDays:7,notifs:{bills:true,budget:true,yearly:true,sync:true,firstSync:true,localSave:true,nudge:true},customNotifs:[],denPreview:false};
+let settings={username:'',provider:'none',jsonbinId:'',jsonbinKey:'',gistId:'',gistToken:'',selfUrl:'',selfToken:'',selfPayloadKB:'',dropboxToken:'',sharedKey:'',encryptSync:false,darkMode:false,pwaInstalled:false,reminderDays:7,notifs:{bills:true,budget:true,yearly:true,sync:true,firstSync:true,localSave:true,nudge:true},customNotifs:[],denPreview:false};
 let planFilterCat='all',planFilterPri='all',rcptFilterCat='all',rptFilterCat='all';
 let reportView='monthly';
 let pendingCloudData=null;
@@ -1010,8 +1022,11 @@ function getLimitWarnings(){
   else if(vc>=vl*LIMITS.warnAt)warns.push({sev:'warn',msg:`Vendor memory filling up (${vc}/${vl})`});
   CATS().forEach(c=>{const len=expenses[c].length;if(len>=LIMITS.expPerCat)warns.push({sev:'warn',msg:`${c} has ${len} expense lines (limit ${LIMITS.expPerCat})`});});
   const kb=estimatePayloadKB();
-  if(kb>=LIMITS.payloadKB)warns.push({sev:'err',msg:`Payload is ${kb}KB — approaching sync provider limit (${LIMITS.payloadKB}KB)`});
-  else if(kb>=LIMITS.payloadKB*LIMITS.warnAt)warns.push({sev:'warn',msg:`Payload is ${kb}KB — nearing sync limit (${LIMITS.payloadKB}KB)`});
+  const limitKB=getProviderPayloadKB();
+  if(isFinite(limitKB)){
+    if(kb>=limitKB)warns.push({sev:'err',msg:`Payload is ${kb}KB — at or over sync provider limit (${fmtLimitKB(limitKB)})`});
+    else if(kb>=limitKB*LIMITS.warnAt)warns.push({sev:'warn',msg:`Payload is ${kb}KB — nearing sync limit (${fmtLimitKB(limitKB)})`});
+  }
   return warns;
 }
 
@@ -1019,13 +1034,15 @@ function renderHealthPanel(){
   const warns=getLimitWarnings();
   const kb=estimatePayloadKB();
   const rc=receipts.length,arc=Object.values(archives).reduce((s,a)=>s+a.length,0);
-  const pct=Math.min(100,Math.round(kb/LIMITS.payloadKB*100));
+  const limitKB=getProviderPayloadKB();
+  const pct=isFinite(limitKB)?Math.min(100,Math.round(kb/limitKB*100)):0;
   const barColor=pct>=100?'var(--red)':pct>=80?'var(--amber)':'var(--green)';
+  const limitLabel=fmtLimitKB(limitKB);
   let html=`<div style="margin-bottom:10px">
     <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-soft);margin-bottom:4px">
-      <span>Payload size</span><span style="font-weight:600">${kb}KB / ${LIMITS.payloadKB}KB</span>
+      <span>Payload size</span><span style="font-weight:600">${kb}KB${isFinite(limitKB)?' / '+limitLabel:' — '+limitLabel}</span>
     </div>
-    <div class="progress-wrap"><div style="height:100%;border-radius:4px;background:${barColor};width:${pct}%;transition:width 0.4s"></div></div>
+    ${isFinite(limitKB)?`<div class="progress-wrap"><div style="height:100%;border-radius:4px;background:${barColor};width:${pct}%;transition:width 0.4s"></div></div>`:''}
   </div>
   <div style="font-size:12px;color:var(--text-soft);display:flex;gap:16px;flex-wrap:wrap;margin-bottom:10px">
     <span>Active receipts: <strong style="color:var(--text)">${rc}</strong></span>
@@ -1176,22 +1193,24 @@ function onProviderChange(silent){
   const el=document.getElementById('provider-fields');
   const notes={
     none:'',
-    jsonbin:'<p class="provider-note">Free at <strong>jsonbin.io</strong> — create an account, make a new Bin, copy the Bin ID and Master Key below. Both users enter the same credentials plus the shared key above.</p>',
-    gist:'<p class="provider-note">Free with GitHub. Create a <strong>private Gist</strong> with a file named <code>hedgie.json</code>, generate a Personal Access Token with <code>gist</code> scope.</p>',
-    self:'<p class="provider-note">Any endpoint that accepts <strong>GET</strong> (returns JSON) and <strong>PUT</strong> (saves JSON). Works great on a homelab. Add a bearer token for auth.</p>',
-    dropbox:'<p class="provider-note">Generate a long-lived access token from the Dropbox App Console. The file saves as <code>/hedgie/data.json</code> in your Dropbox.</p>'
+    gist:'<p class="provider-note">Free with GitHub — <strong>100MB</strong> per file limit. Create a <strong>private Gist</strong> with a file named <code>hedgie.json</code>, generate a Personal Access Token with <code>gist</code> scope.</p>',
+    jsonbin:'<p class="provider-note">Free at <strong>jsonbin.io</strong> — <strong>100KB</strong> payload limit. Create an account, make a new Bin, copy the Bin ID and Master Key below. Both users enter the same credentials plus the shared key above.</p>',
+    self:'<p class="provider-note">Any endpoint that accepts <strong>GET</strong> (returns JSON) and <strong>PUT</strong> (saves JSON). Works great on a homelab. Add a bearer token for auth. Set a custom payload limit below.</p>',
+    dropbox:'<p class="provider-note">Generate a long-lived access token from the Dropbox App Console. The file saves as <code>/hedgie/data.json</code> in your Dropbox — <strong>2GB</strong> file limit.</p>'
   };
   const fields={
     none:'',
-    jsonbin:`<div class="drawer-field"><label>Bin ID</label><input type="text" placeholder="67a3b..." value="${esc(settings.jsonbinId)}" oninput="settings.jsonbinId=this.value;saveSettings()"></div>
-             <div class="drawer-field"><label>Master Key</label><input type="text" placeholder="$2a$10$..." value="${esc(settings.jsonbinKey)}" oninput="settings.jsonbinKey=this.value;saveSettings()"></div>`,
     gist:`<div class="drawer-field"><label>Gist ID</label><input type="text" placeholder="abc123..." value="${esc(settings.gistId)}" oninput="settings.gistId=this.value;saveSettings()"></div>
           <div class="drawer-field"><label>Personal Access Token</label><input type="text" placeholder="ghp_..." value="${esc(settings.gistToken)}" oninput="settings.gistToken=this.value;saveSettings()"></div>`,
+    jsonbin:`<div class="drawer-field"><label>Bin ID</label><input type="text" placeholder="67a3b..." value="${esc(settings.jsonbinId)}" oninput="settings.jsonbinId=this.value;saveSettings()"></div>
+             <div class="drawer-field"><label>Master Key</label><input type="text" placeholder="$2a$10$..." value="${esc(settings.jsonbinKey)}" oninput="settings.jsonbinKey=this.value;saveSettings()"></div>`,
     self:`<div class="drawer-field"><label>Endpoint URL</label><input type="text" placeholder="https://myserver.local/hedgie/data" value="${esc(settings.selfUrl)}" oninput="settings.selfUrl=this.value;saveSettings()"></div>
-          <div class="drawer-field"><label>Bearer Token (optional)</label><input type="text" placeholder="optional secret" value="${esc(settings.selfToken)}" oninput="settings.selfToken=this.value;saveSettings()"></div>`,
+          <div class="drawer-field"><label>Bearer Token (optional)</label><input type="text" placeholder="optional secret" value="${esc(settings.selfToken)}" oninput="settings.selfToken=this.value;saveSettings()"></div>
+          <div class="drawer-field"><label>Payload size limit (KB) <span style="color:var(--text-faint);font-weight:400">default 10240 = 10MB</span></label><input type="number" placeholder="10240" min="1" value="${esc(settings.selfPayloadKB||'')}" oninput="settings.selfPayloadKB=this.value;saveSettings();renderHealthPanel()"></div>`,
     dropbox:`<div class="drawer-field"><label>Access Token</label><input type="text" placeholder="sl...." value="${esc(settings.dropboxToken)}" oninput="settings.dropboxToken=this.value;saveSettings()"></div>`
   };
   el.innerHTML=p==='none'?'':`<div class="provider-fields">${notes[p]||''}${fields[p]||''}</div>`;
+  renderHealthPanel();
 }
 
 // ── SYNC STATUS ───────────────────────────────
@@ -1655,12 +1674,14 @@ const CN_FIELDS=[
   {key:'budget.pct',         label:'Category budget used (%)',  type:'catnum'},
   {key:'days.since',         label:'Days since last receipt',   type:'num'},
   {key:'expense.amount',     label:'Expense line amount ($)',   type:'num'},
+  {key:'note.total',         label:'Note keyword total ($)',    type:'notenum'},
 ];
 const CN_OPS={
-  cat:    [{key:'is',label:'is'},{key:'is_not',label:'is not'}],
-  text:   [{key:'is',label:'is'},{key:'is_not',label:'is not'},{key:'contains',label:'contains'}],
-  num:    [{key:'gt',label:'exceeds'},{key:'lt',label:'is under'}],
-  catnum: [{key:'gt',label:'exceeds'},{key:'lt',label:'is under'}],
+  cat:     [{key:'is',label:'is'},{key:'is_not',label:'is not'}],
+  text:    [{key:'is',label:'is'},{key:'is_not',label:'is not'},{key:'contains',label:'contains'}],
+  num:     [{key:'gt',label:'exceeds'},{key:'lt',label:'is under'}],
+  catnum:  [{key:'gt',label:'exceeds'},{key:'lt',label:'is under'}],
+  notenum: [{key:'gt',label:'exceeds'},{key:'lt',label:'is under'}],
 };
 
 function evalCondition(cond){
@@ -1732,6 +1753,13 @@ function evalCondition(cond){
       const n=parseFloat(v)||0;
       return Object.values(expenses).flat().some(e=>cond.op==='gt'?(e.a||0)>n:(e.a||0)<n);
     }
+    case 'note.total':{
+      const kw=(cond.noteText||'').toLowerCase().trim();
+      if(!kw)return false;
+      const total=monthRecs.filter(r=>(r.note||'').toLowerCase().includes(kw)).reduce((s,r)=>s+r.amt,0);
+      const n=parseFloat(v)||0;
+      return cond.op==='gt'?total>n:total<n;
+    }
     default:return false;
   }
 }
@@ -1751,6 +1779,10 @@ function describeRule(rule){
     const catPart=c.cat?' ('+c.cat+')':'';
     const isNum=c.value!==''&&!isNaN(c.value);
     const val=c.field==='budget.pct'?c.value+'%':(isNum?'$'+c.value:c.value);
+    if(f?.type==='notenum'){
+      const kw=c.noteText?'"'+c.noteText+'"':'?';
+      return 'Note '+kw+' total '+(op?.label||c.op)+' '+(val||'?');
+    }
     return (f?.label||c.field)+catPart+' '+(op?.label||c.op)+' '+(val||'?');
   }).join(rule.conditionJoin==='or'?' OR ':' AND ');
 }
@@ -1820,6 +1852,7 @@ function renderCondRow(ruleId,idx,cond,cats){
   const f=CN_FIELDS.find(function(x){return x.key===cond.field;})||CN_FIELDS[5];
   const ops=CN_OPS[f.type]||CN_OPS.num;
   const needsCat=f.type==='catnum';
+  const needsNote=f.type==='notenum';
   let html='<div id="cn-row-'+ruleId+'-'+idx+'" style="display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap">';
   html+='<select style="flex:2;min-width:120px;height:28px;font-size:11px" onchange="onCondFieldChange(\''+ruleId+'\','+idx+',this.value)">';
   CN_FIELDS.forEach(function(fi){html+='<option value="'+fi.key+'"'+(fi.key===cond.field?' selected':'')+'>'+fi.label+'</option>';});
@@ -1827,7 +1860,10 @@ function renderCondRow(ruleId,idx,cond,cats){
   html+='<select id="cn-op-'+ruleId+'-'+idx+'" style="flex:1;min-width:80px;height:28px;font-size:11px">';
   ops.forEach(function(o){html+='<option value="'+o.key+'"'+(o.key===cond.op?' selected':'')+'>'+o.label+'</option>';});
   html+='</select>';
-  if(f.type==='cat'){
+  if(needsNote){
+    html+='<input type="text" id="cn-note-'+ruleId+'-'+idx+'" value="'+esc(cond.noteText||'')+'" placeholder="keyword" style="flex:1;min-width:70px;height:28px;font-size:11px;padding:2px 6px">';
+    html+='<input type="number" id="cn-val-'+ruleId+'-'+idx+'" value="'+esc(cond.value||'')+'" placeholder="$" style="flex:1;min-width:60px;height:28px;font-size:11px;padding:2px 6px">';
+  }else if(f.type==='cat'){
     html+='<select id="cn-val-'+ruleId+'-'+idx+'" style="flex:1;min-width:80px;height:28px;font-size:11px">';
     cats.forEach(function(c){html+='<option value="'+esc(c)+'"'+(c===cond.value?' selected':'')+'>'+esc(c)+'</option>';});
     html+='</select>';
@@ -1848,7 +1884,7 @@ function onCondFieldChange(ruleId,idx,newField){
   const ops=CN_OPS[f.type]||CN_OPS.num;
   const row=document.getElementById('cn-row-'+ruleId+'-'+idx);
   if(!row)return;
-  const newCond={field:newField,op:ops[0].key,value:'',cat:CATS()[0]||''};
+  const newCond={field:newField,op:ops[0].key,value:'',cat:CATS()[0]||'',noteText:''};
   row.outerHTML=renderCondRow(ruleId,idx,newCond,CATS());
 }
 
@@ -1871,7 +1907,8 @@ function gatherConditions(ruleId){
     const op=document.getElementById('cn-op-'+ruleId+'-'+i)?.value||'gt';
     const val=document.getElementById('cn-val-'+ruleId+'-'+i)?.value||'';
     const cat=document.getElementById('cn-cat-'+ruleId+'-'+i)?.value||'';
-    conds.push({field,op,value:val,cat});
+    const noteText=document.getElementById('cn-note-'+ruleId+'-'+i)?.value||'';
+    conds.push({field,op,value:val,cat,noteText});
   }
   return conds;
 }
@@ -2508,7 +2545,7 @@ function renderMonthlyReport(){
       <div class="card-hdr"><span class="card-title">Transactions</span><span class="card-sub">${rptFilterCat==='all'?recs.length:visRecs.length+'/'+recs.length} transaction${recs.length!==1?'s':''}</span></div>
       ${rptPills}
       ${renderUserBreakdown(visRecs)}
-      ${visRecs.length?visRecs.map(r=>`<div class="receipt-row"><div class="cat-dot" style="background:${catColor(r.cat)}"></div><div class="receipt-info"><div class="receipt-store">${esc(r.vendor||r.cat)}</div><div class="receipt-meta">${esc(r.cat)} &middot; ${fmtDate(r.date)}</div>${r.note?`<div class="receipt-note">${esc(r.note)}</div>`:``}${r.financeId&&getFinancingName(r.financeId)?`<div class="receipt-note" style="color:var(--text-soft)">&#9670; ${esc(getFinancingName(r.financeId))}</div>`:''}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><div class="receipt-amt">${fmtDec(r.amt)}</div>${r.by?`<div class="receipt-by" style="color:${getUserColor(r.by)}">${esc(r.by)}</div>`:''}</div></div>`).join('')+`<div class="receipt-total"><span>${visRecs.length} item${visRecs.length!==1?'s':''}</span><span>${fmtDec(rptTotal)}</span></div>`:`<div class="empty-state"><div style="font-size:24px;margin-bottom:6px">&#128467;</div><div>No transactions${rptFilterCat!=='all'?' for '+rptFilterCat:' for '+monthLabel(ym)}</div></div>`}
+      ${visRecs.length?visRecs.map(r=>`<div class="receipt-row"><div class="cat-dot" style="background:${catColor(r.cat)}"></div><div class="receipt-info"><div class="receipt-store" style="display:flex;align-items:center;gap:5px">${esc(r.vendor||r.cat)}${r.recurring?'<span class="recur-badge">&#8635; recurring</span>':''}</div><div class="receipt-meta">${esc(r.cat)} &middot; ${fmtDate(r.date)}</div>${r.note?`<div class="receipt-note">${esc(r.note)}</div>`:``}${r.financeId&&getFinancingName(r.financeId)?`<div class="receipt-note" style="color:var(--text-soft)">&#9670; ${esc(getFinancingName(r.financeId))}</div>`:''}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><div class="receipt-amt">${fmtDec(r.amt)}</div>${r.by?`<div class="receipt-by" style="color:${getUserColor(r.by)}">${esc(r.by)}</div>`:''}</div></div>`).join('')+`<div class="receipt-total"><span>${visRecs.length} item${visRecs.length!==1?'s':''}</span><span>${fmtDec(rptTotal)}</span></div>`:`<div class="empty-state"><div style="font-size:24px;margin-bottom:6px">&#128467;</div><div>No transactions${rptFilterCat!=='all'?' for '+rptFilterCat:' for '+monthLabel(ym)}</div></div>`}
     </div>`;
 }
 
@@ -2704,7 +2741,7 @@ function renderLogMetrics(){
   const recs=receiptsForMonth(ym),spent=recs.reduce((s,r)=>s+r.amt,0);
   const budget=totalExpMo(),inc=totalIncome(),pct=budget>0?Math.round(spent/budget*100):0;
   const rem=inc-recs.filter(r=>!isSavingsCat(r.cat)).reduce((s,r)=>s+r.amt,0);
-  document.getElementById('log-metrics').innerHTML=`<div class="metric"><div class="metric-label">Logged ${monthLabel(ym)}</div><div class="metric-val">${fmt(spent)}</div></div><div class="metric"><div class="metric-label">Monthly budget</div><div class="metric-val">${fmt(budget)}</div></div><div class="metric"><div class="metric-label">Budget used</div><div class="metric-val ${pct>=100?'neg':pct>=80?'warn':'pos'}">${pct}%</div></div><div class="metric"><div class="metric-label">Income remaining</div><div class="metric-val ${rem>=0?'pos':'neg'}">${rem<0?'-':''}${fmt(Math.abs(rem))}</div></div>`;
+  document.getElementById('log-metrics').innerHTML=`<div class="metric"><div class="metric-label">Spent ${monthLabel(ym)}</div><div class="metric-val">${fmt(spent)}</div></div><div class="metric"><div class="metric-label">Total budgeted</div><div class="metric-val">${fmt(budget)}</div></div><div class="metric"><div class="metric-label">Budget used</div><div class="metric-val ${pct>=100?'neg':pct>=80?'warn':'pos'}">${pct}%</div></div><div class="metric"><div class="metric-label">Income remaining</div><div class="metric-val ${rem>=0?'pos':'neg'}">${rem<0?'-':''}${fmt(Math.abs(rem))}</div></div>`;
 }
 
 let editingReceiptId=null;
