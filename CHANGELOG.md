@@ -10,11 +10,11 @@ All notable changes to Open Hedgie are documented here.
 
 **Den Preview — forward-compatible schema and opt-in UI**
 - New **Den Preview** accordion in Settings lets users opt in to early Den data features; all data is stored immediately and will be read natively by the Hedgie app when released
-- **Events & trips** — create named events with a start date and optional budget; receipts can be tagged to an event from the log form; event name appears as a badge on receipt rows in both the log and monthly report tabs
-- **Funding source** — receipts can be marked as funded from savings or from a specific event's budget, keeping off-budget spending from distorting regular monthly reports
-- **Savings goals** — create named savings targets with a target amount; managed from the Den Preview settings accordion
+- **Financing accounts** — create and manage loans, credit lines, and leases (name + type); tag receipts as payments towards a specific account from the log form so native Hedgie can read the full payment history on day one without users having to retag anything
+- Financing account name appears as a badge on tagged receipt rows in both the log and monthly report tabs
+- **Savings goals** — create named savings targets with an optional target amount; persisted and synced alongside all other data
 - **Category types** — each category (default and custom) can be assigned a type: Expense, Savings, or Investment; type selector appears in the category manager when Den Preview is enabled
-- Schema additions: `events[]`, `savingsGoals[]` arrays are now persisted and synced; `receipt.eventId?`, `receipt.fundingSource?`, and `category.type?` are documented optional fields carried transparently through all sync paths
+- Schema additions: `savingsGoals[]` array and `receipt.financeId?` and `category.type?` optional fields are now persisted and flow through all sync paths
 
 ---
 

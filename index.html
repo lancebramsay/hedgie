@@ -413,16 +413,8 @@ select{cursor:pointer}
         <input type="number" id="log-recur-day" placeholder="e.g. 1" min="1" max="31" step="1" style="text-align:left">
       </div>
       <div class="full" id="den-log-fields" style="display:none">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          <div>
-            <label>Event <span style="opacity:0.5;font-weight:400">(Den)</span></label>
-            <select id="log-event-id"><option value="">None</option></select>
-          </div>
-          <div>
-            <label>Funding source <span style="opacity:0.5;font-weight:400">(Den)</span></label>
-            <select id="log-funding-src"><option value="">Regular income</option><option value="savings">From savings</option></select>
-          </div>
-        </div>
+        <label>Payment towards <span style="opacity:0.5;font-weight:400">(Den)</span></label>
+        <select id="log-finance-id"><option value="">None</option></select>
       </div>
       <div class="full" style="display:flex;justify-content:flex-end;gap:8px;margin-top:4px">
         <button class="btn primary" style="height:40px;min-width:140px;font-size:14px" onclick="addReceipt()">Add to log</button>
@@ -706,9 +698,10 @@ select{cursor:pointer}
           <span style="font-size:13px;font-weight:500">Enable Den Preview features</span>
         </label>
         <div id="den-preview-content" style="display:none;margin-top:14px">
-          <div style="font-size:11px;font-weight:600;color:var(--text-faint);letter-spacing:0.4px;margin-bottom:6px">EVENTS &amp; TRIPS</div>
-          <div id="den-events-list"></div>
-          <button class="btn" style="font-size:12px;margin-bottom:14px" onclick="addDenEvent()">+ Add event</button>
+          <div style="font-size:11px;font-weight:600;color:var(--text-faint);letter-spacing:0.4px;margin-bottom:6px">FINANCING ACCOUNTS</div>
+          <div style="font-size:12px;color:var(--text-soft);margin-bottom:8px;line-height:1.5">Add loans, credit lines, or leases. Tag receipts as payments towards them so native Hedgie can read your history on day one.</div>
+          <div id="den-financing-list"></div>
+          <button class="btn" style="font-size:12px;margin-bottom:14px" onclick="addFinancingAcct()">+ Add account</button>
           <div style="font-size:11px;font-weight:600;color:var(--text-faint);letter-spacing:0.4px;margin-bottom:6px">SAVINGS GOALS</div>
           <div id="den-goals-list"></div>
           <button class="btn" style="font-size:12px" onclick="addSavingsGoal()">+ Add goal</button>
@@ -818,14 +811,11 @@ let archives={};
 let recurringBills=[];
 // Schema note: recurringBill objects may include optional financeId (string)
 // linking to a Den financing account for debt/payment tracking
-let financing=[]; // Den feature: financing accounts (loans, lines of credit, etc.)
-// Financing account shape (populated by Hedgie native, read-only in Open):
-// {id, name, type ('loan'|'credit'|'lease'|'other'), originalBalance, currentBalance,
-//  interestRate, termMonths, startDate, endDate, linkedCategoryName, linkedExpenseIds[]}
-let events=[]; // Den feature: special events / trips
-// Event shape: {id, name, startDate?, endDate?, budget?, notes?}
-// receipt.eventId? links a receipt to an event (set via Den Preview)
-// receipt.fundingSource? ('savings'|'event:{id}') marks off-budget funding
+let financing=[]; // Den feature: financing accounts (loans, credit lines, leases, etc.)
+// Financing account shape: {id, name, type ('loan'|'credit'|'lease'|'other'),
+//  originalBalance, currentBalance, interestRate, termMonths, startDate, endDate,
+//  linkedCategoryName, linkedExpenseIds[]}
+// receipt.financeId? links a payment receipt to a financing account (set via Den Preview)
 let savingsGoals=[]; // Den feature: savings / portfolio targets
 // Savings goal shape: {id, name, targetAmt?, priority?}
 // category.type? ('expense'|'savings'|'investment') set via Den Preview
@@ -1003,7 +993,7 @@ async function decryptData(ciphertext,iv,secret){
 
 // ── LIMITS & HEALTH ──────────────────────────
 function estimatePayloadKB(){
-  const state={categories,income,expenses,receipts,vendors,archives,recurringBills,financing,events,savingsGoals};
+  const state={categories,income,expenses,receipts,vendors,archives,recurringBills,financing,savingsGoals};
   return Math.round(JSON.stringify(state).length/1024);
 }
 
@@ -1161,7 +1151,7 @@ function forceRefresh(){
 }
 
 async function exportDecryptedBackup(){
-  const data={categories,income,expenses,receipts,vendors,archives,recurringBills,financing,events,savingsGoals};
+  const data={categories,income,expenses,receipts,vendors,archives,recurringBills,financing,savingsGoals};
   const payload={_hedgie:true,version:syncMeta.version,lastEditedBy:syncMeta.lastEditedBy,lastEditedAt:syncMeta.lastEditedAt,data};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
   const a=document.createElement('a');
@@ -1282,7 +1272,7 @@ async function quickSync(){
 
     // Step 3 - decrypt + decide direction
     cloud=await toPlainPayload(cloud);
-    const localPayload={version:syncMeta.version,lastEditedBy:settings.username,lastEditedAt:new Date().toISOString(),data:{categories,income,expenses,receipts,vendors,archives,recurringBills,financing,events,savingsGoals}};
+    const localPayload={version:syncMeta.version,lastEditedBy:settings.username,lastEditedAt:new Date().toISOString(),data:{categories,income,expenses,receipts,vendors,archives,recurringBills,financing,savingsGoals}};
     const cloudAhead=(cloud.version||0)>(syncMeta.lastPulledVersion||0);
 
     let resolved;
@@ -1382,7 +1372,7 @@ function triggerAutosave(source){
 
 // ── CLOUD PAYLOAD ─────────────────────────────
 async function buildPayload(){
-  const rawData={categories,income,expenses,receipts,vendors,archives,recurringBills,financing,events,savingsGoals,darkMode:settings.darkMode,pwaInstalled:settings.pwaInstalled};
+  const rawData={categories,income,expenses,receipts,vendors,archives,recurringBills,financing,savingsGoals,darkMode:settings.darkMode,pwaInstalled:settings.pwaInstalled};
   const base={_hedgie:true,version:(syncMeta.version||0)+1,lastEditedBy:settings.username||'Unknown',lastEditedAt:new Date().toISOString()};
   if(settings.encryptSync&&settings.sharedKey){
     try{
@@ -1453,7 +1443,6 @@ function _applyData(d,payload){
   if(d.archives)archives=d.archives;
   if(d.recurringBills)recurringBills=d.recurringBills;
   if(d.financing)financing=d.financing;
-  if(d.events)events=d.events;
   if(d.savingsGoals)savingsGoals=d.savingsGoals;
   // Restore preference flags from payload
   if(d.darkMode!==undefined&&settings.darkMode!==d.darkMode){settings.darkMode=d.darkMode;applyDarkMode();}
@@ -1510,7 +1499,7 @@ async function toPlainPayload(payload){
     }
   }
   // Ensure .data always exists even for a malformed/empty payload
-  if(!payload.data)return {...payload,data:{income:[],expenses:{},receipts:[],vendors:{},archives:{},recurringBills:[],categories:DEFAULT_CATS,financing:[],events:[],savingsGoals:[]}};
+  if(!payload.data)return {...payload,data:{income:[],expenses:{},receipts:[],vendors:{},archives:{},recurringBills:[],categories:DEFAULT_CATS,financing:[],savingsGoals:[]}};
   return payload;
 }
 
@@ -1560,7 +1549,7 @@ async function cloudPull(){
     if(vr.unsigned&&settings.sharedKey){setGSB('warn','Cloud payload has no signature — push to sign it','');}
         // Decrypt before any .data access
     let plainCloud;try{plainCloud=await toPlainPayload(cloud);}catch(e){updateSyncStatus('err',e.message);setGSB('err',e.message,'',true);return;}
-    const localPayload={version:syncMeta.version,data:{categories,income,expenses,receipts,vendors,archives,recurringBills,financing,events,savingsGoals}};
+    const localPayload={version:syncMeta.version,data:{categories,income,expenses,receipts,vendors,archives,recurringBills,financing,savingsGoals}};
     const cloudVer=plainCloud.version||0;
     const isFirstSync=syncMeta.lastPulledVersion===0&&syncMeta.version===0;
     if(cloudVer>(syncMeta.lastPulledVersion||0)){
@@ -1590,7 +1579,7 @@ async function cloudPush(){
       if(!vr.ok){updateSyncStatus('err','Remote signature mismatch — wrong shared key?');setGSB('err','Remote signature invalid — check shared key','',true);return;}
       if(vr.unsigned&&settings.sharedKey){setGSB('warn','Remote payload unsigned — will be signed on push','');}
       if((cloud.version||0)>syncMeta.lastPulledVersion){
-        const localPayload={version:syncMeta.version,data:{categories,income,expenses,receipts,vendors,archives,recurringBills,financing,events,savingsGoals}};
+        const localPayload={version:syncMeta.version,data:{categories,income,expenses,receipts,vendors,archives,recurringBills,financing,savingsGoals}};
         let plainCloud2;try{plainCloud2=await toPlainPayload(cloud);}catch(e){updateSyncStatus('err',e.message);setGSB('err',e.message,'',true);return;}
         if(budgetChanged(localPayload,plainCloud2)){pendingCloudData=plainCloud2;showConflictModal(plainCloud2);updateSyncStatus('conflict');return;}
         const merged=mergePayloads(localPayload,plainCloud2);
@@ -1613,7 +1602,7 @@ function showConflictModal(cloud){
 async function resolveConflict(choice){
   document.getElementById('conflict-modal').classList.remove('open');
   const cloud=pendingCloudData;if(!cloud)return;
-  const local={version:syncMeta.version,lastEditedBy:settings.username,lastEditedAt:new Date().toISOString(),data:{categories,income,expenses,receipts,vendors,archives,recurringBills,financing,events,savingsGoals}};
+  const local={version:syncMeta.version,lastEditedBy:settings.username,lastEditedAt:new Date().toISOString(),data:{categories,income,expenses,receipts,vendors,archives,recurringBills,financing,savingsGoals}};
   let resolved=mergePayloads(local,cloud);
   if(choice==="theirs"){const cd2=cloud.data||{};resolved.data.income=cd2.income||income;resolved.data.expenses=cd2.expenses||expenses;resolved.data.bufferPct=cd2.bufferPct;}
   resolved.signature=await signPayload(resolved);
@@ -2510,7 +2499,7 @@ function renderMonthlyReport(){
       <div class="card-hdr"><span class="card-title">Transactions</span><span class="card-sub">${rptFilterCat==='all'?recs.length:visRecs.length+'/'+recs.length} transaction${recs.length!==1?'s':''}</span></div>
       ${rptPills}
       ${renderUserBreakdown(visRecs)}
-      ${visRecs.length?visRecs.map(r=>`<div class="receipt-row"><div class="cat-dot" style="background:${catColor(r.cat)}"></div><div class="receipt-info"><div class="receipt-store">${esc(r.vendor||r.cat)}</div><div class="receipt-meta">${esc(r.cat)} &middot; ${fmtDate(r.date)}</div>${r.note?`<div class="receipt-note">${esc(r.note)}</div>`:``}${r.eventId&&getEventName(r.eventId)?`<div class="receipt-note" style="color:var(--brown-light)">&#128197; ${esc(getEventName(r.eventId))}</div>`:''}${r.fundingSource?`<div class="receipt-note" style="color:var(--text-soft)">&#9670; ${esc(getFundingLabel(r.fundingSource))}</div>`:''}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><div class="receipt-amt">${fmtDec(r.amt)}</div>${r.by?`<div class="receipt-by" style="color:${getUserColor(r.by)}">${esc(r.by)}</div>`:''}</div></div>`).join('')+`<div class="receipt-total"><span>${visRecs.length} item${visRecs.length!==1?'s':''}</span><span>${fmtDec(rptTotal)}</span></div>`:`<div class="empty-state"><div style="font-size:24px;margin-bottom:6px">&#128467;</div><div>No transactions${rptFilterCat!=='all'?' for '+rptFilterCat:' for '+monthLabel(ym)}</div></div>`}
+      ${visRecs.length?visRecs.map(r=>`<div class="receipt-row"><div class="cat-dot" style="background:${catColor(r.cat)}"></div><div class="receipt-info"><div class="receipt-store">${esc(r.vendor||r.cat)}</div><div class="receipt-meta">${esc(r.cat)} &middot; ${fmtDate(r.date)}</div>${r.note?`<div class="receipt-note">${esc(r.note)}</div>`:``}${r.financeId&&getFinancingName(r.financeId)?`<div class="receipt-note" style="color:var(--text-soft)">&#9670; ${esc(getFinancingName(r.financeId))}</div>`:''}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><div class="receipt-amt">${fmtDec(r.amt)}</div>${r.by?`<div class="receipt-by" style="color:${getUserColor(r.by)}">${esc(r.by)}</div>`:''}</div></div>`).join('')+`<div class="receipt-total"><span>${visRecs.length} item${visRecs.length!==1?'s':''}</span><span>${fmtDec(rptTotal)}</span></div>`:`<div class="empty-state"><div style="font-size:24px;margin-bottom:6px">&#128467;</div><div>No transactions${rptFilterCat!=='all'?' for '+rptFilterCat:' for '+monthLabel(ym)}</div></div>`}
     </div>`;
 }
 
@@ -2674,9 +2663,8 @@ function addReceipt(){
   const date=document.getElementById('log-date').value||todayStr();
   if(amt<=0){document.getElementById('log-amt').focus();return;}
   saveVendor(vendor,cat);
-  const eventId=settings.denPreview?(document.getElementById('log-event-id')?.value||''):'';
-  const fundingSrc=settings.denPreview?(document.getElementById('log-funding-src')?.value||''):'';
-  const denMeta=Object.assign({},eventId&&{eventId},fundingSrc&&{fundingSource:fundingSrc});
+  const financeId=settings.denPreview?(document.getElementById('log-finance-id')?.value||''):'';
+  const denMeta=Object.assign({},financeId&&{financeId});
   // Handle recurring bill
   if(currentRecurring==='monthly'){
     const day=parseInt(document.getElementById('log-recur-day').value)||new Date().getDate();
@@ -2691,7 +2679,7 @@ function addReceipt(){
   document.getElementById('log-vendor').value='';
   document.getElementById('log-note').value='';
   document.getElementById('log-date').value=todayStr();
-  if(settings.denPreview){const evSel=document.getElementById('log-event-id');const fsSel=document.getElementById('log-funding-src');if(evSel)evSel.value='';if(fsSel)fsSel.value='';}
+  if(settings.denPreview){const fSel=document.getElementById('log-finance-id');if(fSel)fSel.value='';}
   setRecurring('none');
   populateMonthSelects();renderLogMetrics();renderReceiptList();
   triggerAutosave('log');
@@ -2721,7 +2709,7 @@ function renderReceiptList(){
   const logTotal=recs.reduce((s,r)=>s+r.amt,0);
   el.innerHTML=recs.map(r=>{
     if(editingReceiptId===r.id) return renderReceiptEditForm(r);
-    return `<div class="receipt-row"><div class="cat-dot" style="background:${catColor(r.cat)}"></div><div class="receipt-info"><div class="receipt-store" style="display:flex;align-items:center;gap:5px">${esc(r.vendor||r.cat)}${r.recurring?'<span class="recur-badge">&#8635; recurring</span>':''}</div><div class="receipt-meta">${esc(r.cat)} &middot; ${fmtDate(r.date)}</div>${r.note?`<div class="receipt-note">${esc(r.note)}</div>`:``}${r.eventId&&getEventName(r.eventId)?`<div class="receipt-note" style="color:var(--brown-light)">&#128197; ${esc(getEventName(r.eventId))}</div>`:''}${r.fundingSource?`<div class="receipt-note" style="color:var(--text-soft)">&#9670; ${esc(getFundingLabel(r.fundingSource))}</div>`:''}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><div class="receipt-amt">${fmtDec(r.amt)}</div>${r.by?`<div class="receipt-by" style="color:${getUserColor(r.by)}">${esc(r.by)}</div>`:''}</div><button class="receipt-edit" onclick="startEditReceipt('${r.id}')" title="Edit">&#9998;</button><button class="receipt-del" onclick="deleteReceipt('${r.id}')">&#215;</button></div>`;
+    return `<div class="receipt-row"><div class="cat-dot" style="background:${catColor(r.cat)}"></div><div class="receipt-info"><div class="receipt-store" style="display:flex;align-items:center;gap:5px">${esc(r.vendor||r.cat)}${r.recurring?'<span class="recur-badge">&#8635; recurring</span>':''}</div><div class="receipt-meta">${esc(r.cat)} &middot; ${fmtDate(r.date)}</div>${r.note?`<div class="receipt-note">${esc(r.note)}</div>`:``}${r.financeId&&getFinancingName(r.financeId)?`<div class="receipt-note" style="color:var(--text-soft)">&#9670; ${esc(getFinancingName(r.financeId))}</div>`:''}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><div class="receipt-amt">${fmtDec(r.amt)}</div>${r.by?`<div class="receipt-by" style="color:${getUserColor(r.by)}">${esc(r.by)}</div>`:''}</div><button class="receipt-edit" onclick="startEditReceipt('${r.id}')" title="Edit">&#9998;</button><button class="receipt-del" onclick="deleteReceipt('${r.id}')">&#215;</button></div>`;
   }).join('')+`<div class="receipt-total"><span>${recs.length} item${recs.length!==1?'s':''}</span><span>${fmtDec(logTotal)}</span></div>`;
 }
 
@@ -2924,7 +2912,7 @@ function setPlanFilter(type,val,btn){
 
 // ── SAVE / RESTORE ────────────────────────────
 async function getFullState(){
-  const p={_hedgie:true,version:syncMeta.version,lastEditedBy:settings.username||'',lastEditedAt:new Date().toISOString(),data:{categories,income,expenses,receipts,vendors,archives,recurringBills,financing,events,savingsGoals}};
+  const p={_hedgie:true,version:syncMeta.version,lastEditedBy:settings.username||'',lastEditedAt:new Date().toISOString(),data:{categories,income,expenses,receipts,vendors,archives,recurringBills,financing,savingsGoals}};
   p.signature=await signPayload(p);return p;
 }
 
@@ -3072,51 +3060,54 @@ function applyDenPreview(){
   renderDenAccordion();
 }
 
-function renderDenAccordion(){renderDenEvents();renderDenGoals();populateDenLogFields();}
+function renderDenAccordion(){renderDenFinancing();renderDenGoals();populateDenLogFields();}
 
-function renderDenEvents(){
-  const el=document.getElementById('den-events-list');if(!el)return;
-  if(!events.length){el.innerHTML='<div style="font-size:12px;color:var(--text-faint);margin-bottom:8px">No events yet.</div>';return;}
-  el.innerHTML=events.map(e=>`<div style="display:grid;grid-template-columns:1fr 110px 80px auto;gap:6px;align-items:center;margin-bottom:6px">
-    <input type="text" value="${esc(e.name)}" placeholder="Event name" style="font-size:12px;padding:3px 6px;height:26px;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--parchment);color:var(--text)" onblur="updateDenEvent('${e.id}','name',this.value)">
-    <input type="date" value="${e.startDate||''}" style="font-size:11px;height:26px;padding:2px 4px;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--parchment);color:var(--text);color-scheme:dark" onchange="updateDenEvent('${e.id}','startDate',this.value)">
-    <input type="number" value="${e.budget||''}" placeholder="Budget $" style="font-size:12px;padding:3px 6px;height:26px;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--parchment);color:var(--text);text-align:left" onblur="updateDenEvent('${e.id}','budget',this.value)">
-    <button class="receipt-del" onclick="deleteDenEvent('${e.id}')">&#215;</button>
+function renderDenFinancing(){
+  const el=document.getElementById('den-financing-list');if(!el)return;
+  if(!financing.length){el.innerHTML='<div style="font-size:12px;color:var(--text-faint);margin-bottom:8px">No accounts yet.</div>';return;}
+  const inputStyle='font-size:12px;padding:3px 6px;height:26px;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--parchment);color:var(--text)';
+  el.innerHTML=financing.map(f=>`<div style="display:grid;grid-template-columns:1fr 90px auto;gap:6px;align-items:center;margin-bottom:6px">
+    <input type="text" value="${esc(f.name)}" placeholder="Account name" style="${inputStyle}" onblur="updateFinancingAcct('${f.id}','name',this.value)">
+    <select style="font-size:11px;height:26px;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--parchment);color:var(--text-soft)" onchange="updateFinancingAcct('${f.id}','type',this.value)">
+      <option value="loan"${f.type==='loan'?' selected':''}>Loan</option>
+      <option value="credit"${f.type==='credit'?' selected':''}>Credit</option>
+      <option value="lease"${f.type==='lease'?' selected':''}>Lease</option>
+      <option value="other"${(!f.type||f.type==='other')?' selected':''}>Other</option>
+    </select>
+    <button class="receipt-del" onclick="deleteFinancingAcct('${f.id}')">&#215;</button>
   </div>`).join('')+'<div style="margin-bottom:8px"></div>';
 }
 
 function renderDenGoals(){
   const el=document.getElementById('den-goals-list');if(!el)return;
   if(!savingsGoals.length){el.innerHTML='<div style="font-size:12px;color:var(--text-faint);margin-bottom:8px">No goals yet.</div>';return;}
+  const inputStyle='font-size:12px;padding:3px 6px;height:26px;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--parchment);color:var(--text)';
   el.innerHTML=savingsGoals.map(g=>`<div style="display:grid;grid-template-columns:1fr 90px auto;gap:6px;align-items:center;margin-bottom:6px">
-    <input type="text" value="${esc(g.name)}" placeholder="Goal name" style="font-size:12px;padding:3px 6px;height:26px;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--parchment);color:var(--text)" onblur="updateSavingsGoal('${g.id}','name',this.value)">
-    <input type="number" value="${g.targetAmt||''}" placeholder="Target $" style="font-size:12px;padding:3px 6px;height:26px;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--parchment);color:var(--text);text-align:left" onblur="updateSavingsGoal('${g.id}','targetAmt',this.value)">
+    <input type="text" value="${esc(g.name)}" placeholder="Goal name" style="${inputStyle}" onblur="updateSavingsGoal('${g.id}','name',this.value)">
+    <input type="number" value="${g.targetAmt||''}" placeholder="Target $" style="${inputStyle};text-align:left" onblur="updateSavingsGoal('${g.id}','targetAmt',this.value)">
     <button class="receipt-del" onclick="deleteSavingsGoal('${g.id}')">&#215;</button>
   </div>`).join('')+'<div style="margin-bottom:8px"></div>';
 }
 
 function populateDenLogFields(){
-  const evSel=document.getElementById('log-event-id');
-  const fsSel=document.getElementById('log-funding-src');
-  if(!evSel||!fsSel)return;
-  evSel.innerHTML='<option value="">None</option>'+events.map(e=>`<option value="${e.id}">${esc(e.name)}</option>`).join('');
-  fsSel.innerHTML='<option value="">Regular income</option><option value="savings">From savings</option>'+events.filter(e=>e.budget>0).map(e=>`<option value="event:${e.id}">From ${esc(e.name)} budget</option>`).join('');
+  const fSel=document.getElementById('log-finance-id');if(!fSel)return;
+  fSel.innerHTML='<option value="">None</option>'+financing.map(f=>`<option value="${f.id}">${esc(f.name)}${f.type&&f.type!=='other'?' ('+f.type+')':''}</option>`).join('');
 }
 
-function addDenEvent(){
-  events.push({id:uid(),name:'New event',startDate:'',endDate:'',budget:0,notes:''});
+function addFinancingAcct(){
+  financing.push({id:uid(),name:'New account',type:'loan',originalBalance:0,currentBalance:0,interestRate:0,termMonths:0,startDate:'',endDate:'',linkedCategoryName:'',linkedExpenseIds:[]});
   triggerAutosave('den');renderDenAccordion();
 }
-function deleteDenEvent(id){
-  if(!confirm('Delete this event?'))return;
-  events=events.filter(e=>e.id!==id);
+function deleteFinancingAcct(id){
+  if(!confirm('Delete this financing account?'))return;
+  financing=financing.filter(f=>f.id!==id);
   triggerAutosave('den');renderDenAccordion();
 }
-function updateDenEvent(id,field,value){
-  const e=events.find(e=>e.id===id);if(!e)return;
-  e[field]=field==='budget'?parseFloat(value)||0:value;
+function updateFinancingAcct(id,field,value){
+  const f=financing.find(f=>f.id===id);if(!f)return;
+  f[field]=value;
   triggerAutosave('den');
-  if(field==='budget'||field==='name')populateDenLogFields();
+  if(field==='name')populateDenLogFields();
 }
 function addSavingsGoal(){
   savingsGoals.push({id:uid(),name:'New goal',targetAmt:0,priority:savingsGoals.length+1});
@@ -3136,13 +3127,8 @@ function updateCatType(name,type){
   const cat=categories.find(c=>c.name===name);if(!cat)return;
   cat.type=type;triggerAutosave('den');
 }
-function getEventName(id){const e=events.find(e=>e.id===id);return e?e.name:'';}
-function getFundingLabel(src){
-  if(!src)return'';
-  if(src==='savings')return'From savings';
-  if(src.startsWith('event:')){const id=src.slice(6);const e=events.find(ev=>ev.id===id);return e?'From '+e.name+' budget':'Event budget';}
-  return src;
-}
+function getFinancingName(id){const f=financing.find(f=>f.id===id);return f?f.name:'';}
+
 
 function refreshAll(){initExpenses();rebuildCatUI();buildNotifications();document.getElementById('cat-count-lbl')&&(document.getElementById('cat-count-lbl').textContent=CATS().length+' categories');populateMonthSelects();renderBuffers();updatePlanner();renderLogMetrics();renderReceiptList();if(document.getElementById('panel-report').classList.contains('active'))renderReport();applyDenPreview();}
 
@@ -3196,7 +3182,7 @@ function resetBudgetAndReceipts(){
   bufferPct={};
   receipts=[];
   vendors={};
-  recurringBills=[];financing=[];events=[];savingsGoals=[];
+  recurringBills=[];financing=[];savingsGoals=[];
   archives={};
   syncMeta={version:0,lastEditedBy:'',lastEditedAt:'',lastPulledVersion:0,lastPushedAt:'',lastPulledAt:'',lastSyncedAt:''};
   localStorage.removeItem('hedgie_syncmeta');
