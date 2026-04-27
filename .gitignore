@@ -21,3 +21,9 @@ hedgie-*.json
 # Node (if anyone adds a dev server)
 node_modules/
 npm-debug.log*
+
+# Claude Code local settings
+.claude/
+
+# One-off scripts
+_fix_den.ps1
