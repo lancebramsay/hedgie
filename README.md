@@ -65,8 +65,8 @@ Works fully offline. No internet required for core features.
 
 ### GitHub Gist (recommended)
 
-1. Create a private Gist at [gist.github.com](https://gist.github.com) with a file named `hedgie.json`
-2. Generate a Personal Access Token with `gist` scope
+1. Create a private Gist at [gist.github.com](https://gist.github.com), name the file `hedgie.json`, and set the initial content to `{"_hedgie":true,"version":0}`
+2. Generate a **classic** Personal Access Token at github.com/settings/tokens with the `gist` scope — fine-grained tokens do not support Gist access
 3. Gear → Cloud sync → GitHub Gist → paste Gist ID and token → **Push**
 
 100 MB per-file limit — effectively unlimited for household budget data.
