@@ -304,7 +304,7 @@ select{cursor:pointer}
       <ellipse cx="20" cy="48" rx="5" ry="3" fill="#c9a882"/>
       <ellipse cx="32" cy="49" rx="5" ry="3" fill="#c9a882"/>
     </svg>
-    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v1.7.6</div></div>
+    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v1.7.7</div></div>
   </div>
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('log')" id="tab-log">
@@ -444,7 +444,6 @@ select{cursor:pointer}
       <button class="pill" data-rc="Debts" onclick="setRcptFilter('Debts',this)">Debts</button>
       <button class="pill" data-rc="Savings" onclick="setRcptFilter('Savings',this)">Savings</button>
     </div>
-    <div id="receipt-limit-warn" style="display:none;font-size:12px;color:var(--amber);background:var(--amber-light);padding:7px 10px;border-radius:var(--radius-sm);margin-bottom:8px"></div>
     <div id="receipt-list"></div>
   </div>
   <div class="hint" style="margin-top:8px" id="donate-btn-log"></div>
@@ -544,7 +543,7 @@ select{cursor:pointer}
     </div>
   </div>
   <div class="hint">Use the gear icon &#x2699; to configure cloud sync, shared keys, and user settings</div>
-  <div class="hint" style="margin-top:4px">Open Hedgie · v1.7.6 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
+  <div class="hint" style="margin-top:4px">Open Hedgie · v1.7.7 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
   <div class="hint" style="margin-top:8px" id="donate-btn-planner"></div>
 </div><!-- /panel-planner -->
 </div></div><!-- /tab-panels-inner /tab-panels-wrap -->
@@ -651,6 +650,19 @@ select{cursor:pointer}
           <button class="btn" style="font-size:12px" onclick="exportArchiveCSV()">Export archived receipts</button>
           <button class="btn" style="font-size:12px" onclick="exportDecryptedBackup()">Export decrypted backup</button>
           <button class="btn" style="font-size:12px" onclick="forceRefresh()" title="Clears cached version and reloads the app">&#8635; Force refresh</button>
+        </div>
+        <div class="drawer-field" style="margin-top:12px">
+          <label>Receipt data retention</label>
+          <select id="cfg-prune-years" onchange="settings.pruneYears=parseInt(this.value);saveSettings();">
+            <option value="0">Keep forever</option>
+            <option value="1">1 year</option>
+            <option value="2">2 years</option>
+            <option value="3">3 years</option>
+            <option value="5">5 years</option>
+            <option value="7">7 years</option>
+            <option value="10">10 years</option>
+          </select>
+          <div style="font-size:11px;color:var(--text-faint);margin-top:5px;line-height:1.4">Archived data outside this window is permanently deleted on the next sync or app open.</div>
         </div>
         <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border-light)">
           <div style="font-size:11px;font-weight:600;color:var(--text-faint);letter-spacing:0.3px;margin-bottom:8px">DANGER ZONE</div>
@@ -784,7 +796,7 @@ const isSavingsCat=name=>{const c=categories.find(x=>x.name===name);return c?.ty
 const MONTH_NAMES=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const USER_COLORS=['#3a6ea8','#b94040','#4a7c59','#7c5a8b','#b87820','#8b6340'];
 
-const LIMITS={receipts:2000,vendors:200,expPerCat:25,warnAt:0.8};
+const LIMITS={vendors:200,expPerCat:25,warnAt:0.8};
 const PROVIDER_LIMITS={none:Infinity,jsonbin:100,gist:102400,dropbox:2097152,self:null};
 function fmtLimitKB(kb){
   if(!isFinite(kb))return'No limit';
@@ -835,7 +847,7 @@ let savingsGoals=[]; // Den feature: savings / portfolio targets
 // Savings goal shape: {id, name, targetAmt?, priority?}
 // category.type? ('expense'|'savings'|'investment') set via Den Preview
 let currentRecurring='none';
-let settings={username:'',provider:'none',jsonbinId:'',jsonbinKey:'',gistId:'',gistToken:'',selfUrl:'',selfToken:'',selfPayloadKB:'',dropboxToken:'',sharedKey:'',encryptSync:false,darkMode:false,pwaInstalled:false,reminderDays:7,notifs:{bills:true,budget:true,yearly:true,sync:true,firstSync:true,localSave:true,nudge:true},customNotifs:[],denPreview:false};
+let settings={username:'',provider:'none',jsonbinId:'',jsonbinKey:'',gistId:'',gistToken:'',selfUrl:'',selfToken:'',selfPayloadKB:'',dropboxToken:'',sharedKey:'',encryptSync:false,darkMode:false,pwaInstalled:false,reminderDays:7,pruneYears:0,notifs:{bills:true,budget:true,yearly:true,sync:true,firstSync:true,localSave:true,nudge:true},customNotifs:[],denPreview:false};
 let planFilterCat='all',planFilterPri='all',rcptFilterCat='all',rptFilterCat='all';
 let reportView='monthly';
 let pendingCloudData=null;
@@ -891,6 +903,16 @@ function runAutoArchive(){
     if(!archives[yr].find(a=>a.id===r.id))archives[yr].push(r);
   });
   receipts=receipts.filter(r=>!r.date||r.date.slice(0,4)>=cutoff);
+}
+function runAutoPrune(){
+  if(!settings.pruneYears)return false;
+  const cutoffYear=(new Date().getFullYear()-settings.pruneYears).toString();
+  let changed=false;
+  Object.keys(archives).forEach(yr=>{if(yr<cutoffYear){delete archives[yr];changed=true;}});
+  const before=receipts.length;
+  receipts=receipts.filter(r=>!r.date||r.date.slice(0,4)>=cutoffYear);
+  if(receipts.length!==before)changed=true;
+  return changed;
 }
 
 // ── HMAC KEY SYSTEM ──────────────────────────
@@ -1014,9 +1036,6 @@ function estimatePayloadKB(){
 
 function getLimitWarnings(){
   const warns=[];
-  const rc=receipts.length,rl=LIMITS.receipts;
-  if(rc>=rl)warns.push({sev:'err',msg:`Active receipts at limit (${rc}/${rl}) — archive will run on next restart`});
-  else if(rc>=rl*LIMITS.warnAt)warns.push({sev:'warn',msg:`Active receipts approaching limit (${rc}/${rl})`});
   const vc=Object.keys(vendors).length,vl=LIMITS.vendors;
   if(vc>=vl)warns.push({sev:'err',msg:`Vendor memory full (${vc}/${vl}) — oldest vendors no longer saved`});
   else if(vc>=vl*LIMITS.warnAt)warns.push({sev:'warn',msg:`Vendor memory filling up (${vc}/${vl})`});
@@ -1048,6 +1067,7 @@ function renderHealthPanel(){
     <span>Active receipts: <strong style="color:var(--text)">${rc}</strong></span>
     <span>Archived: <strong style="color:var(--text)">${arc}</strong></span>
     <span>Vendors: <strong style="color:var(--text)">${Object.keys(vendors).length}</strong></span>
+    <span>Retention: <strong style="color:var(--text)">${settings.pruneYears?settings.pruneYears+'yr':'Forever'}</strong></span>
   </div>`;
   if(warns.length){
     html+=warns.map(w=>`<div style="font-size:12px;padding:6px 10px;border-radius:var(--radius-sm);margin-bottom:5px;background:${w.sev==='err'?'var(--red-light)':'var(--amber-light)'};color:${w.sev==='err'?'var(--red)':'var(--amber)'}">${w.msg}</div>`).join('');
@@ -1216,7 +1236,7 @@ function onProviderChange(silent){
 // ── SYNC STATUS ───────────────────────────────
 function updateSyncStatus(state,msg){
   const dot=document.getElementById('sync-dot'),txt=document.getElementById('sync-status-txt'),gdot=document.getElementById('gear-dot');
-  const map={idle:['',settings.provider==='none'?(totalIncome()>0||totalExpMo()>0||receipts.length>0?'Saved locally':'No data yet \u2014 add income and expenses to get started'):'Ready \u00b7 use Push to sync'],busy:['busy','Syncing\u2026'],ok:['ok',msg||'Sync successful'],err:['err',msg||'Sync failed'],conflict:['err','Conflict — action required']};
+  const map={idle:['',settings.provider==='none'?(totalIncome()>0||totalExpMo()>0||receipts.length>0?'Not backed up':'No data yet \u2014 add income and expenses to get started'):'Ready \u00b7 use Push to sync'],busy:['busy','Syncing\u2026'],ok:['ok',msg||'Sync successful'],err:['err',msg||'Sync failed'],conflict:['err','Conflict — action required']};
   const[cls,label]=map[state]||map.idle;
   dot.className='sync-dot'+(cls?' '+cls:'');
   txt.textContent=label+(syncMeta.lastEditedAt?' · Last push '+fmtAgo(syncMeta.lastEditedAt)+(syncMeta.lastEditedBy?' by '+syncMeta.lastEditedBy:''):'');
@@ -1391,7 +1411,7 @@ function triggerAutosave(source){
         setGSB('warn','Saved locally only — cloud unreachable','');
       }
     }else{
-      setGSB('saved','Saved locally','');
+      setGSB('warn','Not backed up — export a backup to keep your data','');
       updateSyncStatus('idle');
     }
   },2000);
@@ -1975,6 +1995,8 @@ function renderNotifToggles(){
   // Also sync reminder days dropdown
   const rd=document.getElementById('cfg-reminder-days-2');
   if(rd)rd.value=settings.reminderDays||7;
+  const py=document.getElementById('cfg-prune-years');
+  if(py)py.value=settings.pruneYears||0;
 }
 
 function toggleCatManager(){
@@ -2752,9 +2774,6 @@ function renderReceiptList(){
   let recs=receiptsForMonth(ym);
   if(rcptFilterCat!=='all')recs=recs.filter(r=>r.cat===rcptFilterCat);
   const el=document.getElementById('receipt-list');
-  // soft limit warning
-  const rcWarn=document.getElementById('receipt-limit-warn');
-  if(rcWarn){const pct=receipts.length/LIMITS.receipts;rcWarn.style.display=pct>=LIMITS.warnAt?'block':'none';rcWarn.textContent=`${receipts.length} active receipts — approaching the ${LIMITS.receipts} limit. Older years will archive automatically on next app open.`;}
   if(!recs.length){el.innerHTML=`<div class="empty-state"><div style="font-size:28px;margin-bottom:8px">&#128467;</div><div>No receipts logged${rcptFilterCat!=='all'?' for '+rcptFilterCat:' yet'}</div><div style="font-size:12px;margin-top:4px;color:var(--text-faint)">Use the form above to log your first purchase</div></div>`;return;}
   const logTotal=recs.reduce((s,r)=>s+r.amt,0);
   el.innerHTML=recs.map(r=>{
@@ -3164,7 +3183,7 @@ function updateCatType(name,type){
 function getFinancingName(id){const f=financing.find(f=>f.id===id);return f?f.name:'';}
 
 
-function refreshAll(){initExpenses();rebuildCatUI();buildNotifications();document.getElementById('cat-count-lbl')&&(document.getElementById('cat-count-lbl').textContent=CATS().length+' categories');populateMonthSelects();renderBuffers();updatePlanner();renderLogMetrics();renderReceiptList();if(document.getElementById('panel-report').classList.contains('active'))renderReport();applyDenPreview();}
+function refreshAll(){runAutoArchive();if(runAutoPrune())triggerAutosave('prune');initExpenses();rebuildCatUI();buildNotifications();document.getElementById('cat-count-lbl')&&(document.getElementById('cat-count-lbl').textContent=CATS().length+' categories');populateMonthSelects();renderBuffers();updatePlanner();renderLogMetrics();renderReceiptList();if(document.getElementById('panel-report').classList.contains('active'))renderReport();applyDenPreview();}
 
 function gatherRows(){
   let rows=[];
@@ -3228,7 +3247,6 @@ function resetAll(){if(!confirm('Erase ALL data including identity, sync credent
 
 // ── INIT ──────────────────────────────────────
 initExpenses();
-runAutoArchive();
 updateDateLabel();
 rebuildCatUI();
 document.getElementById('cat-count-lbl')&&(document.getElementById('cat-count-lbl').textContent=CATS().length+' categories');
@@ -3250,6 +3268,12 @@ buildNotifications(); // runs after settings and syncMeta loaded
 renderDonateBtns();
 // Refresh notifications every 5 minutes while app is open
 setInterval(()=>{buildNotifications();if(notifPanelOpen)renderNotifList();}, 5*60*1000);
+window.addEventListener('beforeunload',e=>{
+  if(settings.provider!=='none')return;
+  if(!(receipts.length>0||totalIncome()>0||totalExpMo()>0))return;
+  e.preventDefault();
+  return e.returnValue='';
+});
 </script>
 </body>
 </html>

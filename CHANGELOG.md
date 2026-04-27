@@ -4,6 +4,30 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
+## [1.7.7] — 2026-04-26
+
+### Changes
+
+**Auto-archive bug fix**
+- `runAutoArchive()` previously ran at startup before any cloud data was loaded, making it a no-op in the normal sync flow — it now runs after every cloud pull and JSON restore via `refreshAll()`
+- Archive and prune both trigger an autosave when they remove data, so cloud reflects the pruned state without requiring a manual user action
+
+**Receipt data retention (auto-prune)**
+- New "Receipt data retention" setting in Settings → Data — choose 1, 2, 3, 5, 7, or 10 years, or keep forever (default)
+- Archived data older than the selected window is permanently deleted on the next sync or app open
+- A hint below the select explains when deletion takes effect
+- Health panel now shows current retention setting ("Forever" or "Nyr") alongside active receipts, archived count, and vendor count
+
+**Active receipt limit removed**
+- The 2,000 active receipt limit and its warning banner have been removed — the limit did not correspond to any real performance boundary; the natural two-year archive window and the per-provider payload size warning are the appropriate safeguards
+
+**Local-only data safety**
+- Status bar message for users without cloud sync changed from green "Saved locally" to amber "Not backed up — export a backup to keep your data" — the previous label implied persistence that does not exist; all budget data lives in browser memory only until synced or exported
+- Sync status idle label changed from "Saved locally" to "Not backed up" for the same reason
+- Browser now shows a native "Leave site?" confirmation when a local-only user with real data attempts to close or navigate away, preventing accidental loss from tab closure
+
+---
+
 ## [1.7.6] — 2026-04-26
 
 ### Changes

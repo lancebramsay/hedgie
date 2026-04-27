@@ -4,7 +4,7 @@ A lightweight, offline-first household budget planner that runs entirely from a 
 
 **Stable:** [hedgie.pages.dev](https://hedgie.pages.dev) — Cloudflare Pages, fully tested releases<br>
 **Pilot:** [lancebramsay.github.io/hedgie](https://lancebramsay.github.io/hedgie) — GitHub Pages, latest updates<br>
-**Current stable:** v1.7.6
+**Current stable:** v1.7.7
 
 ---
 
@@ -38,7 +38,7 @@ Optional cloud sync lets multiple household members share data with signed and o
 - HMAC-SHA256 signed payloads with shared secret key
 - Optional AES-256-GCM payload encryption (derived from shared key via PBKDF2)
 - Conflict resolution modal and automatic receipt merging
-- Auto-archive for receipts older than the prior calendar year
+- Auto-archive moves receipts older than the prior calendar year to a read-only archive; configurable auto-prune permanently removes archived data beyond a set retention window (1–10 years, or keep forever)
 - Local backup (save/restore JSON), CSV export, Copy for Sheets
 
 ### App & device
@@ -125,7 +125,6 @@ Once installed and opened as a PWA, both the button and banner are hidden automa
 
 | Resource | Warning at | Hard limit |
 |---|---|---|
-| Active receipts | 1,600 | 2,000 (auto-archives) |
 | Vendor memory | 160 | 200 (auto-prunes oldest) |
 | Expense lines per category | — | 25 |
 | Sync payload (JSONBin) | 80 KB | 100 KB |
