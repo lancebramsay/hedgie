@@ -1213,15 +1213,15 @@ function onProviderChange(silent){
   const el=document.getElementById('provider-fields');
   const notes={
     none:'',
-    gist:'<p class="provider-note">Free with GitHub — <strong>100MB</strong> per file limit. Create a <strong>private Gist</strong> with a file named <code>hedgie.json</code>, generate a Personal Access Token with <code>gist</code> scope.</p>',
+    gist:'<p class="provider-note">Free with GitHub — <strong>100MB</strong> per file limit. Create a <strong>private Gist</strong> with a file named <code>hedgie.json</code> and initial content <code>{"_hedgie":true,"version":0}</code>. Generate a <strong>classic</strong> Personal Access Token (not fine-grained) with <code>gist</code> scope. Token and Gist must belong to the same GitHub account.</p>',
     jsonbin:'<p class="provider-note">Free at <strong>jsonbin.io</strong> — <strong>100KB</strong> payload limit. Create an account, make a new Bin, copy the Bin ID and Master Key below. Both users enter the same credentials plus the shared key above.</p>',
     self:'<p class="provider-note">Any endpoint that accepts <strong>GET</strong> (returns JSON) and <strong>PUT</strong> (saves JSON). Works great on a homelab. Add a bearer token for auth. Set a custom payload limit below.</p>',
     dropbox:'<p class="provider-note">Generate a long-lived access token from the Dropbox App Console. The file saves as <code>/hedgie/data.json</code> in your Dropbox — <strong>2GB</strong> file limit.</p>'
   };
   const fields={
     none:'',
-    gist:`<div class="drawer-field"><label>Gist ID</label><input type="text" placeholder="abc123..." value="${esc(settings.gistId)}" oninput="settings.gistId=this.value;saveSettings()"></div>
-          <div class="drawer-field"><label>Personal Access Token</label><input type="text" placeholder="ghp_..." value="${esc(settings.gistToken)}" oninput="settings.gistToken=this.value;saveSettings()"></div>`,
+    gist:`<div class="drawer-field"><label>Gist ID</label><input type="text" placeholder="abc123..." value="${esc(settings.gistId)}" oninput="settings.gistId=this.value.trim();saveSettings()"></div>
+          <div class="drawer-field"><label>Personal Access Token (classic)</label><input type="text" placeholder="ghp_..." value="${esc(settings.gistToken)}" oninput="settings.gistToken=this.value.trim();saveSettings()"></div>`,
     jsonbin:`<div class="drawer-field"><label>Bin ID</label><input type="text" placeholder="67a3b..." value="${esc(settings.jsonbinId)}" oninput="settings.jsonbinId=this.value;saveSettings()"></div>
              <div class="drawer-field"><label>Master Key</label><input type="text" placeholder="$2a$10$..." value="${esc(settings.jsonbinKey)}" oninput="settings.jsonbinKey=this.value;saveSettings()"></div>`,
     self:`<div class="drawer-field"><label>Endpoint URL</label><input type="text" placeholder="https://myserver.local/hedgie/data" value="${esc(settings.selfUrl)}" oninput="settings.selfUrl=this.value;saveSettings()"></div>
