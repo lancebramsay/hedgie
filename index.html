@@ -624,9 +624,9 @@ select{cursor:pointer}
           <select id="cfg-provider" onchange="onProviderChange()">
             <option value="none">None (local only)</option>
             <option value="gist">GitHub Gist (private)</option>
+            <option value="dropbox">Dropbox</option>
             <option value="jsonbin">JSONBin.io</option>
             <option value="self">Self-hosted endpoint</option>
-            <option value="dropbox">Dropbox</option>
           </select>
         </div>
         <div id="provider-fields"></div>
@@ -1216,7 +1216,7 @@ function onProviderChange(silent){
     gist:'<p class="provider-note">Free with GitHub — <strong>100MB</strong> per file limit. Create a <strong>private Gist</strong> with a file named <code>hedgie.json</code> and initial content <code>{"_hedgie":true,"version":0}</code>. Generate a <strong>classic</strong> Personal Access Token (not fine-grained) with <code>gist</code> scope. Token and Gist must belong to the same GitHub account.</p>',
     jsonbin:'<p class="provider-note">Free at <strong>jsonbin.io</strong> — <strong>100KB</strong> payload limit. Create an account, make a new Bin, copy the Bin ID and Master Key below. Both users enter the same credentials plus the shared key above.</p>',
     self:'<p class="provider-note">Any endpoint that accepts <strong>GET</strong> (returns JSON) and <strong>PUT</strong> (saves JSON). Works great on a homelab. Add a bearer token for auth. Set a custom payload limit below.</p>',
-    dropbox:'<p class="provider-note">Generate a long-lived access token from the Dropbox App Console. The file saves as <code>/hedgie/data.json</code> in your Dropbox — <strong>2GB</strong> file limit.</p>'
+    dropbox:'<p class="provider-note">Create an app at <strong>dropbox.com/developers/apps/create</strong> — choose <strong>Scoped access</strong> and <strong>Full Dropbox</strong>. Under <strong>Permissions</strong>, enable <code>files.content.read</code> and <code>files.content.write</code>. Under <strong>Settings → OAuth 2</strong>, click Generate to create a long-lived access token. Data saves as <code>/hedgie/data.json</code> in your Dropbox — <strong>2GB</strong> file limit.</p>'
   };
   const fields={
     none:'',

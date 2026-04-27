@@ -71,6 +71,15 @@ Works fully offline. No internet required for core features.
 
 100 MB per-file limit — effectively unlimited for household budget data.
 
+### Dropbox
+
+1. Create an app at [dropbox.com/developers/apps/create](https://www.dropbox.com/developers/apps/create) — choose **Scoped access** and **Full Dropbox**
+2. Go to the **Permissions** tab and enable `files.content.read` and `files.content.write`
+3. Go to **Settings → OAuth 2** and click **Generate** to create a long-lived access token
+4. Gear → Cloud sync → Dropbox → paste the token → **Push**
+
+Data saves as `/hedgie/data.json` in your Dropbox root. 2 GB file limit.
+
 ### JSONBin.io
 
 1. Create a free account at [jsonbin.io](https://jsonbin.io)
