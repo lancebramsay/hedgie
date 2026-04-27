@@ -26,8 +26,8 @@ All notable changes to Open Hedgie are documented here.
 - Sync status idle label changed from "Saved locally" to "Not backed up" for the same reason
 - Browser now shows a native "Leave site?" confirmation when a local-only user with real data attempts to close or navigate away, preventing accidental loss from tab closure
 
-**GitHub Gist credential fix**
-- Gist ID and Personal Access Token inputs now trim whitespace on paste — a trailing space or newline from pasting would silently produce a 401 on every push/pull
+**Credential input trimming**
+- All provider credential fields (Gist ID, Gist token, JSONBin Bin ID, JSONBin Master Key, self-hosted URL, self-hosted token, Dropbox token) now trim whitespace on input — a trailing space or newline from pasting would silently cause auth failures (401/404) with no indication the credential itself was not the problem
 - In-app Gist provider note updated to specify classic PAT (not fine-grained), the required initial file content, and that the token and Gist must belong to the same GitHub account
 
 ---
