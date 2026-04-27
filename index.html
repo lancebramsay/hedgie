@@ -1222,12 +1222,12 @@ function onProviderChange(silent){
     none:'',
     gist:`<div class="drawer-field"><label>Gist ID</label><input type="text" placeholder="abc123..." value="${esc(settings.gistId)}" oninput="settings.gistId=this.value.trim();saveSettings()"></div>
           <div class="drawer-field"><label>Personal Access Token (classic)</label><input type="text" placeholder="ghp_..." value="${esc(settings.gistToken)}" oninput="settings.gistToken=this.value.trim();saveSettings()"></div>`,
-    jsonbin:`<div class="drawer-field"><label>Bin ID</label><input type="text" placeholder="67a3b..." value="${esc(settings.jsonbinId)}" oninput="settings.jsonbinId=this.value;saveSettings()"></div>
-             <div class="drawer-field"><label>Master Key</label><input type="text" placeholder="$2a$10$..." value="${esc(settings.jsonbinKey)}" oninput="settings.jsonbinKey=this.value;saveSettings()"></div>`,
-    self:`<div class="drawer-field"><label>Endpoint URL</label><input type="text" placeholder="https://myserver.local/hedgie/data" value="${esc(settings.selfUrl)}" oninput="settings.selfUrl=this.value;saveSettings()"></div>
-          <div class="drawer-field"><label>Bearer Token (optional)</label><input type="text" placeholder="optional secret" value="${esc(settings.selfToken)}" oninput="settings.selfToken=this.value;saveSettings()"></div>
+    jsonbin:`<div class="drawer-field"><label>Bin ID</label><input type="text" placeholder="67a3b..." value="${esc(settings.jsonbinId)}" oninput="settings.jsonbinId=this.value.trim();saveSettings()"></div>
+             <div class="drawer-field"><label>Master Key</label><input type="text" placeholder="$2a$10$..." value="${esc(settings.jsonbinKey)}" oninput="settings.jsonbinKey=this.value.trim();saveSettings()"></div>`,
+    self:`<div class="drawer-field"><label>Endpoint URL</label><input type="text" placeholder="https://myserver.local/hedgie/data" value="${esc(settings.selfUrl)}" oninput="settings.selfUrl=this.value.trim();saveSettings()"></div>
+          <div class="drawer-field"><label>Bearer Token (optional)</label><input type="text" placeholder="optional secret" value="${esc(settings.selfToken)}" oninput="settings.selfToken=this.value.trim();saveSettings()"></div>
           <div class="drawer-field"><label>Payload size limit (KB) <span style="color:var(--text-faint);font-weight:400">default 10240 = 10MB</span></label><input type="number" placeholder="10240" min="1" value="${esc(settings.selfPayloadKB||'')}" oninput="settings.selfPayloadKB=this.value;saveSettings();renderHealthPanel()"></div>`,
-    dropbox:`<div class="drawer-field"><label>Access Token</label><input type="text" placeholder="sl...." value="${esc(settings.dropboxToken)}" oninput="settings.dropboxToken=this.value;saveSettings()"></div>`
+    dropbox:`<div class="drawer-field"><label>Access Token</label><input type="text" placeholder="sl...." value="${esc(settings.dropboxToken)}" oninput="settings.dropboxToken=this.value.trim();saveSettings()"></div>`
   };
   el.innerHTML=p==='none'?'':`<div class="provider-fields">${notes[p]||''}${fields[p]||''}</div>`;
   renderHealthPanel();
