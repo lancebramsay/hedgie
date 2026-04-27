@@ -26,6 +26,10 @@ All notable changes to Open Hedgie are documented here.
 - Sync status idle label changed from "Saved locally" to "Not backed up" for the same reason
 - Browser now shows a native "Leave site?" confirmation when a local-only user with real data attempts to close or navigate away, preventing accidental loss from tab closure
 
+**GitHub Gist credential fix**
+- Gist ID and Personal Access Token inputs now trim whitespace on paste — a trailing space or newline from pasting would silently produce a 404 on every push/pull
+- In-app Gist provider note updated to specify classic PAT (not fine-grained), the required initial file content, and that the token and Gist must belong to the same GitHub account
+
 ---
 
 ## [1.7.6] — 2026-04-26
