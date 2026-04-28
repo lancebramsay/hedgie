@@ -1,6 +1,6 @@
 ﻿# 🦔 Open Hedgie
 
-A lightweight, offline-first household budget planner that runs entirely from a single HTML file.
+A lightweight household budget planner that runs entirely from a single HTML file.
 
 **Stable:** [hedgie.pages.dev](https://hedgie.pages.dev) — Cloudflare Pages, fully tested releases<br>
 **Pilot:** [lancebramsay.github.io/hedgie](https://lancebramsay.github.io/hedgie) — GitHub Pages, latest updates<br>
