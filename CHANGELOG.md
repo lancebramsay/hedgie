@@ -4,6 +4,16 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
+## [1.8.1] — 2026-04-28
+
+### Changes
+
+**Mobile layout fix — log a purchase form**
+- The date and recurring toggle row now stacks vertically on narrow screens (≤580px) — the date field takes full width on its own line, the recurring toggle fills the line below it
+- Previously, the four-button recurring toggle (One-time / Monthly / Yearly / Custom) combined with the fixed-width date input exceeded the available width on phones, causing the form to overflow and clip on the right
+
+---
+
 ## [1.8.0] — 2026-04-28
 
 ### Changes

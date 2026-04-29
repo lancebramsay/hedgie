@@ -4,7 +4,7 @@ A lightweight household budget planner that runs entirely from a single HTML fil
 
 **Stable:** [hedgie.pages.dev](https://hedgie.pages.dev) — Cloudflare Pages, fully tested releases<br>
 **Pilot:** [lancebramsay.github.io/hedgie](https://lancebramsay.github.io/hedgie) — GitHub Pages, latest updates<br>
-**Current stable:** v1.8.0
+**Current stable:** v1.8.1
 
 ---
 
