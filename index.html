@@ -2508,7 +2508,7 @@ function switchTab(tab){
     // Don't hijack touches that start on interactive elements
     const tag=(e.target&&e.target.tagName)||'';
     if(/INPUT|SELECT|TEXTAREA|BUTTON|A/i.test(tag)){dragging=false;return;}
-    if(e.target&&e.target.closest&&(e.target.closest('.quick-form')||e.target.closest('#vendor-dd')||e.target.closest('[data-interactive]'))){dragging=false;return;}
+    if(e.target&&e.target.closest&&(e.target.closest('#vendor-dd')||e.target.closest('[data-interactive]'))){dragging=false;return;}
     startX=e.touches[0].clientX;
     startY=e.touches[0].clientY;
     startTranslate=-currentTabIdx*100;
@@ -2524,7 +2524,7 @@ function switchTab(tab){
     // Never intercept touches on interactive form elements
     const tag=(e.target&&e.target.tagName)||'';
     if(/INPUT|SELECT|TEXTAREA|BUTTON|A/i.test(tag))return;
-    if(e.target&&e.target.closest&&(e.target.closest('.quick-form')||e.target.closest('#vendor-dd')||e.target.closest('[data-interactive]')))return;
+    if(e.target&&e.target.closest&&(e.target.closest('#vendor-dd')||e.target.closest('[data-interactive]')))return;
     // Only prevent default after clearly horizontal movement (>8px horiz, angle <40deg)
     const absDx=Math.abs(dx),absDy=Math.abs(dy);
     if(absDx<8)return; // too small to judge yet
