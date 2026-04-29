@@ -4,7 +4,7 @@ A lightweight household budget planner that runs entirely from a single HTML fil
 
 **Stable:** [hedgie.pages.dev](https://hedgie.pages.dev) — Cloudflare Pages, fully tested releases<br>
 **Pilot:** [lancebramsay.github.io/hedgie](https://lancebramsay.github.io/hedgie) — GitHub Pages, latest updates<br>
-**Current stable:** v1.7.7
+**Current stable:** v1.8.0
 
 ---
 
@@ -19,16 +19,18 @@ Optional cloud sync lets multiple household members share data with signed and o
 ## Features
 
 ### Budgeting
-- Receipt logging with vendor memory and recurring bill auto-logging
+- Receipt logging with vendor memory and recurring bill auto-logging — monthly, yearly (specific month + day), or custom interval (every N months)
 - Monthly budget vs actual tracking per category
 - Yearly spending overview (Hibernation View)
-- Budget planner with monthly/yearly expense frequency support
+- Budget planner with monthly, yearly, and custom-interval (every N months) expense frequency; all frequencies reduce to a monthly equivalent automatically
+- Per-category recurring bill coverage indicator — shows total committed monthly spend vs. budget, flagging underfunded categories
+- Bill set-aside metric — shows total monthly provision needed across all non-monthly recurring bills
 - Custom categories — add, rename, reorder, color, remove; assign type (Expense, Savings, Investment)
 - Income remaining excludes savings contributions — savings receipts stay liquid so they don't reduce the figure; investment receipts (CDs, retirement, etc.) still count against it
 - Rainy day buffer distribution weighted by category priority
 
 ### Insights & notifications
-- Built-in notifications: upcoming bills, budget warnings (expense categories only), sync staleness, monthly logging nudge, first-session sync prompt, monthly local backup reminder
+- Built-in notifications: upcoming bills of all frequencies (monthly, yearly, custom interval) with monthly set-aside shown, budget warnings (expense categories only), sync staleness, monthly logging nudge, first-session sync prompt, monthly local backup reminder
 - Four urgency tiers: high (red), med (amber), low (green), info (blue)
 - Bell badge color reflects highest-priority active notification
 - Custom notification rule builder: 12 queryable fields, AND/OR logic, up to 3 conditions per rule

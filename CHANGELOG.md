@@ -4,6 +4,33 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
+## [1.8.0] — 2026-04-28
+
+### Changes
+
+**Recurring bills: yearly and custom intervals**
+- Recurring bills now support two new frequencies alongside monthly: **Yearly** (specific month + day each year) and **N months** (every 2–24 months — covers quarterly, semi-annual, and any other cadence)
+- All interval types auto-log a receipt when their due date is reached: yearly bills check once per calendar year; N-month bills track the last logged receipt and fire again N months later
+- Receipt badge identifies the frequency — "yearly", "every 6mo", "every 3mo", etc. — so past entries are easy to distinguish
+- Bill edit form shows the appropriate controls for each type (month + day selector for yearly; interval input for N-month) with an inline "set aside $X/mo" reminder
+- Notification panel surfaces upcoming bills of all types within the configured reminder window, showing the due date and monthly set-aside amount
+- Deletion confirm message correctly names the cadence ("future years", "future 6-month intervals", "future months")
+
+**Budget planner: interval frequencies**
+- Expense line items now support a third frequency option — **N mo** — alongside Monthly and Yearly; when selected, a number input appears to set the interval (2–24 months)
+- Monthly equivalent (`moAmt`) is computed as amount ÷ N, so all budget math — category totals, income vs. expense flow bar, Hibernation View — automatically reflects custom-interval items
+- The "Mo equiv" column now shows the monthly equivalent for any non-monthly item, including N-month ones
+- The "· yearly items" label on category cards is updated to "· interval items" to reflect all non-monthly budget lines
+
+**Per-category committed vs. budgeted**
+- Each budget planner category card now shows a "Recurring bills" summary row below its expense lines when any recurring bills exist for that category
+- Displays the total monthly equivalent of all recurring bills in that category (monthly + yearly + interval combined) with a ✓ if the category budget covers it, or an amber "X over" if it does not — making underfunded categories visible at a glance
+
+**Bill set-aside metric**
+- The log metrics row "Bill set-aside" tile (formerly "Yearly set-aside") now covers all non-monthly recurring bills — yearly and N-month — showing the total monthly provision needed across all interval commitments
+
+---
+
 ## [1.7.7] — 2026-04-26
 
 ### Changes
