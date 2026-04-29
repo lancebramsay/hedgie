@@ -12,6 +12,10 @@ All notable changes to Open Hedgie are documented here.
 - The date and recurring toggle row now stacks vertically on narrow screens (≤580px) — the date field takes full width on its own line, the recurring toggle fills the line below it
 - Previously, the four-button recurring toggle (One-time / Monthly / Yearly / Custom) combined with the fixed-width date input exceeded the available width on phones, causing the form to overflow and clip on the right
 
+**Swipe gesture fix — log a purchase panel**
+- Horizontal swipe-to-change-tab now works when the swipe begins anywhere in the log form area, including to the right of the date picker
+- Previously, the gesture handler excluded the entire form panel, blocking tab switches unless the swipe started outside it; individual interactive elements (inputs, selects, buttons) are still excluded as expected
+
 ---
 
 ## [1.8.0] — 2026-04-28
