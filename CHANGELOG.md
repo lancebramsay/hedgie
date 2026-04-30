@@ -4,6 +4,16 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
+## [1.8.2] — 2026-04-29
+
+### Changes
+
+**Notification panel fix — dismissing a single notification**
+- Dismissing one notification no longer closes the panel — remaining notifications stay visible
+- Previously, clicking the × on any notification re-rendered the list (detaching the button from the DOM), causing the outside-click listener to treat the detached element as an outside click and close the panel
+
+---
+
 ## [1.8.1] — 2026-04-28
 
 ### Changes
