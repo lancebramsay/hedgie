@@ -561,7 +561,7 @@ select{cursor:pointer}
     </div>
     <div id="buffer-list"></div>
     <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border-light);display:flex;justify-content:space-between;align-items:center">
-      <span style="font-size:13px;color:var(--text-soft)">Total buffer allocated</span>
+      <span style="font-size:13px;color:var(--text-soft)">Rainy day buffer</span>
       <span style="font-size:13px;font-weight:600;color:var(--green)" id="buf-total-amt">$0</span>
     </div>
   </div>
@@ -3017,7 +3017,7 @@ function plannerChanged(){clearTimeout(plannerDebounce);plannerDebounce=setTimeo
 
 function updatePlanner(){
   const inc=totalIncome(),exp=totalExpMo(),net=inc-exp,pct=inc>0?Math.min(200,Math.round(exp/inc*100)):0,surplus=Math.max(0,net);
-  document.getElementById('pl-metrics').innerHTML=`<div class="metric"><div class="metric-label">Income / mo</div><div class="metric-val">${fmt(inc)}</div></div><div class="metric"><div class="metric-label">Expenses / mo</div><div class="metric-val">${fmt(exp)}</div></div><div class="metric"><div class="metric-label">Net cash flow</div><div class="metric-val ${net>=0?'pos':'neg'}">${net<0?'-':''}${fmt(net)}</div></div><div class="metric"><div class="metric-label">Buffer allocated</div><div class="metric-val" id="pl-buf-total">$0</div></div>`;
+  document.getElementById('pl-metrics').innerHTML=`<div class="metric"><div class="metric-label">Income / mo</div><div class="metric-val">${fmt(inc)}</div></div><div class="metric"><div class="metric-label">Expenses / mo</div><div class="metric-val">${fmt(exp)}</div></div><div class="metric"><div class="metric-label">Net cash flow</div><div class="metric-val ${net>=0?'pos':'neg'}">${net<0?'-':''}${fmt(net)}</div></div><div class="metric"><div class="metric-label">Rainy day buffer</div><div class="metric-val" id="pl-buf-total">$0</div></div>`;
   document.getElementById('pl-pct-lbl').textContent=pct+'%';
   const ff=document.getElementById('pl-flow-fill');ff.style.width=Math.min(100,pct)+'%';ff.className='progress-fill'+(pct>90&&pct<=100?' warn':pct>100?' over':'');
   const {alloc,catScore:_cs}=calcBufferAlloc(surplus);
