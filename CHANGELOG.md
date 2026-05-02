@@ -19,6 +19,9 @@ All notable changes to Open Hedgie are documented here.
 - The "Payment towards" financing selector is now available when editing a receipt, not just when first logging one
 - For recurring receipts, saving the edit also updates the bill template so all future auto-logged receipts carry the financing account forward
 
+**Log form — Payment Towards always visible**
+- "Payment towards" now appears for all categories when Den Preview is enabled, not just Debts and Savings
+
 ---
 
 ## [1.8.2] — 2026-04-29
