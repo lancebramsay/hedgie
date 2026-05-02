@@ -2785,7 +2785,7 @@ function processRecurringBills(){
       if(todayDay<dueDay)return;
       const alreadyLogged=receipts.some(r=>r.recurId===bill.id&&monthKey(r.date)===ym);
       if(alreadyLogged)return;
-      receipts.push({id:uid(),cat:bill.cat,amt:bill.amt,vendor:bill.vendor,note:bill.note,date:today,by:settings.username||'',recurring:true,recurId:bill.id});
+      receipts.push({id:uid(),cat:bill.cat,amt:bill.amt,vendor:bill.vendor,note:bill.note,date:today,by:settings.username||'',recurring:true,recurId:bill.id,...(bill.financeId&&{financeId:bill.financeId})});
       added++;
     } else if(bill.freq==='yearly'){
       const dueDate=new Date(todayDate.getFullYear(),(parseInt(bill.month)||1)-1,parseInt(bill.day)||1);
@@ -2793,7 +2793,7 @@ function processRecurringBills(){
       const thisYear=todayDate.getFullYear().toString();
       const alreadyLogged=receipts.some(r=>r.recurId===bill.id&&r.date.startsWith(thisYear));
       if(alreadyLogged)return;
-      receipts.push({id:uid(),cat:bill.cat,amt:bill.amt,vendor:bill.vendor,note:bill.note,date:today,by:settings.username||'',recurring:true,recurId:bill.id});
+      receipts.push({id:uid(),cat:bill.cat,amt:bill.amt,vendor:bill.vendor,note:bill.note,date:today,by:settings.username||'',recurring:true,recurId:bill.id,...(bill.financeId&&{financeId:bill.financeId})});
       added++;
     } else if(bill.freq==='interval'){
       const N=parseInt(bill.intervalMonths)||2;
@@ -2806,7 +2806,7 @@ function processRecurringBills(){
       const nextDueStr=nextDue.toISOString().slice(0,10);
       const alreadyLogged=receipts.some(r=>r.recurId===bill.id&&r.date>=nextDueStr);
       if(alreadyLogged)return;
-      receipts.push({id:uid(),cat:bill.cat,amt:bill.amt,vendor:bill.vendor,note:bill.note,date:today,by:settings.username||'',recurring:true,recurId:bill.id});
+      receipts.push({id:uid(),cat:bill.cat,amt:bill.amt,vendor:bill.vendor,note:bill.note,date:today,by:settings.username||'',recurring:true,recurId:bill.id,...(bill.financeId&&{financeId:bill.financeId})});
       added++;
     }
   });
@@ -2922,6 +2922,10 @@ function renderReceiptEditForm(r){
   html+=`<div class="full"><label>Vendor</label><input type="text" id="re-vendor-${r.id}" value="${esc(r.vendor||'')}"></div>`;
   html+=`<div class="full"><label>Note</label><input type="text" id="re-note-${r.id}" value="${esc(r.note||'')}"></div>`;
   html+=`<div><label>Date</label><input type="date" id="re-date-${r.id}" value="${r.date||''}"></div>`;
+  if(settings.denPreview&&financing.length){
+    const finOpts='<option value="">None</option>'+financing.map(f=>`<option value="${f.id}"${r.financeId===f.id?' selected':''}>${esc(f.name)}${f.type&&f.type!=='other'?' ('+f.type+')':''}</option>`).join('');
+    html+=`<div class="full"><label>Payment towards</label><select id="re-fin-${r.id}">${finOpts}</select></div>`;
+  }
   if(bill){
     if(bill.freq==='yearly'){
       const mn=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -2966,6 +2970,8 @@ function saveReceiptEdit(id){
   r.vendor=document.getElementById('re-vendor-'+id)?.value.trim()||r.vendor;
   r.note=document.getElementById('re-note-'+id)?.value.trim()||'';
   r.date=document.getElementById('re-date-'+id)?.value||r.date;
+  const finSel=document.getElementById('re-fin-'+id);
+  if(finSel)r.financeId=finSel.value||undefined;
   // Update recurring bill template if present
   if(r.recurId){
     const bill=recurringBills.find(b=>b.id===r.recurId);
@@ -2974,6 +2980,7 @@ function saveReceiptEdit(id){
       bill.amt=r.amt;
       bill.vendor=r.vendor;
       bill.note=r.note;
+      if(finSel)bill.financeId=finSel.value||undefined;
       if(bill.freq==='yearly'){const newMonth=parseInt(document.getElementById('re-month-'+id)?.value);if(newMonth>=1&&newMonth<=12)bill.month=newMonth;}
       if(bill.freq==='interval'){const newInt=parseInt(document.getElementById('re-interval-'+id)?.value);if(newInt>=2&&newInt<=24)bill.intervalMonths=newInt;}
       const newDay=parseInt(document.getElementById('re-day-'+id)?.value)||bill.day;
