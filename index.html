@@ -306,7 +306,7 @@ select{cursor:pointer}
       <ellipse cx="20" cy="48" rx="5" ry="3" fill="#c9a882"/>
       <ellipse cx="32" cy="49" rx="5" ry="3" fill="#c9a882"/>
     </svg>
-    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v1.8.2</div></div>
+    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v1.8.3</div></div>
   </div>
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('log')" id="tab-log">
@@ -566,7 +566,7 @@ select{cursor:pointer}
     </div>
   </div>
   <div class="hint">Use the gear icon &#x2699; to configure cloud sync, shared keys, and user settings</div>
-  <div class="hint" style="margin-top:4px">Open Hedgie · v1.8.2 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
+  <div class="hint" style="margin-top:4px">Open Hedgie · v1.8.3 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
   <div class="hint" style="margin-top:8px" id="donate-btn-planner"></div>
 </div><!-- /panel-planner -->
 </div></div><!-- /tab-panels-inner /tab-panels-wrap -->
@@ -3335,7 +3335,7 @@ function updateCatType(name,type){
 function getFinancingName(id){const f=financing.find(f=>f.id===id);return f?f.name:'';}
 
 
-function refreshAll(){runAutoArchive();if(runAutoPrune())triggerAutosave('prune');initExpenses();rebuildCatUI();buildNotifications();document.getElementById('cat-count-lbl')&&(document.getElementById('cat-count-lbl').textContent=CATS().length+' categories');populateMonthSelects();renderBuffers();updatePlanner();renderLogMetrics();renderReceiptList();if(document.getElementById('panel-report').classList.contains('active'))renderReport();applyDenPreview();}
+function refreshAll(){runAutoArchive();if(runAutoPrune())triggerAutosave('prune');initExpenses();rebuildCatUI();processRecurringBills();buildNotifications();document.getElementById('cat-count-lbl')&&(document.getElementById('cat-count-lbl').textContent=CATS().length+' categories');populateMonthSelects();renderBuffers();updatePlanner();renderLogMetrics();renderReceiptList();if(document.getElementById('panel-report').classList.contains('active'))renderReport();applyDenPreview();}
 
 function gatherRows(){
   let rows=[];
