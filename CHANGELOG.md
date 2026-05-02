@@ -12,6 +12,9 @@ All notable changes to Open Hedgie are documented here.
 - Recurring bills due on the current day are now auto-logged into receipts immediately after cloud data is pulled, not just at initial app startup
 - Previously, `processRecurringBills()` ran once at startup before cloud data arrived, so bills due today would show a "due today" notification but never appear in the receipt list until the next app reload
 
+**Planner — label rename**
+- "Buffer allocated" metric renamed to "Rainy day buffer"
+
 ---
 
 ## [1.8.2] — 2026-04-29
