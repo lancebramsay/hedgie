@@ -3290,9 +3290,7 @@ function applyDenPreview(){
 
 function updateDenLogFieldVisibility(){
   const fields=document.getElementById('den-log-fields');if(!fields)return;
-  if(!settings.denPreview){fields.style.display='none';return;}
-  const cat=document.getElementById('log-cat')?.value||'';
-  fields.style.display=(cat==='Debts'||cat==='Savings')?'block':'none';
+  fields.style.display=settings.denPreview?'block':'none';
 }
 
 function renderDenAccordion(){renderDenFinancing();populateDenLogFields();}
