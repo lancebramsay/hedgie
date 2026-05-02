@@ -15,6 +15,10 @@ All notable changes to Open Hedgie are documented here.
 **Planner — label rename**
 - "Buffer allocated" metric renamed to "Rainy day buffer"
 
+**Receipt edit form — Payment Towards**
+- The "Payment towards" financing selector is now available when editing a receipt, not just when first logging one
+- For recurring receipts, saving the edit also updates the bill template so all future auto-logged receipts carry the financing account forward
+
 ---
 
 ## [1.8.2] — 2026-04-29
