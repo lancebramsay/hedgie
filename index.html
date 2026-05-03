@@ -104,7 +104,8 @@ select{cursor:pointer}
 .receipt-info{flex:1;min-width:0}
 .receipt-store{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .receipt-meta{font-size:11px;color:var(--text-soft);margin-top:1px}
-.receipt-note{font-size:11px;color:var(--text-soft);font-style:italic;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.receipt-note{font-size:11px;color:var(--text-soft);font-style:italic;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.receipt-note.expanded{white-space:normal;overflow:visible;text-overflow:unset}
 .receipt-amt{font-size:14px;font-weight:600;white-space:nowrap;flex-shrink:0}
 .receipt-del{background:none;border:none;color:var(--text-faint);cursor:pointer;font-size:17px;padding:2px 4px;flex-shrink:0;line-height:1}
 .receipt-del:hover{color:var(--red)}
@@ -209,10 +210,6 @@ select{cursor:pointer}
 .welcome-card{background:var(--warm-white);border-radius:var(--radius-lg);border:1px solid var(--border);max-width:380px;width:100%;padding:2rem;text-align:center;box-shadow:0 8px 32px rgba(61,42,16,0.2)}
 .welcome-card h2{font-size:20px;font-weight:700;color:var(--brown-dark);margin:1rem 0 0.5rem}
 .welcome-card p{font-size:13px;color:var(--text-soft);margin-bottom:1.5rem;line-height:1.6}
-/* color swatches */
-.color-swatches{display:flex;gap:8px;flex-wrap:wrap}
-.color-swatch{width:26px;height:26px;border-radius:50%;cursor:pointer;border:3px solid transparent;box-sizing:border-box;transition:border-color 0.15s}
-.color-swatch.sel{border-color:var(--brown-dark)}
 /* sync banner */
 
 /* recurring */
@@ -615,7 +612,7 @@ select{cursor:pointer}
 
         <div class="drawer-field">
           <label>Signature color <span style="color:var(--text-faint);font-weight:400">(your name next to receipts)</span></label>
-          <div class="color-swatches" id="cfg-color-swatches"></div>
+          <input type="color" id="cfg-user-color" style="width:36px;height:36px;padding:2px;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;background:transparent" onchange="settings.userColor=this.value;saveSettings();renderReceiptList();buildNotifications()">
         </div>
 
         <div class="drawer-field">
@@ -799,9 +796,9 @@ select{cursor:pointer}
     <h2>Welcome to Hedgie</h2>
     <p>Set your display name to get started. This stamps your receipts and sync activity so your household knows who made each change.</p>
     <input type="text" id="welcome-name" placeholder="Your first name" style="margin-bottom:12px;text-align:center">
-    <div style="margin-bottom:14px">
-      <div style="font-size:12px;color:var(--text-soft);margin-bottom:8px">Pick your signature color</div>
-      <div class="color-swatches" id="welcome-color-swatches" style="justify-content:center"></div>
+    <div style="display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:14px">
+      <span style="font-size:12px;color:var(--text-soft)">Signature color</span>
+      <input type="color" id="welcome-user-color" value="#3a6ea8" style="width:32px;height:32px;padding:2px;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;background:transparent">
     </div>
     <button class="btn primary" style="width:100%;height:40px;font-size:14px" onclick="completeWelcome()">Get started</button>
     <a href="https://github.com/lancebramsay/hedgie/wiki" target="_blank"
@@ -1154,7 +1151,7 @@ function checkWelcome(){
   if(saved){try{settings={...settings,...JSON.parse(saved)};}catch(e){}}
   if(!settings.username){
     document.getElementById('welcome-overlay').classList.add('open');
-    renderColorSwatches('welcome-color-swatches',settings.userColor||USER_COLORS[0]);
+    const wc=document.getElementById('welcome-user-color');if(wc)wc.value=settings.userColor||USER_COLORS[0];
   }else{
     document.getElementById('cfg-username').value=settings.username;
     document.getElementById('cfg-provider').value=settings.provider||'none';
@@ -1169,26 +1166,17 @@ function checkWelcome(){
     updateSyncButton();
   }
 }
-function renderColorSwatches(containerId,selectedColor){
-  const el=document.getElementById(containerId);if(!el)return;
-  const active=selectedColor||USER_COLORS[0];
-  el.innerHTML=USER_COLORS.map(c=>`<div class="color-swatch${active===c?' sel':''}" style="background:${c}" title="${c}" onclick="pickSwatch(this,'${containerId}','${c}')"></div>`).join('');
-}
-function pickSwatch(el,containerId,color){
-  document.querySelectorAll('#'+containerId+' .color-swatch').forEach(s=>s.classList.remove('sel'));
-  el.classList.add('sel');
-  if(containerId==='cfg-color-swatches'){settings.userColor=color;saveSettings();renderReceiptList();buildNotifications();}
-}
 function completeWelcome(){
   const name=document.getElementById('welcome-name').value.trim();
   if(!name){document.getElementById('welcome-name').focus();return;}
   settings.username=name;
-  const selSwatch=document.querySelector('#welcome-color-swatches .color-swatch.sel');
-  if(selSwatch)settings.userColor=selSwatch.style.background;
+  const colorInp=document.getElementById('welcome-user-color');
+  if(colorInp)settings.userColor=colorInp.value;
   saveSettings();
   document.getElementById('welcome-overlay').classList.remove('open');
   document.getElementById('cfg-username').value=name;
-  renderColorSwatches('cfg-color-swatches',settings.userColor);
+  const cfgColor=document.getElementById('cfg-user-color');
+  if(cfgColor)cfgColor.value=settings.userColor||USER_COLORS[0];
   if(!settings.sharedKey)generateKey();
   updateSyncStatus('idle');
   buildNotifications();
@@ -1200,7 +1188,7 @@ function openDrawer(){
   document.getElementById('drawer').classList.add('open');
   document.getElementById('drawer-overlay').classList.add('open');
   renderHealthPanel();renderNotifToggles();renderCustomNotifList();
-  renderColorSwatches('cfg-color-swatches',settings.userColor||USER_COLORS[0]);
+  const cfgColor=document.getElementById('cfg-user-color');if(cfgColor)cfgColor.value=settings.userColor||USER_COLORS[0];
   // Render encryption toggle state
   const cb=document.getElementById('cfg-encrypt');
   if(cb)cb.checked=!!settings.encryptSync;
@@ -2674,7 +2662,7 @@ function renderMonthlyReport(){
       <div class="card-hdr"><span class="card-title">Transactions</span><span class="card-sub">${rptFilterCat==='all'?recs.length:visRecs.length+'/'+recs.length} transaction${recs.length!==1?'s':''}</span></div>
       ${rptPills}
       ${renderUserBreakdown(visRecs)}
-      ${visRecs.length?visRecs.map(r=>`<div class="receipt-row"><div class="cat-dot" style="background:${catColor(r.cat)}"></div><div class="receipt-info"><div class="receipt-store" style="display:flex;align-items:center;gap:5px">${esc(r.vendor||r.cat)}${recurBadge(r)}</div><div class="receipt-meta">${esc(r.cat)} &middot; ${fmtDate(r.date)}</div>${r.note?`<div class="receipt-note">${esc(r.note)}</div>`:``}${r.financeId&&getFinancingName(r.financeId)?`<div class="receipt-note" style="color:var(--text-soft)">&#9670; ${esc(getFinancingName(r.financeId))}</div>`:''}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><div class="receipt-amt">${fmtDec(r.amt)}</div>${r.by?`<div class="receipt-by" style="color:${getUserColor(r.by)}">${esc(r.by)}</div>`:''}</div></div>`).join('')+`<div class="receipt-total"><span>${visRecs.length} item${visRecs.length!==1?'s':''}</span><span>${fmtDec(rptTotal)}</span></div>`:`<div class="empty-state"><div style="font-size:24px;margin-bottom:6px">&#128467;</div><div>No transactions${rptFilterCat!=='all'?' for '+rptFilterCat:' for '+monthLabel(ym)}</div></div>`}
+      ${visRecs.length?visRecs.map(r=>`<div class="receipt-row"><div class="cat-dot" style="background:${catColor(r.cat)}"></div><div class="receipt-info"><div class="receipt-store" style="display:flex;align-items:center;gap:5px">${esc(r.vendor||r.cat)}${recurBadge(r)}</div><div class="receipt-meta">${esc(r.cat)} &middot; ${fmtDate(r.date)}</div>${r.note?`<div class="receipt-note" onclick="this.classList.toggle('expanded')" title="Tap to expand">${esc(r.note)}</div>`:``}${r.financeId&&getFinancingName(r.financeId)?`<div class="receipt-note" style="color:var(--text-soft)">&#9670; ${esc(getFinancingName(r.financeId))}</div>`:''}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><div class="receipt-amt">${fmtDec(r.amt)}</div>${r.by?`<div class="receipt-by" style="color:${getUserColor(r.by)}">${esc(r.by)}</div>`:''}</div></div>`).join('')+`<div class="receipt-total"><span>${visRecs.length} item${visRecs.length!==1?'s':''}</span><span>${fmtDec(rptTotal)}</span></div>`:`<div class="empty-state"><div style="font-size:24px;margin-bottom:6px">&#128467;</div><div>No transactions${rptFilterCat!=='all'?' for '+rptFilterCat:' for '+monthLabel(ym)}</div></div>`}
     </div>`;
 }
 
@@ -2936,7 +2924,7 @@ function renderReceiptList(){
   const logTotal=recs.reduce((s,r)=>s+r.amt,0);
   el.innerHTML=recs.map(r=>{
     if(editingReceiptId===r.id) return renderReceiptEditForm(r);
-    return `<div class="receipt-row"><div class="cat-dot" style="background:${catColor(r.cat)}"></div><div class="receipt-info"><div class="receipt-store" style="display:flex;align-items:center;gap:5px">${esc(r.vendor||r.cat)}${recurBadge(r)}</div><div class="receipt-meta">${esc(r.cat)} &middot; ${fmtDate(r.date)}</div>${r.note?`<div class="receipt-note">${esc(r.note)}</div>`:``}${r.financeId&&getFinancingName(r.financeId)?`<div class="receipt-note" style="color:var(--text-soft)">&#9670; ${esc(getFinancingName(r.financeId))}</div>`:''}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><div class="receipt-amt">${fmtDec(r.amt)}</div>${r.by?`<div class="receipt-by" style="color:${getUserColor(r.by)}">${esc(r.by)}</div>`:''}</div><button class="receipt-edit" onclick="startEditReceipt('${r.id}')" title="Edit">&#9998;</button><button class="receipt-del" onclick="deleteReceipt('${r.id}')">&#215;</button></div>`;
+    return `<div class="receipt-row"><div class="cat-dot" style="background:${catColor(r.cat)}"></div><div class="receipt-info"><div class="receipt-store" style="display:flex;align-items:center;gap:5px">${esc(r.vendor||r.cat)}${recurBadge(r)}</div><div class="receipt-meta">${esc(r.cat)} &middot; ${fmtDate(r.date)}</div>${r.note?`<div class="receipt-note" onclick="this.classList.toggle('expanded')" title="Tap to expand">${esc(r.note)}</div>`:``}${r.financeId&&getFinancingName(r.financeId)?`<div class="receipt-note" style="color:var(--text-soft)">&#9670; ${esc(getFinancingName(r.financeId))}</div>`:''}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><div class="receipt-amt">${fmtDec(r.amt)}</div>${r.by?`<div class="receipt-by" style="color:${getUserColor(r.by)}">${esc(r.by)}</div>`:''}</div><button class="receipt-edit" onclick="startEditReceipt('${r.id}')" title="Edit">&#9998;</button><button class="receipt-del" onclick="deleteReceipt('${r.id}')">&#215;</button></div>`;
   }).join('')+`<div class="receipt-total"><span>${recs.length} item${recs.length!==1?'s':''}</span><span>${fmtDec(logTotal)}</span></div>`;
 }
 
