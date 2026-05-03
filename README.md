@@ -4,7 +4,7 @@ A lightweight household budget planner that runs entirely from a single HTML fil
 
 **Stable:** [hedgie.pages.dev](https://hedgie.pages.dev) — Cloudflare Pages, fully tested releases<br>
 **Pilot:** [lancebramsay.github.io/hedgie](https://lancebramsay.github.io/hedgie) — GitHub Pages, latest updates<br>
-**Current stable:** v1.8.1
+**Current stable:** v1.8.4
 
 ---
 
@@ -24,7 +24,7 @@ Optional cloud sync lets multiple household members share data with signed and o
 - Yearly spending overview (Hibernation View)
 - Budget planner with monthly, yearly, and custom-interval (every N months) expense frequency; all frequencies reduce to a monthly equivalent automatically
 - Per-category recurring bill coverage indicator — shows total committed monthly spend vs. budget, flagging underfunded categories
-- Bill set-aside metric — shows total monthly provision needed across all non-monthly recurring bills
+- Bill set-aside metric — shows total monthly provision needed across all non-monthly planner expenses; each yearly or interval expense can be toggled individually to include or exclude it from the set-aside total; color-coded against income remaining (green ≥ 120%, amber 100–120%, red < 100%)
 - Custom categories — add, rename, reorder, color, remove; assign type (Expense, Savings, Investment)
 - Income remaining excludes savings contributions — savings receipts stay liquid so they don't reduce the figure; investment receipts (CDs, retirement, etc.) still count against it
 - Rainy day buffer distribution weighted by category priority
@@ -47,7 +47,8 @@ Optional cloud sync lets multiple household members share data with signed and o
 - Dark mode — toggle in tab bar, synced across devices via cloud payload
 - Installable PWA: 📲 button on Android/desktop; Share → Add to Home Screen banner on iOS/iPadOS
 - Swipe left/right between tabs on any touch screen (iOS, Android, tablet)
-- Multi-user receipt attribution — each entry stamped with the logger's display name
+- Tap a truncated receipt note to expand it inline
+- Multi-user receipt attribution — each entry stamped with the logger's display name; signature color customizable per user in Identity settings and on the welcome screen
 
 ---
 
@@ -179,7 +180,7 @@ Deploys from the `stable` branch. Updated manually once a release is confirmed s
 
 A future **Hedgie** native app (iOS/macOS, SwiftUI, CloudKit sync) is planned with expanded financial planning features ("Den features"). The Open Hedgie schema already includes forward-compatible fields (`financing[]`, `savingsGoals[]`, `category.type`, `category.financing`, `financeId`) that Den will populate.
 
-A **Den Preview** toggle in Settings enables early Den data features in Open Hedgie today — financing account tagging on receipts and category type assignments. All data is stored immediately and will be read natively by the Hedgie app on day one.
+A **Den Preview** toggle in Settings enables early Den data features in Open Hedgie today — financing account tagging on receipts (including editing Payment Towards on existing receipts) and category type assignments. All data is stored immediately and will be read natively by the Hedgie app on day one.
 
 Planned Den features include:
 
