@@ -2638,6 +2638,7 @@ function renderMonthlyReport(){
   const spent=recs.reduce((s,r)=>s+r.amt,0);
   const budgetMo=totalExpMo(),inc=totalIncome(),pct=budgetMo>0?Math.min(200,Math.round(spent/budgetMo*100)):0;
   const rem=inc-recs.filter(r=>!isSavingsCat(r.cat)).reduce((s,r)=>s+r.amt,0);
+  let billSetAside=0;CATS().forEach(c=>expenses[c].forEach(r=>{if(r.f!=='M'&&r.setAside!==false)billSetAside+=moAmt(r);}));
   const visRecs=rptFilterCat==='all'?recs:recs.filter(r=>r.cat===rptFilterCat);
   const rptTotal=visRecs.reduce((s,r)=>s+r.amt,0);
   const rptPills='<div class="pills" id="rpt-filters" style="margin:4px 0 8px">'+['all',...CATS()].map(c=>`<button class="pill${(c==='all'?rptFilterCat==='all':rptFilterCat===c)?' on':''}" data-rp="${esc(c)}" onclick="setRptFilter(this.dataset.rp)">${c==='all'?'All':esc(c)}</button>`).join('')+'</div>';
@@ -2648,6 +2649,7 @@ function renderMonthlyReport(){
       <div class="metric"><div class="metric-label">Total budgeted</div><div class="metric-val">${fmt(budgetMo)}</div></div>
       <div class="metric"><div class="metric-label">Actually spent</div><div class="metric-val ${spent>budgetMo?'neg':''}">${fmt(spent)}</div></div>
       <div class="metric"><div class="metric-label">Income remaining</div><div class="metric-val ${rem>=0?'pos':'neg'}">${rem<0?'-':''}${fmt(rem)}</div></div>
+      ${billSetAside>0?`<div class="metric"><div class="metric-label">Bill set-aside</div><div class="metric-val">${fmt(billSetAside)}/mo</div></div>`:''}
     </div>
     <div class="card">
       <div class="card-hdr"><span class="card-title">Spending by category</span><span class="card-sub">${pct}% of budget used</span></div>
