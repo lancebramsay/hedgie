@@ -4,6 +4,22 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
+## [1.8.4] — 2026-05-02
+
+### Changes
+
+**Recurring bills — set-aside toggle**
+- Yearly and Custom (N-month) recurring bills now have a "Requires monthly set-aside saving" checkbox in both the log form and the receipt edit form
+- Bills marked as not requiring set-aside are excluded from the Rainy day buffer metric, the set-aside hint in the edit form, and the notification description — useful for bills already covered by a monthly payment plan
+- Existing bills without the flag default to requiring set-aside (backward compatible)
+
+**Identity — signature color**
+- Each user can now pick their receipt signature color from a set of presets in Identity settings
+- New users are prompted to pick a color on the welcome screen
+- Color is applied at render time by username, so all past and future receipts automatically reflect the current preference — no data migration needed
+
+---
+
 ## [1.8.3] — 2026-05-02
 
 ### Changes
