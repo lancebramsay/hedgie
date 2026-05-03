@@ -209,6 +209,10 @@ select{cursor:pointer}
 .welcome-card{background:var(--warm-white);border-radius:var(--radius-lg);border:1px solid var(--border);max-width:380px;width:100%;padding:2rem;text-align:center;box-shadow:0 8px 32px rgba(61,42,16,0.2)}
 .welcome-card h2{font-size:20px;font-weight:700;color:var(--brown-dark);margin:1rem 0 0.5rem}
 .welcome-card p{font-size:13px;color:var(--text-soft);margin-bottom:1.5rem;line-height:1.6}
+/* color swatches */
+.color-swatches{display:flex;gap:8px;flex-wrap:wrap}
+.color-swatch{width:26px;height:26px;border-radius:50%;cursor:pointer;border:3px solid transparent;box-sizing:border-box;transition:border-color 0.15s}
+.color-swatch.sel{border-color:var(--brown-dark)}
 /* sync banner */
 
 /* recurring */
@@ -306,7 +310,7 @@ select{cursor:pointer}
       <ellipse cx="20" cy="48" rx="5" ry="3" fill="#c9a882"/>
       <ellipse cx="32" cy="49" rx="5" ry="3" fill="#c9a882"/>
     </svg>
-    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v1.8.3</div></div>
+    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v1.8.4</div></div>
   </div>
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('log')" id="tab-log">
@@ -439,6 +443,12 @@ select{cursor:pointer}
           <input type="number" id="log-recur-yday" placeholder="Day" min="1" max="31" step="1" style="width:72px;text-align:left">
         </div>
       </div>
+      <div class="full" id="recur-setaside-row" style="display:none">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" id="log-recur-setaside" checked style="width:16px;height:16px;cursor:pointer;accent-color:var(--purple)">
+          <span style="font-size:13px;color:rgba(255,255,255,0.85)">Requires monthly set-aside saving</span>
+        </label>
+      </div>
       <div class="full" id="den-log-fields" style="display:none">
         <label>Payment towards <span style="opacity:0.5;font-weight:400">(Den)</span></label>
         <select id="log-finance-id"><option value="">None</option></select>
@@ -566,7 +576,7 @@ select{cursor:pointer}
     </div>
   </div>
   <div class="hint">Use the gear icon &#x2699; to configure cloud sync, shared keys, and user settings</div>
-  <div class="hint" style="margin-top:4px">Open Hedgie · v1.8.3 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
+  <div class="hint" style="margin-top:4px">Open Hedgie · v1.8.4 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
   <div class="hint" style="margin-top:8px" id="donate-btn-planner"></div>
 </div><!-- /panel-planner -->
 </div></div><!-- /tab-panels-inner /tab-panels-wrap -->
@@ -607,6 +617,11 @@ select{cursor:pointer}
         <div class="drawer-field">
           <label>Display name <span style="color:var(--text-faint);font-weight:400">(stamps your receipts)</span></label>
           <input type="text" id="cfg-username" placeholder="e.g. Lance" oninput="settings.username=this.value;saveSettings()">
+        </div>
+
+        <div class="drawer-field">
+          <label>Signature color <span style="color:var(--text-faint);font-weight:400">(your name next to receipts)</span></label>
+          <div class="color-swatches" id="cfg-color-swatches"></div>
         </div>
 
         <div class="drawer-field">
@@ -790,6 +805,10 @@ select{cursor:pointer}
     <h2>Welcome to Hedgie</h2>
     <p>Set your display name to get started. This stamps your receipts and sync activity so your household knows who made each change.</p>
     <input type="text" id="welcome-name" placeholder="Your first name" style="margin-bottom:12px;text-align:center">
+    <div style="margin-bottom:14px">
+      <div style="font-size:12px;color:var(--text-soft);margin-bottom:8px">Pick your signature color</div>
+      <div class="color-swatches" id="welcome-color-swatches" style="justify-content:center"></div>
+    </div>
     <button class="btn primary" style="width:100%;height:40px;font-size:14px" onclick="completeWelcome()">Get started</button>
     <a href="https://github.com/lancebramsay/hedgie/wiki" target="_blank"
        style="display:block;margin-top:10px;font-size:12px;color:var(--text-faint);text-decoration:none;text-align:center">
@@ -870,7 +889,7 @@ let savingsGoals=[]; // Den feature: savings / portfolio targets
 // Savings goal shape: {id, name, targetAmt?, priority?}
 // category.type? ('expense'|'savings'|'investment') set via Den Preview
 let currentRecurring='none';
-let settings={username:'',provider:'none',jsonbinId:'',jsonbinKey:'',gistId:'',gistToken:'',selfUrl:'',selfToken:'',selfPayloadKB:'',dropboxToken:'',sharedKey:'',encryptSync:false,darkMode:false,pwaInstalled:false,reminderDays:7,pruneYears:0,notifs:{bills:true,budget:true,yearly:true,sync:true,firstSync:true,localSave:true,nudge:true},customNotifs:[],denPreview:false};
+let settings={username:'',provider:'none',jsonbinId:'',jsonbinKey:'',gistId:'',gistToken:'',selfUrl:'',selfToken:'',selfPayloadKB:'',dropboxToken:'',sharedKey:'',encryptSync:false,darkMode:false,pwaInstalled:false,reminderDays:7,pruneYears:0,notifs:{bills:true,budget:true,yearly:true,sync:true,firstSync:true,localSave:true,nudge:true},customNotifs:[],denPreview:false,userColor:''};
 let planFilterCat='all',planFilterPri='all',rcptFilterCat='all',rptFilterCat='all';
 let reportView='monthly';
 let pendingCloudData=null;
@@ -1141,6 +1160,7 @@ function checkWelcome(){
   if(saved){try{settings={...settings,...JSON.parse(saved)};}catch(e){}}
   if(!settings.username){
     document.getElementById('welcome-overlay').classList.add('open');
+    renderColorSwatches('welcome-color-swatches',settings.userColor||USER_COLORS[0]);
   }else{
     document.getElementById('cfg-username').value=settings.username;
     document.getElementById('cfg-provider').value=settings.provider||'none';
@@ -1155,12 +1175,26 @@ function checkWelcome(){
     updateSyncButton();
   }
 }
+function renderColorSwatches(containerId,selectedColor){
+  const el=document.getElementById(containerId);if(!el)return;
+  const active=selectedColor||USER_COLORS[0];
+  el.innerHTML=USER_COLORS.map(c=>`<div class="color-swatch${active===c?' sel':''}" style="background:${c}" title="${c}" onclick="pickSwatch(this,'${containerId}','${c}')"></div>`).join('');
+}
+function pickSwatch(el,containerId,color){
+  document.querySelectorAll('#'+containerId+' .color-swatch').forEach(s=>s.classList.remove('sel'));
+  el.classList.add('sel');
+  if(containerId==='cfg-color-swatches'){settings.userColor=color;saveSettings();renderReceiptList();buildNotifications();}
+}
 function completeWelcome(){
   const name=document.getElementById('welcome-name').value.trim();
   if(!name){document.getElementById('welcome-name').focus();return;}
-  settings.username=name;saveSettings();
+  settings.username=name;
+  const selSwatch=document.querySelector('#welcome-color-swatches .color-swatch.sel');
+  if(selSwatch)settings.userColor=selSwatch.style.background;
+  saveSettings();
   document.getElementById('welcome-overlay').classList.remove('open');
   document.getElementById('cfg-username').value=name;
+  renderColorSwatches('cfg-color-swatches',settings.userColor);
   if(!settings.sharedKey)generateKey();
   updateSyncStatus('idle');
   buildNotifications();
@@ -1172,6 +1206,7 @@ function openDrawer(){
   document.getElementById('drawer').classList.add('open');
   document.getElementById('drawer-overlay').classList.add('open');
   renderHealthPanel();renderNotifToggles();renderCustomNotifList();
+  renderColorSwatches('cfg-color-swatches',settings.userColor||USER_COLORS[0]);
   // Render encryption toggle state
   const cb=document.getElementById('cfg-encrypt');
   if(cb)cb.checked=!!settings.encryptSync;
@@ -2274,7 +2309,7 @@ function buildNotifications(){
       notifs.push({
         id,type:'bill',icon:'&#128197;',
         title:`${bill.vendor||bill.cat} due ${daysAway===0?'today':daysAway===1?'tomorrow':'in '+daysAway+' days'} · ${dueLabel}`,
-        desc:`${bill.cat} · ${fmt(bill.amt)}/yr · set aside ${fmt(bill.amt/12)}/mo`,
+        desc:`${bill.cat} · ${fmt(bill.amt)}/yr${bill.setAside!==false?' · set aside '+fmt(bill.amt/12)+'/mo':''}`,
         urgency:daysAway<=2?'high':daysAway<=5?'med':'low'
       });
     }
@@ -2298,7 +2333,7 @@ function buildNotifications(){
       notifs.push({
         id,type:'bill',icon:'&#128197;',
         title:`${bill.vendor||bill.cat} due ${daysAway===0?'today':daysAway===1?'tomorrow':'in '+daysAway+' days'}`,
-        desc:`${bill.cat} · ${fmt(bill.amt)} every ${N} months · ${fmt(bill.amt/N)}/mo`,
+        desc:`${bill.cat} · ${fmt(bill.amt)} every ${N} months${bill.setAside!==false?' · set aside '+fmt(bill.amt/N)+'/mo':''}`,
         urgency:daysAway<=2?'high':daysAway<=5?'med':'low'
       });
     }
@@ -2590,6 +2625,7 @@ function renderReport(){
 // ── USER COLORS ───────────────────────────────
 function getUserColor(name){
   if(!name)return'var(--text-faint)';
+  if(name===settings.username&&settings.userColor)return settings.userColor;
   if(!knownUsers[name])knownUsers[name]=USER_COLORS[Object.keys(knownUsers).length%USER_COLORS.length];
   return knownUsers[name];
 }
@@ -2764,6 +2800,8 @@ function setRecurring(mode){
   if(iRow)iRow.style.display=mode==='interval'?'block':'none';
   const yRow=document.getElementById('recur-yearly-row');
   if(yRow)yRow.style.display=mode==='yearly'?'block':'none';
+  const saRow=document.getElementById('recur-setaside-row');
+  if(saRow)saRow.style.display=(mode==='yearly'||mode==='interval')?'block':'none';
   if(mode==='yearly'){
     const mSel=document.getElementById('log-recur-month');
     if(mSel)mSel.value=String(new Date().getMonth()+1);
@@ -2856,14 +2894,16 @@ function addReceipt(){
     receipts.push({id:uid(),cat,amt,vendor,note,date,by:settings.username||'',recurring:true,recurId:billId,...denMeta});
   } else if(currentRecurring==='interval'){
     const intervalMonths=Math.max(2,parseInt(document.getElementById('log-recur-interval').value)||3);
+    const setAside=document.getElementById('log-recur-setaside')?.checked!==false;
     const billId=uid();
-    recurringBills.push({id:billId,cat,amt,vendor,note,freq:'interval',intervalMonths,startDate:date,by:settings.username||''});
+    recurringBills.push({id:billId,cat,amt,vendor,note,freq:'interval',intervalMonths,startDate:date,setAside,by:settings.username||''});
     receipts.push({id:uid(),cat,amt,vendor,note,date,by:settings.username||'',recurring:true,recurId:billId,...denMeta});
   } else if(currentRecurring==='yearly'){
     const month=parseInt(document.getElementById('log-recur-month').value)||new Date().getMonth()+1;
     const day=parseInt(document.getElementById('log-recur-yday').value)||new Date().getDate();
+    const setAside=document.getElementById('log-recur-setaside')?.checked!==false;
     const billId=uid();
-    recurringBills.push({id:billId,cat,amt,vendor,note,freq:'yearly',month,day,by:settings.username||''});
+    recurringBills.push({id:billId,cat,amt,vendor,note,freq:'yearly',month,day,setAside,by:settings.username||''});
     receipts.push({id:uid(),cat,amt,vendor,note,date,by:settings.username||'',recurring:true,recurId:billId,...denMeta});
   } else {
     receipts.push({id:uid(),cat,amt,vendor,note,date,by:settings.username||'',...denMeta});
@@ -2888,7 +2928,7 @@ function renderLogMetrics(){
   const recs=receiptsForMonth(ym),spent=recs.reduce((s,r)=>s+r.amt,0);
   const budget=totalExpMo(),inc=totalIncome(),pct=budget>0?Math.round(spent/budget*100):0;
   const rem=inc-recs.filter(r=>!isSavingsCat(r.cat)).reduce((s,r)=>s+r.amt,0);
-  const billSetAside=recurringBills.filter(b=>b.freq!=='monthly').reduce((s,b)=>{
+  const billSetAside=recurringBills.filter(b=>b.freq!=='monthly'&&b.setAside!==false).reduce((s,b)=>{
     if(b.freq==='yearly')return s+b.amt/12;
     if(b.freq==='interval')return s+b.amt/(parseInt(b.intervalMonths)||2);
     return s;
@@ -2930,11 +2970,13 @@ function renderReceiptEditForm(r){
     if(bill.freq==='yearly'){
       const mn=['January','February','March','April','May','June','July','August','September','October','November','December'];
       html+=`<div class="full"><label>Annual due date</label><div style="display:flex;gap:8px"><select id="re-month-${r.id}" style="flex:1;height:36px;font-size:13px">${mn.map((m,i)=>`<option value="${i+1}"${(bill.month||1)===(i+1)?' selected':''}>${m}</option>`).join('')}</select><input type="number" id="re-day-${r.id}" value="${bill.day||1}" min="1" max="31" style="width:72px;text-align:left" placeholder="Day"></div></div>`;
-      html+=`<div class="full" style="font-size:11px;color:var(--purple);background:var(--purple-light);border-radius:var(--radius-sm);padding:6px 8px">&#8635; Yearly bill — saving updates amount, category, vendor, and due date for all future auto-logs. Set aside ${fmt(bill.amt/12)}/mo to cover this.</div>`;
+      html+=`<div class="full"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="re-setaside-${r.id}"${bill.setAside!==false?' checked':''} style="width:15px;height:15px;cursor:pointer;accent-color:var(--purple)"><span style="font-size:12px;color:var(--text)">Requires monthly set-aside saving</span></label></div>`;
+      html+=`<div class="full" style="font-size:11px;color:var(--purple);background:var(--purple-light);border-radius:var(--radius-sm);padding:6px 8px">&#8635; Yearly bill — saving updates amount, category, vendor, and due date for all future auto-logs.${bill.setAside!==false?' Set aside '+fmt(bill.amt/12)+'/mo to cover this.':''}</div>`;
     } else if(bill.freq==='interval'){
       const N=bill.intervalMonths||2;
       html+=`<div class="full"><label>Every how many months?</label><div style="display:flex;align-items:center;gap:8px"><input type="number" id="re-interval-${r.id}" value="${N}" min="2" max="24" style="width:72px;text-align:left"><span style="font-size:13px;color:var(--text-soft)">months</span></div></div>`;
-      html+=`<div class="full" style="font-size:11px;color:var(--purple);background:var(--purple-light);border-radius:var(--radius-sm);padding:6px 8px">&#8635; Every ${N}-month bill — saving updates amount, category, vendor, and interval for all future auto-logs. Set aside ${fmt(bill.amt/N)}/mo to cover this.</div>`;
+      html+=`<div class="full"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="re-setaside-${r.id}"${bill.setAside!==false?' checked':''} style="width:15px;height:15px;cursor:pointer;accent-color:var(--purple)"><span style="font-size:12px;color:var(--text)">Requires monthly set-aside saving</span></label></div>`;
+      html+=`<div class="full" style="font-size:11px;color:var(--purple);background:var(--purple-light);border-radius:var(--radius-sm);padding:6px 8px">&#8635; Every ${N}-month bill — saving updates amount, category, vendor, and interval for all future auto-logs.${bill.setAside!==false?' Set aside '+fmt(bill.amt/N)+'/mo to cover this.':''}</div>`;
     } else {
       html+=`<div class="full"><label>Due day (recurring bill)</label><input type="number" id="re-day-${r.id}" value="${bill.day||1}" min="1" max="31" style="text-align:left"></div>`;
       html+=`<div class="full" style="font-size:11px;color:var(--purple);background:var(--purple-light);border-radius:var(--radius-sm);padding:6px 8px">&#8635; Recurring bill — saving updates amount, category, vendor, and due day for all future auto-logs.</div>`;
@@ -2981,6 +3023,7 @@ function saveReceiptEdit(id){
       bill.vendor=r.vendor;
       bill.note=r.note;
       if(finSel)bill.financeId=finSel.value||undefined;
+      if(bill.freq==='yearly'||bill.freq==='interval'){const saEl=document.getElementById('re-setaside-'+id);if(saEl)bill.setAside=saEl.checked;}
       if(bill.freq==='yearly'){const newMonth=parseInt(document.getElementById('re-month-'+id)?.value);if(newMonth>=1&&newMonth<=12)bill.month=newMonth;}
       if(bill.freq==='interval'){const newInt=parseInt(document.getElementById('re-interval-'+id)?.value);if(newInt>=2&&newInt<=24)bill.intervalMonths=newInt;}
       const newDay=parseInt(document.getElementById('re-day-'+id)?.value)||bill.day;
