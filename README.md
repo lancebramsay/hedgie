@@ -190,7 +190,7 @@ Alongside the collection, a separate **Community App** serves as the ecosystem h
 
 ### Phase 3 — Later: Native Hedgie (iOS / macOS)
 
-A native app built with SwiftUI and CloudKit sync, shipping the full Den feature set alongside deeper Apple ecosystem integration: Sign in with Apple, iCloud Keychain wallet backup, seed phrase management, and In-App Purchase Den unlock for App Store compliance.
+A native app built with SwiftUI and CloudKit sync, shipping the full Den feature set alongside deeper Apple ecosystem integration: Sign in with Apple, iCloud Keychain wallet backup, and seed phrase management. Den features are included in the paid App Store download — no separate unlock needed.
 
 Den features include:
 
