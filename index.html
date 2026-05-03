@@ -105,7 +105,6 @@ select{cursor:pointer}
 .receipt-store{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .receipt-meta{font-size:11px;color:var(--text-soft);margin-top:1px}
 .receipt-note{font-size:11px;color:var(--text-soft);font-style:italic;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
-.receipt-note.expanded{white-space:normal;overflow:visible;text-overflow:unset}
 .receipt-amt{font-size:14px;font-weight:600;white-space:nowrap;flex-shrink:0}
 .receipt-del{background:none;border:none;color:var(--text-faint);cursor:pointer;font-size:17px;padding:2px 4px;flex-shrink:0;line-height:1}
 .receipt-del:hover{color:var(--red)}
@@ -2604,6 +2603,15 @@ function renderReport(){
   else renderMonthlyReport();
 }
 
+function toggleNoteExpand(e,el){
+  e.stopPropagation();
+  const expanded=el.dataset.expanded==='1';
+  el.style.whiteSpace=expanded?'':'normal';
+  el.style.overflow=expanded?'':'visible';
+  el.style.textOverflow=expanded?'':'clip';
+  el.dataset.expanded=expanded?'':'1';
+}
+
 // ── USER COLORS ───────────────────────────────
 function getUserColor(name){
   if(!name)return'var(--text-faint)';
@@ -2662,7 +2670,7 @@ function renderMonthlyReport(){
       <div class="card-hdr"><span class="card-title">Transactions</span><span class="card-sub">${rptFilterCat==='all'?recs.length:visRecs.length+'/'+recs.length} transaction${recs.length!==1?'s':''}</span></div>
       ${rptPills}
       ${renderUserBreakdown(visRecs)}
-      ${visRecs.length?visRecs.map(r=>`<div class="receipt-row"><div class="cat-dot" style="background:${catColor(r.cat)}"></div><div class="receipt-info"><div class="receipt-store" style="display:flex;align-items:center;gap:5px">${esc(r.vendor||r.cat)}${recurBadge(r)}</div><div class="receipt-meta">${esc(r.cat)} &middot; ${fmtDate(r.date)}</div>${r.note?`<div class="receipt-note" onclick="this.classList.toggle('expanded')" title="Tap to expand">${esc(r.note)}</div>`:``}${r.financeId&&getFinancingName(r.financeId)?`<div class="receipt-note" style="color:var(--text-soft)">&#9670; ${esc(getFinancingName(r.financeId))}</div>`:''}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><div class="receipt-amt">${fmtDec(r.amt)}</div>${r.by?`<div class="receipt-by" style="color:${getUserColor(r.by)}">${esc(r.by)}</div>`:''}</div></div>`).join('')+`<div class="receipt-total"><span>${visRecs.length} item${visRecs.length!==1?'s':''}</span><span>${fmtDec(rptTotal)}</span></div>`:`<div class="empty-state"><div style="font-size:24px;margin-bottom:6px">&#128467;</div><div>No transactions${rptFilterCat!=='all'?' for '+rptFilterCat:' for '+monthLabel(ym)}</div></div>`}
+      ${visRecs.length?visRecs.map(r=>`<div class="receipt-row"><div class="cat-dot" style="background:${catColor(r.cat)}"></div><div class="receipt-info"><div class="receipt-store" style="display:flex;align-items:center;gap:5px">${esc(r.vendor||r.cat)}${recurBadge(r)}</div><div class="receipt-meta">${esc(r.cat)} &middot; ${fmtDate(r.date)}</div>${r.note?`<div class="receipt-note" onclick="toggleNoteExpand(event,this)" title="Tap to expand">${esc(r.note)}</div>`:``}${r.financeId&&getFinancingName(r.financeId)?`<div class="receipt-note" style="color:var(--text-soft)">&#9670; ${esc(getFinancingName(r.financeId))}</div>`:''}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><div class="receipt-amt">${fmtDec(r.amt)}</div>${r.by?`<div class="receipt-by" style="color:${getUserColor(r.by)}">${esc(r.by)}</div>`:''}</div></div>`).join('')+`<div class="receipt-total"><span>${visRecs.length} item${visRecs.length!==1?'s':''}</span><span>${fmtDec(rptTotal)}</span></div>`:`<div class="empty-state"><div style="font-size:24px;margin-bottom:6px">&#128467;</div><div>No transactions${rptFilterCat!=='all'?' for '+rptFilterCat:' for '+monthLabel(ym)}</div></div>`}
     </div>`;
 }
 
@@ -2924,7 +2932,7 @@ function renderReceiptList(){
   const logTotal=recs.reduce((s,r)=>s+r.amt,0);
   el.innerHTML=recs.map(r=>{
     if(editingReceiptId===r.id) return renderReceiptEditForm(r);
-    return `<div class="receipt-row"><div class="cat-dot" style="background:${catColor(r.cat)}"></div><div class="receipt-info"><div class="receipt-store" style="display:flex;align-items:center;gap:5px">${esc(r.vendor||r.cat)}${recurBadge(r)}</div><div class="receipt-meta">${esc(r.cat)} &middot; ${fmtDate(r.date)}</div>${r.note?`<div class="receipt-note" onclick="this.classList.toggle('expanded')" title="Tap to expand">${esc(r.note)}</div>`:``}${r.financeId&&getFinancingName(r.financeId)?`<div class="receipt-note" style="color:var(--text-soft)">&#9670; ${esc(getFinancingName(r.financeId))}</div>`:''}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><div class="receipt-amt">${fmtDec(r.amt)}</div>${r.by?`<div class="receipt-by" style="color:${getUserColor(r.by)}">${esc(r.by)}</div>`:''}</div><button class="receipt-edit" onclick="startEditReceipt('${r.id}')" title="Edit">&#9998;</button><button class="receipt-del" onclick="deleteReceipt('${r.id}')">&#215;</button></div>`;
+    return `<div class="receipt-row"><div class="cat-dot" style="background:${catColor(r.cat)}"></div><div class="receipt-info"><div class="receipt-store" style="display:flex;align-items:center;gap:5px">${esc(r.vendor||r.cat)}${recurBadge(r)}</div><div class="receipt-meta">${esc(r.cat)} &middot; ${fmtDate(r.date)}</div>${r.note?`<div class="receipt-note" onclick="toggleNoteExpand(event,this)" title="Tap to expand">${esc(r.note)}</div>`:``}${r.financeId&&getFinancingName(r.financeId)?`<div class="receipt-note" style="color:var(--text-soft)">&#9670; ${esc(getFinancingName(r.financeId))}</div>`:''}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><div class="receipt-amt">${fmtDec(r.amt)}</div>${r.by?`<div class="receipt-by" style="color:${getUserColor(r.by)}">${esc(r.by)}</div>`:''}</div><button class="receipt-edit" onclick="startEditReceipt('${r.id}')" title="Edit">&#9998;</button><button class="receipt-del" onclick="deleteReceipt('${r.id}')">&#215;</button></div>`;
   }).join('')+`<div class="receipt-total"><span>${recs.length} item${recs.length!==1?'s':''}</span><span>${fmtDec(logTotal)}</span></div>`;
 }
 
