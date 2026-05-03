@@ -178,15 +178,25 @@ Deploys from the `stable` branch. Updated manually once a release is confirmed s
 
 ## Roadmap
 
-A future **Hedgie** native app (iOS/macOS, SwiftUI, CloudKit sync) is planned with expanded financial planning features ("Den features"). The Open Hedgie schema already includes forward-compatible fields (`financing[]`, `savingsGoals[]`, `category.type`, `category.financing`, `financeId`) that Den will populate.
+### Phase 1 — Now: Den Preview
 
-A **Den Preview** toggle in Settings enables early Den data features in Open Hedgie today — financing account tagging on receipts (including editing Payment Towards on existing receipts) and category type assignments. All data is stored immediately and will be read natively by the Hedgie app on day one.
+A **Den Preview** toggle in Settings enables early Den data features in Open Hedgie today — financing account tagging on receipts and category type assignments. All data is stored immediately in the shared schema, ready for future phases to read natively.
 
-Planned Den features include:
+### Phase 2 — Next: NFT ecosystem
+
+The **Hedgehog Den** NFT collection unlocks Den features on Open Hedgie without an account or subscription. Each NFT is a unique generative hedgehog and a self-sovereign Den license — owned by the user, verified on-chain, valid across Ethereum, Arbitrum, Base, and Polygon.
+
+Alongside the collection, a separate **Community App** serves as the ecosystem hub: NFT marketplace (swap or sell), staking hub (stake NFTs to earn `$HEDGE` participation tokens), and a non-binding community signal board for charitable giving, development fund direction, open polls, and a budgeter's idea exchange.
+
+### Phase 3 — Later: Native Hedgie (iOS / macOS)
+
+A native app built with SwiftUI and CloudKit sync, shipping the full Den feature set alongside deeper Apple ecosystem integration: Sign in with Apple, iCloud Keychain wallet backup, seed phrase management, and In-App Purchase Den unlock for App Store compliance.
+
+Den features include:
 
 - **Debt tracking & financing management** — track balances, interest, and payoff timelines alongside monthly budgets
-- **Special event planning** — budget for vacations, trips, and one-off events separately from the monthly budget, with support for drawing from savings or temporary funding sources so planned splurges don't distort regular spending reports
-- **Surplus allocation** — automatically suggest or apply end-of-month leftover funds toward savings goals and portfolio contributions, helping turn consistent under-spending into deliberate wealth building
+- **Special event planning** — budget for vacations and one-off events separately, so planned splurges don't distort regular spending reports
+- **Surplus allocation** — automatically suggest end-of-month leftover funds toward savings goals and portfolio contributions
 
 ---
 
