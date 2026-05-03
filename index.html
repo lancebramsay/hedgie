@@ -443,12 +443,6 @@ select{cursor:pointer}
           <input type="number" id="log-recur-yday" placeholder="Day" min="1" max="31" step="1" style="width:72px;text-align:left">
         </div>
       </div>
-      <div class="full" id="recur-setaside-row" style="display:none">
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
-          <input type="checkbox" id="log-recur-setaside" checked style="width:16px;height:16px;cursor:pointer;accent-color:var(--purple)">
-          <span style="font-size:13px;color:rgba(255,255,255,0.85)">Requires monthly set-aside saving</span>
-        </label>
-      </div>
       <div class="full" id="den-log-fields" style="display:none">
         <label>Payment towards <span style="opacity:0.5;font-weight:400">(Den)</span></label>
         <select id="log-finance-id"><option value="">None</option></select>
@@ -2309,7 +2303,7 @@ function buildNotifications(){
       notifs.push({
         id,type:'bill',icon:'&#128197;',
         title:`${bill.vendor||bill.cat} due ${daysAway===0?'today':daysAway===1?'tomorrow':'in '+daysAway+' days'} · ${dueLabel}`,
-        desc:`${bill.cat} · ${fmt(bill.amt)}/yr${bill.setAside!==false?' · set aside '+fmt(bill.amt/12)+'/mo':''}`,
+        desc:`${bill.cat} · ${fmt(bill.amt)}/yr · set aside ${fmt(bill.amt/12)}/mo`,
         urgency:daysAway<=2?'high':daysAway<=5?'med':'low'
       });
     }
@@ -2333,7 +2327,7 @@ function buildNotifications(){
       notifs.push({
         id,type:'bill',icon:'&#128197;',
         title:`${bill.vendor||bill.cat} due ${daysAway===0?'today':daysAway===1?'tomorrow':'in '+daysAway+' days'}`,
-        desc:`${bill.cat} · ${fmt(bill.amt)} every ${N} months${bill.setAside!==false?' · set aside '+fmt(bill.amt/N)+'/mo':''}`,
+        desc:`${bill.cat} · ${fmt(bill.amt)} every ${N} months · set aside ${fmt(bill.amt/N)}/mo`,
         urgency:daysAway<=2?'high':daysAway<=5?'med':'low'
       });
     }
@@ -2800,8 +2794,6 @@ function setRecurring(mode){
   if(iRow)iRow.style.display=mode==='interval'?'block':'none';
   const yRow=document.getElementById('recur-yearly-row');
   if(yRow)yRow.style.display=mode==='yearly'?'block':'none';
-  const saRow=document.getElementById('recur-setaside-row');
-  if(saRow)saRow.style.display=(mode==='yearly'||mode==='interval')?'block':'none';
   if(mode==='yearly'){
     const mSel=document.getElementById('log-recur-month');
     if(mSel)mSel.value=String(new Date().getMonth()+1);
@@ -2894,16 +2886,14 @@ function addReceipt(){
     receipts.push({id:uid(),cat,amt,vendor,note,date,by:settings.username||'',recurring:true,recurId:billId,...denMeta});
   } else if(currentRecurring==='interval'){
     const intervalMonths=Math.max(2,parseInt(document.getElementById('log-recur-interval').value)||3);
-    const setAside=document.getElementById('log-recur-setaside')?.checked!==false;
     const billId=uid();
-    recurringBills.push({id:billId,cat,amt,vendor,note,freq:'interval',intervalMonths,startDate:date,setAside,by:settings.username||''});
+    recurringBills.push({id:billId,cat,amt,vendor,note,freq:'interval',intervalMonths,startDate:date,by:settings.username||''});
     receipts.push({id:uid(),cat,amt,vendor,note,date,by:settings.username||'',recurring:true,recurId:billId,...denMeta});
   } else if(currentRecurring==='yearly'){
     const month=parseInt(document.getElementById('log-recur-month').value)||new Date().getMonth()+1;
     const day=parseInt(document.getElementById('log-recur-yday').value)||new Date().getDate();
-    const setAside=document.getElementById('log-recur-setaside')?.checked!==false;
     const billId=uid();
-    recurringBills.push({id:billId,cat,amt,vendor,note,freq:'yearly',month,day,setAside,by:settings.username||''});
+    recurringBills.push({id:billId,cat,amt,vendor,note,freq:'yearly',month,day,by:settings.username||''});
     receipts.push({id:uid(),cat,amt,vendor,note,date,by:settings.username||'',recurring:true,recurId:billId,...denMeta});
   } else {
     receipts.push({id:uid(),cat,amt,vendor,note,date,by:settings.username||'',...denMeta});
@@ -2928,11 +2918,8 @@ function renderLogMetrics(){
   const recs=receiptsForMonth(ym),spent=recs.reduce((s,r)=>s+r.amt,0);
   const budget=totalExpMo(),inc=totalIncome(),pct=budget>0?Math.round(spent/budget*100):0;
   const rem=inc-recs.filter(r=>!isSavingsCat(r.cat)).reduce((s,r)=>s+r.amt,0);
-  const billSetAside=recurringBills.filter(b=>b.freq!=='monthly'&&b.setAside!==false).reduce((s,b)=>{
-    if(b.freq==='yearly')return s+b.amt/12;
-    if(b.freq==='interval')return s+b.amt/(parseInt(b.intervalMonths)||2);
-    return s;
-  },0);
+  let billSetAside=0;
+  CATS().forEach(c=>expenses[c].forEach(r=>{if(r.f!=='M'&&r.setAside!==false)billSetAside+=moAmt(r);}));
   document.getElementById('log-metrics').innerHTML=`<div class="metric"><div class="metric-label">Spent ${monthLabel(ym)}</div><div class="metric-val">${fmt(spent)}</div></div><div class="metric"><div class="metric-label">Total budgeted</div><div class="metric-val">${fmt(budget)}</div></div><div class="metric"><div class="metric-label">Budget used</div><div class="metric-val ${pct>=100?'neg':pct>=80?'warn':'pos'}">${pct}%</div></div><div class="metric"><div class="metric-label">Income remaining</div><div class="metric-val ${rem>=0?'pos':'neg'}">${rem<0?'-':''}${fmt(Math.abs(rem))}</div></div>${billSetAside>0?`<div class="metric"><div class="metric-label">Bill set-aside</div><div class="metric-val">${fmt(billSetAside)}/mo</div></div>`:''}`;
 }
 
@@ -2970,13 +2957,11 @@ function renderReceiptEditForm(r){
     if(bill.freq==='yearly'){
       const mn=['January','February','March','April','May','June','July','August','September','October','November','December'];
       html+=`<div class="full"><label>Annual due date</label><div style="display:flex;gap:8px"><select id="re-month-${r.id}" style="flex:1;height:36px;font-size:13px">${mn.map((m,i)=>`<option value="${i+1}"${(bill.month||1)===(i+1)?' selected':''}>${m}</option>`).join('')}</select><input type="number" id="re-day-${r.id}" value="${bill.day||1}" min="1" max="31" style="width:72px;text-align:left" placeholder="Day"></div></div>`;
-      html+=`<div class="full"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="re-setaside-${r.id}"${bill.setAside!==false?' checked':''} style="width:15px;height:15px;cursor:pointer;accent-color:var(--purple)"><span style="font-size:12px;color:var(--text)">Requires monthly set-aside saving</span></label></div>`;
-      html+=`<div class="full" style="font-size:11px;color:var(--purple);background:var(--purple-light);border-radius:var(--radius-sm);padding:6px 8px">&#8635; Yearly bill — saving updates amount, category, vendor, and due date for all future auto-logs.${bill.setAside!==false?' Set aside '+fmt(bill.amt/12)+'/mo to cover this.':''}</div>`;
+      html+=`<div class="full" style="font-size:11px;color:var(--purple);background:var(--purple-light);border-radius:var(--radius-sm);padding:6px 8px">&#8635; Yearly bill — saving updates amount, category, vendor, and due date for all future auto-logs. Set aside ${fmt(bill.amt/12)}/mo to cover this.</div>`;
     } else if(bill.freq==='interval'){
       const N=bill.intervalMonths||2;
       html+=`<div class="full"><label>Every how many months?</label><div style="display:flex;align-items:center;gap:8px"><input type="number" id="re-interval-${r.id}" value="${N}" min="2" max="24" style="width:72px;text-align:left"><span style="font-size:13px;color:var(--text-soft)">months</span></div></div>`;
-      html+=`<div class="full"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="re-setaside-${r.id}"${bill.setAside!==false?' checked':''} style="width:15px;height:15px;cursor:pointer;accent-color:var(--purple)"><span style="font-size:12px;color:var(--text)">Requires monthly set-aside saving</span></label></div>`;
-      html+=`<div class="full" style="font-size:11px;color:var(--purple);background:var(--purple-light);border-radius:var(--radius-sm);padding:6px 8px">&#8635; Every ${N}-month bill — saving updates amount, category, vendor, and interval for all future auto-logs.${bill.setAside!==false?' Set aside '+fmt(bill.amt/N)+'/mo to cover this.':''}</div>`;
+      html+=`<div class="full" style="font-size:11px;color:var(--purple);background:var(--purple-light);border-radius:var(--radius-sm);padding:6px 8px">&#8635; Every ${N}-month bill — saving updates amount, category, vendor, and interval for all future auto-logs. Set aside ${fmt(bill.amt/N)}/mo to cover this.</div>`;
     } else {
       html+=`<div class="full"><label>Due day (recurring bill)</label><input type="number" id="re-day-${r.id}" value="${bill.day||1}" min="1" max="31" style="text-align:left"></div>`;
       html+=`<div class="full" style="font-size:11px;color:var(--purple);background:var(--purple-light);border-radius:var(--radius-sm);padding:6px 8px">&#8635; Recurring bill — saving updates amount, category, vendor, and due day for all future auto-logs.</div>`;
@@ -3023,7 +3008,6 @@ function saveReceiptEdit(id){
       bill.vendor=r.vendor;
       bill.note=r.note;
       if(finSel)bill.financeId=finSel.value||undefined;
-      if(bill.freq==='yearly'||bill.freq==='interval'){const saEl=document.getElementById('re-setaside-'+id);if(saEl)bill.setAside=saEl.checked;}
       if(bill.freq==='yearly'){const newMonth=parseInt(document.getElementById('re-month-'+id)?.value);if(newMonth>=1&&newMonth<=12)bill.month=newMonth;}
       if(bill.freq==='interval'){const newInt=parseInt(document.getElementById('re-interval-'+id)?.value);if(newInt>=2&&newInt<=24)bill.intervalMonths=newInt;}
       const newDay=parseInt(document.getElementById('re-day-'+id)?.value)||bill.day;
@@ -3117,7 +3101,8 @@ function renderExpenses(){
       <span class="yr-note yr-col">${r.f!=='M'?fmt(mo)+'/mo':''}</span>
       <button class="del-btn" onclick="expenses['${c}'].splice(${ri},1);updatePlanner()">&#215;</button>`;
       rc.appendChild(rd);
-      if(r.f==='C'){const nr=document.createElement('div');nr.style.cssText='display:flex;align-items:center;gap:6px;padding:3px 0 4px;font-size:12px;color:var(--text-soft);border-top:none';nr.innerHTML=`Every <input type="number" value="${r.every||3}" min="2" max="24" style="width:48px;height:24px;text-align:center;font-size:12px;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--parchment);color:var(--text);padding:0 4px" onchange="expenses['${c}'][${ri}].every=Math.max(2,parseInt(this.value)||3);updatePlanner()"> months`;rc.appendChild(nr);}});
+      if(r.f==='C'){const nr=document.createElement('div');nr.style.cssText='display:flex;align-items:center;gap:6px;padding:3px 0 4px;font-size:12px;color:var(--text-soft);border-top:none';nr.innerHTML=`Every <input type="number" value="${r.every||3}" min="2" max="24" style="width:48px;height:24px;text-align:center;font-size:12px;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--parchment);color:var(--text);padding:0 4px" onchange="expenses['${c}'][${ri}].every=Math.max(2,parseInt(this.value)||3);updatePlanner()"> months`;rc.appendChild(nr);}
+      if(r.f==='Y'||r.f==='C'){const sr=document.createElement('div');sr.style.cssText='display:flex;align-items:center;gap:6px;padding:2px 0 4px;border-top:none';sr.innerHTML=`<label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--text-soft)"><input type="checkbox"${r.setAside!==false?' checked':''} style="width:13px;height:13px;cursor:pointer;accent-color:var(--brown)" onchange="expenses['${c}'][${ri}].setAside=this.checked;updatePlanner()">Set aside monthly towards this expense</label>`;rc.appendChild(sr);}});
   });
 }
 function addExpense(c){if(expenses[c].length>=LIMITS.expPerCat){return;}expenses[c].push({n:'',a:0,p:'M',f:'M'});updatePlanner();}
