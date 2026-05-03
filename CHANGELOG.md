@@ -25,6 +25,10 @@ All notable changes to Open Hedgie are documented here.
 - Tapping a truncated receipt note expands it to show the full text; tapping again collapses it
 - Applies to both the log tab and the monthly report
 
+**Bill set-aside — color coding**
+- The Bill set-aside amount is now color-coded by how much headroom remains in your income: green if income remaining is above 120% of the set-aside, amber for 100–120%, and red if it falls below 100%
+- Applies to both the log tab and monthly report
+
 ---
 
 ## [1.8.3] — 2026-05-02
