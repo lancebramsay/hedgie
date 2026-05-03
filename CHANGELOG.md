@@ -8,10 +8,13 @@ All notable changes to Open Hedgie are documented here.
 
 ### Changes
 
-**Recurring bills — set-aside toggle**
-- Yearly and Custom (N-month) recurring bills now have a "Requires monthly set-aside saving" checkbox in both the log form and the receipt edit form
-- Bills marked as not requiring set-aside are excluded from the Rainy day buffer metric, the set-aside hint in the edit form, and the notification description — useful for bills already covered by a monthly payment plan
-- Existing bills without the flag default to requiring set-aside (backward compatible)
+**Budget planner — set-aside toggle for non-monthly expenses**
+- Yearly and N-month expense lines in the budget planner now have a "Set aside monthly towards this expense" checkbox
+- When unchecked (e.g. the expense is already on a monthly payment plan), it is excluded from the Bill set-aside metric
+- Existing expenses default to requiring set-aside (backward compatible)
+
+**Bill set-aside in monthly report**
+- The Bill set-aside metric now appears in the metrics row at the top of the monthly report, consistent with the log tab
 
 **Identity — signature color**
 - Each user can now pick their receipt signature color from a set of presets in Identity settings
