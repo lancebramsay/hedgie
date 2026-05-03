@@ -2564,6 +2564,8 @@ function switchTab(tab){
     const dy=e.changedTouches[0].clientY-startY;
     const inner=getInner();
     if(inner)inner.style.transition='';
+    // Pure tap with no meaningful movement — don't interfere, let the click event fire naturally
+    if(Math.abs(dx)<8&&Math.abs(dy)<8)return;
     // Only commit if horizontal displacement exceeds threshold and isn\'t too vertical
     if(Math.abs(dx)>=threshold&&Math.abs(dx)>Math.abs(dy)){
       if(dx<0&&currentTabIdx<TAB_ORDER.length-1)switchTab(TAB_ORDER[currentTabIdx+1]);
