@@ -16,10 +16,14 @@ All notable changes to Open Hedgie are documented here.
 **Bill set-aside in monthly report**
 - The Bill set-aside metric now appears in the metrics row at the top of the monthly report, consistent with the log tab
 
-**Identity — signature color**
-- Each user can now pick their receipt signature color from a set of presets in Identity settings
-- New users are prompted to pick a color on the welcome screen
+**Identity — signature color picker**
+- Signature color now uses a native color picker (same as category colors), giving full color freedom instead of fixed presets
+- Available in Identity settings and on the welcome screen for new users
 - Color is applied at render time by username, so all past and future receipts automatically reflect the current preference — no data migration needed
+
+**Receipt notes — tap to expand**
+- Tapping a truncated receipt note expands it to show the full text; tapping again collapses it
+- Applies to both the log tab and the monthly report
 
 ---
 
