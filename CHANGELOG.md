@@ -4,7 +4,7 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
-## [1.9.0] — 2026-05-09
+## [2.0] — 2026-05-09
 
 ### New: Den tab (Preview)
 
