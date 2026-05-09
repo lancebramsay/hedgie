@@ -4,7 +4,7 @@ A lightweight household budget planner that runs entirely from a single HTML fil
 
 **Stable:** [hedgie.pages.dev](https://hedgie.pages.dev) — Cloudflare Pages, fully tested releases<br>
 **Pilot:** [lancebramsay.github.io/hedgie](https://lancebramsay.github.io/hedgie) — GitHub Pages, latest updates<br>
-**Current stable:** v1.8.4
+**Current stable:** v1.8.4 | **Pilot:** v1.9.0
 
 ---
 
@@ -42,6 +42,16 @@ Optional cloud sync lets multiple household members share data with signed and o
 - Conflict resolution modal and automatic receipt merging
 - Auto-archive moves receipts older than the prior calendar year to a read-only archive; configurable auto-prune permanently removes archived data beyond a set retention window (1–10 years, or keep forever)
 - Local backup (save/restore JSON), CSV export, Copy for Sheets
+
+### Den (Preview)
+
+Enable via **Settings → Den Preview** to unlock a fourth tab for tracking long-term assets and liabilities alongside your monthly budget. All Den data is stored in the shared sync payload immediately, so it survives cloud sync and is ready for native Den features in a future phase.
+
+- **Liabilities** — loan, credit, lease, and other financing accounts with balance tracking, interest rate, term, payoff estimate, and budget line linking; receipt tagging available from the log form
+- **Portfolio** — stock, ETF, crypto, and other investment positions with units, cost basis, current price, and gain/loss per position and group
+- **Savings goals** — named targets with a current amount, target, progress bar, and budget line link
+- **Net worth summary** — SVG donut pie chart breaking down asset classes (loan equity, stocks, ETFs, crypto, other, savings) with total assets, liabilities, and net worth
+- **Live price feed** — optional API connection for current stock and crypto prices; four providers: CoinGecko (free, no key), Finnhub, Twelve Data, Alpha Vantage; API keys stay on-device and are never synced
 
 ### App & device
 - Dark mode — toggle in tab bar, synced across devices via cloud payload
@@ -180,7 +190,7 @@ Deploys from the `stable` branch. Updated manually once a release is confirmed s
 
 ### Phase 1 — Now: Den Preview
 
-A **Den Preview** toggle in Settings enables early Den data features in Open Hedgie today — financing account tagging on receipts and category type assignments. All data is stored immediately in the shared schema, ready for future phases to read natively.
+The **Den Preview** toggle in Settings unlocks the full Den tab: liability tracking, investment portfolio, savings goals, a net worth pie chart, and an optional live price feed (CoinGecko, Finnhub, Twelve Data, Alpha Vantage). All Den data is stored in the shared sync schema, ready for future phases to read natively.
 
 ### Phase 2 — Next: NFT ecosystem
 

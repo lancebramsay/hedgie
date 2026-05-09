@@ -273,6 +273,24 @@ select{cursor:pointer}
   .log-date-recur-row{flex-wrap:wrap}
   .log-date-recur-row>div:first-child{flex:0 0 100%}
 }
+/* Den tab */
+.den-item{background:var(--parchment);border:1px solid var(--border-light);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:8px}
+.den-item:last-child{margin-bottom:0}
+.den-item-hdr{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+.den-item-body{display:none;padding-top:10px;margin-top:10px;border-top:1px solid var(--border-light)}
+.den-item-body.den-open{display:block}
+.den-badge-loan{background:var(--red-light);color:var(--red);font-size:10px;padding:2px 7px;border-radius:8px;font-weight:600;white-space:nowrap;flex-shrink:0}
+.den-badge-credit{background:var(--amber-light);color:var(--amber);font-size:10px;padding:2px 7px;border-radius:8px;font-weight:600;white-space:nowrap;flex-shrink:0}
+.den-badge-lease{background:var(--blue-light);color:var(--blue);font-size:10px;padding:2px 7px;border-radius:8px;font-weight:600;white-space:nowrap;flex-shrink:0}
+.den-badge-other{background:var(--parchment);color:var(--text-soft);font-size:10px;padding:2px 7px;border-radius:8px;font-weight:600;white-space:nowrap;flex-shrink:0;border:1px solid var(--border)}
+.den-inp{font-size:12px;padding:3px 6px;height:28px;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--warm-white);color:var(--text);font-family:inherit;outline:none;transition:border-color 0.15s}
+.den-inp:focus{border-color:var(--brown-light)}
+.den-inp-nm{flex:1;min-width:0}
+.den-inp-amt{width:110px;text-align:right}
+.den-field-row{display:flex;gap:8px;align-items:center;margin-bottom:7px;flex-wrap:wrap}
+.den-field-lbl{font-size:11px;color:var(--text-soft);white-space:nowrap;min-width:90px;flex-shrink:0}
+.den-gain{color:var(--green)}.den-loss{color:var(--red)}
+.den-expand-arrow{font-size:11px;color:var(--text-faint);transition:transform 0.2s;flex-shrink:0;margin-left:auto}
 </style>
 <script>
 // Strip ?v= cache-bust param from URL immediately on load (added by forceRefresh())
@@ -320,6 +338,10 @@ select{cursor:pointer}
     <button class="tab-btn" onclick="switchTab('planner')" id="tab-planner">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
       <span class="tab-lbl">Budget planner</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('den')" id="tab-den" style="display:none">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span class="tab-lbl">Den</span>
     </button>
   </div>
   <div class="notif-wrap" style="display:flex;align-items:center;align-self:center;margin-right:4px">
@@ -569,6 +591,43 @@ select{cursor:pointer}
   <div class="hint" style="margin-top:4px">Open Hedgie · v1.8.4 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
   <div class="hint" style="margin-top:8px" id="donate-btn-planner"></div>
 </div><!-- /panel-planner -->
+
+<!-- ═══ TAB 4 — DEN ═══ -->
+<div class="panel" id="panel-den">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
+    <div>
+      <div style="font-size:18px;font-weight:700;color:var(--brown-dark)">Den</div>
+      <div style="font-size:13px;color:var(--text-soft)">Long-term assets &amp; liabilities</div>
+    </div>
+  </div>
+  <div id="den-net-worth"></div>
+  <div class="card">
+    <div class="card-hdr">
+      <span class="card-title">Liabilities</span>
+      <button class="btn" style="font-size:12px" onclick="addFinancingAcct()">+ Add</button>
+    </div>
+    <div id="den-liabilities"></div>
+  </div>
+  <div class="card">
+    <div class="card-hdr">
+      <span class="card-title">Portfolio</span>
+      <div class="btn-row">
+        <button class="btn" style="font-size:12px" onclick="addInvestment('stock')">+ Stock / ETF</button>
+        <button class="btn" style="font-size:12px" onclick="addInvestment('crypto')">+ Crypto</button>
+      </div>
+    </div>
+    <div id="den-portfolio-actions" style="display:none;padding:0 0 8px"></div>
+    <div id="den-price-status" style="display:none;font-size:11px;color:var(--text-soft);padding-bottom:8px"></div>
+    <div id="den-portfolio"></div>
+  </div>
+  <div class="card">
+    <div class="card-hdr">
+      <span class="card-title">Savings goals</span>
+      <button class="btn" style="font-size:12px" onclick="addSavingsGoal()">+ Add goal</button>
+    </div>
+    <div id="den-goals"></div>
+  </div>
+</div><!-- /panel-den -->
 </div></div><!-- /tab-panels-inner /tab-panels-wrap -->
 
 <!-- GEAR -->
@@ -736,16 +795,32 @@ select{cursor:pointer}
     </div>
     <div class="drawer-acc-body" id="acc-den">
       <div class="drawer-acc-inner">
-        <div style="font-size:12px;color:var(--text-soft);margin-bottom:10px;line-height:1.5">Tag receipts with financing accounts and assign category types. Data is stored now and will be read natively by the Hedgie app when released.</div>
+        <div style="font-size:12px;color:var(--text-soft);margin-bottom:10px;line-height:1.5">Unlocks the <strong>Den tab</strong> for tracking loans, investments, and savings goals. Receipts can be tagged to financing accounts in the log form.</div>
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:0">
           <input type="checkbox" id="cfg-den-preview" onchange="toggleDenPreview(this.checked)">
           <span style="font-size:13px;font-weight:500">Enable Den Preview features</span>
         </label>
-        <div id="den-preview-content" style="display:none;margin-top:14px">
-          <div style="font-size:11px;font-weight:600;color:var(--text-faint);letter-spacing:0.4px;margin-bottom:6px">FINANCING ACCOUNTS</div>
-          <div style="font-size:12px;color:var(--text-soft);margin-bottom:8px;line-height:1.5">Add loans, credit lines, or leases. Tag receipts as payments towards them so native Hedgie can read your history on day one.</div>
-          <div id="den-financing-list"></div>
-          <button class="btn" style="font-size:12px;margin-bottom:14px" onclick="addFinancingAcct()">+ Add account</button>
+        <div id="den-preview-content" style="display:none;margin-top:10px">
+          <div style="font-size:12px;color:var(--text-soft);line-height:1.5">Manage accounts, investments, and goals in the <strong>Den tab</strong>. Receipt tagging is available in the log form above.</div>
+          <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border-light)">
+            <div style="font-size:12px;font-weight:600;color:var(--text-mid);margin-bottom:6px">Price Feed</div>
+            <div style="font-size:12px;color:var(--text-soft);margin-bottom:8px">Fetch live stock and crypto prices. All providers offer a free tier.</div>
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+              <span style="font-size:12px;color:var(--text-soft);white-space:nowrap;min-width:60px">Provider</span>
+              <select id="cfg-price-provider" class="den-inp" style="flex:1;height:28px" onchange="updatePriceProvider(this.value)">
+                <option value="none">None — manual only</option>
+                <option value="coingecko">CoinGecko — crypto, free, no key</option>
+                <option value="finnhub">Finnhub — stocks + crypto, free key</option>
+                <option value="twelvedata">Twelve Data — stocks + crypto, free key</option>
+                <option value="alphavantage">Alpha Vantage — stocks + crypto, free key</option>
+              </select>
+            </div>
+            <div id="cfg-price-key-row" style="display:none;gap:8px;align-items:center;margin-bottom:8px">
+              <span style="font-size:12px;color:var(--text-soft);white-space:nowrap;min-width:60px">API key</span>
+              <input id="cfg-price-apikey" class="den-inp" type="password" style="flex:1" placeholder="Paste API key" onblur="savePriceApiKey(this.value)">
+            </div>
+            <div id="cfg-price-notes" style="font-size:11px;color:var(--text-soft);line-height:1.5"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -872,14 +947,16 @@ let recurringBills=[];
 // linking to a Den financing account for debt/payment tracking
 let financing=[]; // Den feature: financing accounts (loans, credit lines, leases, etc.)
 // Financing account shape: {id, name, type ('loan'|'credit'|'lease'|'other'),
-//  originalBalance, currentBalance, interestRate, termMonths, startDate, endDate,
-//  linkedCategoryName, linkedExpenseIds[]}
-// receipt.financeId? links a payment receipt to a financing account (set via Den Preview)
-let savingsGoals=[]; // Den feature: savings / portfolio targets
-// Savings goal shape: {id, name, targetAmt?, priority?}
-// category.type? ('expense'|'savings'|'investment') set via Den Preview
+//  originalBalance, currentBalance, interestRate, termMonths, startDate,
+//  linkedExpenseKey ('catName|expName'), receipt.financeId links payments}
+let savingsGoals=[]; // Den feature: savings goals
+// Savings goal shape: {id, name, targetAmt, currentAmt, linkedExpenseKey}
+let investments=[]; // Den feature: investment positions (stocks, ETFs, crypto)
+// Investment shape: {id, name, symbol, type ('stock'|'etf'|'crypto'|'other'),
+//  units, costBasis, currentPrice, lastPriceUpdate}
+let denOpenItems=new Set(); // tracks which Den liability body IDs are expanded
 let currentRecurring='none';
-let settings={username:'',provider:'none',jsonbinId:'',jsonbinKey:'',gistId:'',gistToken:'',selfUrl:'',selfToken:'',selfPayloadKB:'',dropboxToken:'',sharedKey:'',encryptSync:false,darkMode:false,pwaInstalled:false,reminderDays:7,pruneYears:0,notifs:{bills:true,budget:true,yearly:true,sync:true,firstSync:true,localSave:true,nudge:true},customNotifs:[],denPreview:false,userColor:''};
+let settings={username:'',provider:'none',jsonbinId:'',jsonbinKey:'',gistId:'',gistToken:'',selfUrl:'',selfToken:'',selfPayloadKB:'',dropboxToken:'',sharedKey:'',encryptSync:false,darkMode:false,pwaInstalled:false,reminderDays:7,pruneYears:0,notifs:{bills:true,budget:true,yearly:true,sync:true,firstSync:true,localSave:true,nudge:true},customNotifs:[],denPreview:false,userColor:'',priceProvider:'none',priceApiKey:''};
 let planFilterCat='all',planFilterPri='all',rcptFilterCat='all',rptFilterCat='all';
 let reportView='monthly';
 let pendingCloudData=null;
@@ -1062,7 +1139,7 @@ async function decryptData(ciphertext,iv,secret){
 
 // ── LIMITS & HEALTH ──────────────────────────
 function estimatePayloadKB(){
-  const state={categories,income,expenses,receipts,vendors,archives,recurringBills,financing,savingsGoals};
+  const state={categories,income,expenses,receipts,vendors,archives,recurringBills,financing,savingsGoals,investments};
   return Math.round(JSON.stringify(state).length/1024);
 }
 
@@ -1235,7 +1312,7 @@ function forceRefresh(){
 }
 
 async function exportDecryptedBackup(){
-  const data={categories,income,expenses,receipts,vendors,archives,recurringBills,financing,savingsGoals};
+  const data={categories,income,expenses,receipts,vendors,archives,recurringBills,financing,savingsGoals,investments};
   const payload={_hedgie:true,version:syncMeta.version,lastEditedBy:syncMeta.lastEditedBy,lastEditedAt:syncMeta.lastEditedAt,data};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
   const a=document.createElement('a');
@@ -1358,7 +1435,7 @@ async function quickSync(){
 
     // Step 3 - decrypt + decide direction
     cloud=await toPlainPayload(cloud);
-    const localPayload={version:syncMeta.version,lastEditedBy:settings.username,lastEditedAt:new Date().toISOString(),data:{categories,income,expenses,receipts,vendors,archives,recurringBills,financing,savingsGoals}};
+    const localPayload={version:syncMeta.version,lastEditedBy:settings.username,lastEditedAt:new Date().toISOString(),data:{categories,income,expenses,receipts,vendors,archives,recurringBills,financing,savingsGoals,investments}};
     const cloudAhead=(cloud.version||0)>(syncMeta.lastPulledVersion||0);
 
     let resolved;
@@ -1458,7 +1535,7 @@ function triggerAutosave(source){
 
 // ── CLOUD PAYLOAD ─────────────────────────────
 async function buildPayload(){
-  const rawData={categories,income,expenses,receipts,vendors,archives,recurringBills,financing,savingsGoals,darkMode:settings.darkMode,pwaInstalled:settings.pwaInstalled};
+  const rawData={categories,income,expenses,receipts,vendors,archives,recurringBills,financing,savingsGoals,investments,darkMode:settings.darkMode,pwaInstalled:settings.pwaInstalled};
   const base={_hedgie:true,version:(syncMeta.version||0)+1,lastEditedBy:settings.username||'Unknown',lastEditedAt:new Date().toISOString()};
   if(settings.encryptSync&&settings.sharedKey){
     try{
@@ -1530,6 +1607,7 @@ function _applyData(d,payload){
   if(d.recurringBills)recurringBills=d.recurringBills;
   if(d.financing)financing=d.financing;
   if(d.savingsGoals)savingsGoals=d.savingsGoals;
+  if(d.investments)investments=d.investments;
   // Restore preference flags from payload
   if(d.darkMode!==undefined&&settings.darkMode!==d.darkMode){settings.darkMode=d.darkMode;applyDarkMode();}
   if(d.pwaInstalled!==undefined)settings.pwaInstalled=d.pwaInstalled;
@@ -1585,7 +1663,7 @@ async function toPlainPayload(payload){
     }
   }
   // Ensure .data always exists even for a malformed/empty payload
-  if(!payload.data)return {...payload,data:{income:[],expenses:{},receipts:[],vendors:{},archives:{},recurringBills:[],categories:DEFAULT_CATS,financing:[],savingsGoals:[]}};
+  if(!payload.data)return {...payload,data:{income:[],expenses:{},receipts:[],vendors:{},archives:{},recurringBills:[],categories:DEFAULT_CATS,financing:[],savingsGoals:[],investments:[]}};
   return payload;
 }
 
@@ -1635,7 +1713,7 @@ async function cloudPull(){
     if(vr.unsigned&&settings.sharedKey){setGSB('warn','Cloud payload has no signature — push to sign it','');}
         // Decrypt before any .data access
     let plainCloud;try{plainCloud=await toPlainPayload(cloud);}catch(e){updateSyncStatus('err',e.message);setGSB('err',e.message,'',true);return;}
-    const localPayload={version:syncMeta.version,data:{categories,income,expenses,receipts,vendors,archives,recurringBills,financing,savingsGoals}};
+    const localPayload={version:syncMeta.version,data:{categories,income,expenses,receipts,vendors,archives,recurringBills,financing,savingsGoals,investments}};
     const cloudVer=plainCloud.version||0;
     const isFirstSync=syncMeta.lastPulledVersion===0&&syncMeta.version===0;
     if(cloudVer>(syncMeta.lastPulledVersion||0)){
@@ -1665,7 +1743,7 @@ async function cloudPush(){
       if(!vr.ok){updateSyncStatus('err','Remote signature mismatch — wrong shared key?');setGSB('err','Remote signature invalid — check shared key','',true);return;}
       if(vr.unsigned&&settings.sharedKey){setGSB('warn','Remote payload unsigned — will be signed on push','');}
       if((cloud.version||0)>syncMeta.lastPulledVersion){
-        const localPayload={version:syncMeta.version,data:{categories,income,expenses,receipts,vendors,archives,recurringBills,financing,savingsGoals}};
+        const localPayload={version:syncMeta.version,data:{categories,income,expenses,receipts,vendors,archives,recurringBills,financing,savingsGoals,investments}};
         let plainCloud2;try{plainCloud2=await toPlainPayload(cloud);}catch(e){updateSyncStatus('err',e.message);setGSB('err',e.message,'',true);return;}
         if(budgetChanged(localPayload,plainCloud2)){pendingCloudData=plainCloud2;showConflictModal(plainCloud2);updateSyncStatus('conflict');return;}
         const merged=mergePayloads(localPayload,plainCloud2);
@@ -1688,7 +1766,7 @@ function showConflictModal(cloud){
 async function resolveConflict(choice){
   document.getElementById('conflict-modal').classList.remove('open');
   const cloud=pendingCloudData;if(!cloud)return;
-  const local={version:syncMeta.version,lastEditedBy:settings.username,lastEditedAt:new Date().toISOString(),data:{categories,income,expenses,receipts,vendors,archives,recurringBills,financing,savingsGoals}};
+  const local={version:syncMeta.version,lastEditedBy:settings.username,lastEditedAt:new Date().toISOString(),data:{categories,income,expenses,receipts,vendors,archives,recurringBills,financing,savingsGoals,investments}};
   let resolved=mergePayloads(local,cloud);
   if(choice==="theirs"){const cd2=cloud.data||{};resolved.data.income=cd2.income||income;resolved.data.expenses=cd2.expenses||expenses;resolved.data.bufferPct=cd2.bufferPct;}
   resolved.signature=await signPayload(resolved);
@@ -2494,7 +2572,7 @@ function dismissAllNotifs(){
 }
 
 // ── TAB SWITCHING ─────────────────────────────
-const TAB_ORDER=['log','report','planner'];
+let TAB_ORDER=['log','report','planner'];
 let currentTabIdx=0;
 
 function switchTab(tab){
@@ -2511,6 +2589,7 @@ function switchTab(tab){
   if(inner)inner.style.transform=`translateX(${-idx*100}%)`;
   if(tab==='report')renderReport();
   if(tab==='log'){renderReceiptList();renderLogMetrics();}
+  if(tab==='den')renderDen();
 }
 
 // Touch swipe between tabs
@@ -3168,7 +3247,7 @@ function setPlanFilter(type,val,btn){
 
 // ── SAVE / RESTORE ────────────────────────────
 async function getFullState(){
-  const p={_hedgie:true,version:syncMeta.version,lastEditedBy:settings.username||'',lastEditedAt:new Date().toISOString(),data:{categories,income,expenses,receipts,vendors,archives,recurringBills,financing,savingsGoals}};
+  const p={_hedgie:true,version:syncMeta.version,lastEditedBy:settings.username||'',lastEditedAt:new Date().toISOString(),data:{categories,income,expenses,receipts,vendors,archives,recurringBills,financing,savingsGoals,investments}};
   p.signature=await signPayload(p);return p;
 }
 
@@ -3310,10 +3389,18 @@ function toggleDenPreview(on){settings.denPreview=!!on;saveSettings();applyDenPr
 function applyDenPreview(){
   const on=!!settings.denPreview;
   const cb=document.getElementById('cfg-den-preview');if(cb)cb.checked=on;
-  // Den log fields only show for Debts/Savings when Den Preview is on
   updateDenLogFieldVisibility();
   const content=document.getElementById('den-preview-content');if(content)content.style.display=on?'block':'none';
-  renderDenAccordion();
+  const tabBtn=document.getElementById('tab-den');if(tabBtn)tabBtn.style.display=on?'':'none';
+  const hasDen=TAB_ORDER.includes('den');
+  if(on&&!hasDen){TAB_ORDER.push('den');}
+  else if(!on&&hasDen){
+    TAB_ORDER.splice(TAB_ORDER.indexOf('den'),1);
+    if(currentTabIdx>=TAB_ORDER.length){currentTabIdx=0;switchTab('log');}
+  }
+  populateDenLogFields();
+  applyPriceProvider();
+  if(on)renderDen();
 }
 
 function updateDenLogFieldVisibility(){
@@ -3321,23 +3408,7 @@ function updateDenLogFieldVisibility(){
   fields.style.display=settings.denPreview?'block':'none';
 }
 
-function renderDenAccordion(){renderDenFinancing();populateDenLogFields();}
-
-function renderDenFinancing(){
-  const el=document.getElementById('den-financing-list');if(!el)return;
-  if(!financing.length){el.innerHTML='<div style="font-size:12px;color:var(--text-faint);margin-bottom:8px">No accounts yet.</div>';return;}
-  const inputStyle='font-size:12px;padding:3px 6px;height:26px;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--parchment);color:var(--text)';
-  el.innerHTML=financing.map(f=>`<div style="display:grid;grid-template-columns:1fr 90px auto;gap:6px;align-items:center;margin-bottom:6px">
-    <input type="text" value="${esc(f.name)}" placeholder="Account name" style="${inputStyle}" onblur="updateFinancingAcct('${f.id}','name',this.value)">
-    <select style="font-size:11px;height:28px;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--parchment);color:var(--text-soft)" onchange="updateFinancingAcct('${f.id}','type',this.value)">
-      <option value="loan"${f.type==='loan'?' selected':''}>Loan</option>
-      <option value="credit"${f.type==='credit'?' selected':''}>Credit</option>
-      <option value="lease"${f.type==='lease'?' selected':''}>Lease</option>
-      <option value="other"${(!f.type||f.type==='other')?' selected':''}>Other</option>
-    </select>
-    <button class="receipt-del" onclick="deleteFinancingAcct('${f.id}')">&#215;</button>
-  </div>`).join('')+'<div style="margin-bottom:8px"></div>';
-}
+function renderDenAccordion(){populateDenLogFields();}
 
 
 function populateDenLogFields(){
@@ -3346,13 +3417,14 @@ function populateDenLogFields(){
 }
 
 function addFinancingAcct(){
-  financing.push({id:uid(),name:'New account',type:'loan',originalBalance:0,currentBalance:0,interestRate:0,termMonths:0,startDate:'',endDate:'',linkedCategoryName:'',linkedExpenseIds:[]});
-  triggerAutosave('den');renderDenAccordion();
+  financing.push({id:uid(),name:'New account',type:'loan',originalBalance:0,currentBalance:0,interestRate:0,termMonths:0,startDate:'',linkedExpenseKey:''});
+  triggerAutosave('den');renderDen();
 }
 function deleteFinancingAcct(id){
   if(!confirm('Delete this financing account?'))return;
   financing=financing.filter(f=>f.id!==id);
-  triggerAutosave('den');renderDenAccordion();
+  denOpenItems.delete('den-fi-body-'+id);
+  triggerAutosave('den');renderDen();
 }
 function updateFinancingAcct(id,field,value){
   const f=financing.find(f=>f.id===id);if(!f)return;
@@ -3367,8 +3439,390 @@ function updateCatType(name,type){
 }
 function getFinancingName(id){const f=financing.find(f=>f.id===id);return f?f.name:'';}
 
+// ── DEN TAB ──────────────────────────────────
 
-function refreshAll(){runAutoArchive();if(runAutoPrune())triggerAutosave('prune');initExpenses();rebuildCatUI();processRecurringBills();buildNotifications();document.getElementById('cat-count-lbl')&&(document.getElementById('cat-count-lbl').textContent=CATS().length+' categories');populateMonthSelects();renderBuffers();updatePlanner();renderLogMetrics();renderReceiptList();if(document.getElementById('panel-report').classList.contains('active'))renderReport();applyDenPreview();}
+function findExpByKey(key){
+  if(!key)return null;
+  const p=key.indexOf('|');if(p<0)return null;
+  const cat=key.slice(0,p),nm=key.slice(p+1);
+  return(expenses[cat]||[]).find(e=>e.n===nm)||null;
+}
+
+function renderDen(){
+  renderDenNetWorth();
+  renderDenLiabilities();
+  renderDenPortfolio();
+  renderDenGoals();
+  applyDenOpenStates();
+}
+
+function applyDenOpenStates(){
+  denOpenItems.forEach(bid=>{
+    const b=document.getElementById(bid);if(b)b.classList.add('den-open');
+    const a=document.getElementById('den-arr-'+bid);if(a)a.style.transform='rotate(90deg)';
+  });
+}
+
+function toggleDenItem(bodyId){
+  const body=document.getElementById(bodyId);if(!body)return;
+  if(denOpenItems.has(bodyId)){
+    denOpenItems.delete(bodyId);body.classList.remove('den-open');
+    const a=document.getElementById('den-arr-'+bodyId);if(a)a.style.transform='';
+  }else{
+    denOpenItems.add(bodyId);body.classList.add('den-open');
+    const a=document.getElementById('den-arr-'+bodyId);if(a)a.style.transform='rotate(90deg)';
+  }
+}
+
+function renderDenNetWorth(){
+  const el=document.getElementById('den-net-worth');if(!el)return;
+  const loanEquity=financing.reduce((s,f)=>s+Math.max(0,(parseFloat(f.originalBalance)||0)-(parseFloat(f.currentBalance)||0)),0);
+  const byType=t=>investments.filter(v=>v.type===t).reduce((s,v)=>s+(parseFloat(v.units)||0)*(parseFloat(v.currentPrice)||0),0);
+  const stockVal=byType('stock'),etfVal=byType('etf'),cryptoVal=byType('crypto'),otherVal=byType('other');
+  const savingsAmt=savingsGoals.reduce((s,g)=>s+(parseFloat(g.currentAmt)||0),0);
+  const totalWorth=loanEquity+stockVal+etfVal+cryptoVal+otherVal+savingsAmt;
+  const totalDebt=financing.reduce((s,f)=>s+(parseFloat(f.currentBalance)||0),0);
+  const netWorth=totalWorth-totalDebt;
+  const costBasis=investments.reduce((s,v)=>s+(parseFloat(v.costBasis)||0),0);
+  const portVal=stockVal+etfVal+cryptoVal+otherVal;
+  const gl=portVal-costBasis;
+  if(!totalWorth&&!totalDebt){el.innerHTML='';return;}
+  const segs=[
+    {label:'Loan equity',value:loanEquity,color:'#3a6ea8'},
+    {label:'Stocks',value:stockVal,color:'#3a6b4a'},
+    {label:'ETFs',value:etfVal,color:'#2a8b8b'},
+    {label:'Crypto',value:cryptoVal,color:'#7c5a8b'},
+    {label:'Other',value:otherVal,color:'#8b6340'},
+    {label:'Savings',value:savingsAmt,color:'#b87820'},
+  ].filter(s=>s.value>0);
+  const pie=totalWorth>0?buildDenPie(segs,totalWorth):'';
+  const legend=segs.map(s=>{
+    const pct=(s.value/totalWorth*100).toFixed(1);
+    return`<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+      <span style="width:10px;height:10px;border-radius:50%;background:${s.color};flex-shrink:0;display:inline-block"></span>
+      <span style="font-size:12px;color:var(--text-mid);flex:1">${s.label}</span>
+      <span style="font-size:12px;font-weight:600;color:var(--text)">${fmt(s.value)}</span>
+      <span style="font-size:11px;color:var(--text-soft);min-width:36px;text-align:right">${pct}%</span>
+    </div>`;
+  }).join('');
+  el.innerHTML=`<div class="card" style="margin-bottom:1rem">
+    <div class="card-hdr" style="margin-bottom:12px"><span class="card-title">Net worth</span><span class="card-sub">${fmt(totalWorth)} total worth</span></div>
+    <div style="display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap;margin-bottom:1rem">
+      ${pie}
+      <div style="flex:1;min-width:150px">${legend||'<div style="font-size:12px;color:var(--text-faint)">Add accounts below to see your breakdown</div>'}</div>
+    </div>
+    <div class="metrics-row" style="margin-bottom:0">
+      <div class="metric"><div class="metric-label">Net worth</div><div class="metric-val ${netWorth>=0?'pos':'neg'}">${fmt(netWorth)}</div></div>
+      <div class="metric"><div class="metric-label">Total worth</div><div class="metric-val">${fmt(totalWorth)}</div></div>
+      <div class="metric"><div class="metric-label">Total debt</div><div class="metric-val${totalDebt?' neg':''}">${fmt(totalDebt)}</div></div>
+      ${portVal&&costBasis?`<div class="metric"><div class="metric-label">Portfolio G/L</div><div class="metric-val ${gl>=0?'pos':'neg'}">${gl>=0?'+':''}${fmt(gl)}</div></div>`:''}
+    </div>
+  </div>`;
+}
+
+function buildDenPie(segs,total){
+  const cx=72,cy=72,r=56,ir=26,p=n=>n.toFixed(2);
+  // Handle single-segment case (full ring)
+  if(segs.length===1){
+    return`<div style="flex-shrink:0"><svg viewBox="0 0 144 144" width="144" height="144" aria-hidden="true"><circle cx="${cx}" cy="${cy}" r="${r}" fill="${segs[0].color}"/><circle cx="${cx}" cy="${cy}" r="${ir}" fill="var(--warm-white)"/></svg></div>`;
+  }
+  let angle=-Math.PI/2,paths='';
+  segs.forEach(seg=>{
+    const sweep=seg.value/total*Math.PI*2;
+    if(sweep<0.01){angle+=sweep;return;}
+    const end=angle+sweep;
+    const ox1=cx+r*Math.cos(angle),oy1=cy+r*Math.sin(angle);
+    const ox2=cx+r*Math.cos(end),oy2=cy+r*Math.sin(end);
+    const ix1=cx+ir*Math.cos(angle),iy1=cy+ir*Math.sin(angle);
+    const ix2=cx+ir*Math.cos(end),iy2=cy+ir*Math.sin(end);
+    const large=sweep>Math.PI?1:0;
+    paths+=`<path d="M${p(ox1)},${p(oy1)} A${r},${r},0,${large},1,${p(ox2)},${p(oy2)} L${p(ix2)},${p(iy2)} A${ir},${ir},0,${large},0,${p(ix1)},${p(iy1)} Z" fill="${seg.color}" stroke="var(--warm-white)" stroke-width="2"/>`;
+    angle=end;
+  });
+  return`<div style="flex-shrink:0"><svg viewBox="0 0 144 144" width="144" height="144" aria-hidden="true">${paths}</svg></div>`;
+}
+
+function renderDenLiabilities(){
+  const el=document.getElementById('den-liabilities');if(!el)return;
+  if(!financing.length){el.innerHTML='<div style="font-size:12px;color:var(--text-faint);text-align:center;padding:12px 0">No accounts yet. Add a loan, credit line, or lease.</div>';return;}
+  el.innerHTML=financing.map(f=>{
+    const orig=parseFloat(f.originalBalance)||0;
+    const curr=parseFloat(f.currentBalance)||0;
+    const paid=Math.max(0,orig-curr);
+    const pct=orig>0?Math.min(100,paid/orig*100):0;
+    const rate=parseFloat(f.interestRate)||0;
+    const linkedExp=findExpByKey(f.linkedExpenseKey);
+    const pmt=linkedExp?moAmt(linkedExp):0;
+    let payoff='';
+    if(curr>0&&pmt>0){
+      let mo;
+      if(rate>0){const r=rate/100/12;const n=Math.log(1-r*curr/pmt)/Math.log(1+r);if(n<0)mo=Math.ceil(-n);}
+      else{mo=Math.ceil(curr/pmt);}
+      if(mo&&mo>0&&mo<1200){const d=new Date();d.setMonth(d.getMonth()+mo);payoff=`~${mo}mo · ${d.toLocaleDateString('en-US',{month:'short',year:'numeric'})}`;}
+    }
+    const pmtCount=receipts.filter(r=>r.financeId===f.id).length;
+    const expOpts='<option value="">— None —</option>'+CATS().flatMap(cat=>(expenses[cat]||[]).map(exp=>{const k=cat+'|'+exp.n;return`<option value="${esc(k)}"${f.linkedExpenseKey===k?' selected':''}>${esc(cat+' › '+exp.n)} (${fmt(moAmt(exp))}/mo)</option>`;})).join('');
+    const pc=pct>=75?'':pct>=40?'warn':'over';
+    const bid='den-fi-body-'+f.id;
+    const typeCap=(f.type||'other').charAt(0).toUpperCase()+(f.type||'other').slice(1);
+    return`<div class="den-item">
+      <div class="den-item-hdr" onclick="toggleDenItem('${bid}')">
+        <input class="den-inp den-inp-nm" type="text" value="${esc(f.name)}" onblur="updateFinancingAcct('${f.id}','name',this.value);renderDen()" onclick="event.stopPropagation()">
+        <span class="den-badge-${f.type||'other'}">${typeCap}</span>
+        <span style="font-size:14px;font-weight:600;color:var(--red);white-space:nowrap">${fmt(curr)}</span>
+        <span class="den-expand-arrow" id="den-arr-${bid}">&#9656;</span>
+        <button class="receipt-del" onclick="event.stopPropagation();deleteFinancingAcct('${f.id}')" title="Delete">&#215;</button>
+      </div>
+      <div class="progress-wrap" style="margin-top:8px"><div class="progress-fill ${pc}" style="width:${pct.toFixed(1)}%"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-soft);margin-top:3px">
+        <span>${paid>0?fmt(paid)+' paid':'No payments recorded'}</span>
+        <span>${orig?fmt(orig)+' original':''}</span>
+      </div>
+      <div class="den-item-body" id="${bid}">
+        <div class="den-field-row"><span class="den-field-lbl">Original balance</span><input class="den-inp den-inp-amt" type="number" min="0" step="0.01" value="${orig||''}" placeholder="0.00" onblur="updateFinancingAcct('${f.id}','originalBalance',this.value);renderDen()"></div>
+        <div class="den-field-row"><span class="den-field-lbl">Current balance</span><input class="den-inp den-inp-amt" type="number" min="0" step="0.01" value="${curr||''}" placeholder="0.00" onblur="updateFinancingAcct('${f.id}','currentBalance',this.value);renderDen()"></div>
+        <div class="den-field-row"><span class="den-field-lbl">Interest rate</span><input class="den-inp" type="number" min="0" step="0.01" value="${rate||''}" placeholder="e.g. 6.5" style="width:80px;text-align:right" onblur="updateFinancingAcct('${f.id}','interestRate',this.value);renderDen()"><span style="font-size:12px;color:var(--text-soft);margin-left:2px">% APR</span></div>
+        <div class="den-field-row"><span class="den-field-lbl">Term</span><input class="den-inp" type="number" min="0" step="1" value="${parseInt(f.termMonths)||''}" placeholder="e.g. 60" style="width:80px;text-align:right" onblur="updateFinancingAcct('${f.id}','termMonths',this.value)"><span style="font-size:12px;color:var(--text-soft);margin-left:2px">months</span></div>
+        <div class="den-field-row"><span class="den-field-lbl">Start date</span><input class="den-inp" type="date" value="${f.startDate||''}" style="width:150px" onblur="updateFinancingAcct('${f.id}','startDate',this.value)"></div>
+        <div class="den-field-row"><span class="den-field-lbl">Budget line</span><select class="den-inp" style="flex:1;height:28px" onchange="updateFinancingAcct('${f.id}','linkedExpenseKey',this.value);renderDen()">${expOpts}</select></div>
+        ${payoff?`<div style="font-size:12px;color:var(--text-mid);margin-top:6px;padding:6px 8px;background:var(--parchment);border-radius:var(--radius-sm)">Est. payoff: <strong>${payoff}</strong>${pmt?' at '+fmtDec(pmt)+'/mo':''}</div>`:''}
+        ${pmtCount?`<div style="font-size:11px;color:var(--text-soft);margin-top:6px">${pmtCount} payment${pmtCount!==1?'s':''} tagged in receipts</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderDenPortfolio(){
+  const el=document.getElementById('den-portfolio');if(!el)return;
+  const prov=settings.priceProvider||'none';
+  const showPriceId=prov!=='none';
+  const priceIdMeta={coingecko:{label:'CoinGecko ID',ph:'e.g. bitcoin'},finnhub:{label:'Finnhub symbol',ph:'e.g. AAPL or BINANCE:BTCUSDT'},twelvedata:{label:'Symbol',ph:'e.g. AAPL or BTC/USD'},alphavantage:{label:'Symbol',ph:'e.g. AAPL or BTC'}}[prov]||{label:'Price ID',ph:'Ticker / slug'};
+  renderDenPortfolioActions();
+  if(!investments.length){el.innerHTML='<div style="font-size:12px;color:var(--text-faint);text-align:center;padding:12px 0">No positions yet. Add a stock, ETF, or crypto holding.</div>';return;}
+  const groups=[{key:'stock',label:'Stocks'},{key:'etf',label:'ETFs'},{key:'crypto',label:'Crypto'},{key:'other',label:'Other'}];
+  let html='';
+  groups.forEach(({key,label})=>{
+    const group=investments.filter(v=>v.type===key);if(!group.length)return;
+    const gVal=group.reduce((s,v)=>s+(parseFloat(v.units)||0)*(parseFloat(v.currentPrice)||0),0);
+    const gBasis=group.reduce((s,v)=>s+(parseFloat(v.costBasis)||0),0);
+    const gGL=gVal-gBasis;
+    html+=`<div style="font-size:11px;font-weight:600;color:var(--text-faint);letter-spacing:0.4px;margin:8px 0 4px;display:flex;gap:8px;align-items:center">${label}<span style="font-weight:400;color:var(--text-soft)">${fmt(gVal)}</span>${gBasis?`<span class="${gGL>=0?'den-gain':'den-loss'}">${gGL>=0?'+':''}${fmt(gGL)}</span>`:''}</div>`;
+    group.forEach(v=>{
+      const val=(parseFloat(v.units)||0)*(parseFloat(v.currentPrice)||0);
+      const basis=parseFloat(v.costBasis)||0;
+      const gl=val-basis;
+      const glPct=basis>0?gl/basis*100:null;
+      const stale=v.lastPriceUpdate&&v.lastPriceUpdate!==todayStr();
+      html+=`<div class="den-item" style="margin-bottom:6px">
+        <div style="display:flex;gap:8px;align-items:center">
+          <input class="den-inp" type="text" value="${esc(v.symbol||'')}" placeholder="SYM" style="width:64px;font-weight:600;text-transform:uppercase;text-align:center" onblur="updateInvestment('${v.id}','symbol',this.value.toUpperCase())">
+          <input class="den-inp den-inp-nm" type="text" value="${esc(v.name)}" placeholder="Name" onblur="updateInvestment('${v.id}','name',this.value)">
+          <select class="den-inp" style="width:72px;height:28px" onchange="updateInvestment('${v.id}','type',this.value);renderDen()">
+            <option value="stock"${v.type==='stock'?' selected':''}>Stock</option>
+            <option value="etf"${v.type==='etf'?' selected':''}>ETF</option>
+            <option value="crypto"${v.type==='crypto'?' selected':''}>Crypto</option>
+            <option value="other"${v.type==='other'?' selected':''}>Other</option>
+          </select>
+          <button class="receipt-del" onclick="deleteInvestment('${v.id}')" title="Delete">&#215;</button>
+        </div>
+        ${showPriceId?`<div style="display:flex;gap:8px;align-items:center;margin-top:7px"><span style="font-size:11px;color:var(--text-soft);white-space:nowrap;min-width:90px;flex-shrink:0">${priceIdMeta.label}</span><input class="den-inp" style="flex:1" type="text" value="${esc(v.priceId||v.symbol||'')}" placeholder="${esc(priceIdMeta.ph)}" onblur="updateInvestment('${v.id}','priceId',this.value)"></div>`:''}
+        <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-top:8px">
+          <div><div style="font-size:10px;color:var(--text-soft);margin-bottom:2px">Units / shares</div><input class="den-inp" type="number" min="0" step="any" value="${v.units||''}" placeholder="0" style="width:100px;text-align:right" onblur="updateInvestment('${v.id}','units',this.value);renderDenPortfolio();renderDenNetWorth()"></div>
+          <div><div style="font-size:10px;color:var(--text-soft);margin-bottom:2px">Cost basis ($)</div><input class="den-inp" type="number" min="0" step="0.01" value="${v.costBasis||''}" placeholder="0.00" style="width:110px;text-align:right" onblur="updateInvestment('${v.id}','costBasis',this.value);renderDenPortfolio();renderDenNetWorth()"></div>
+          <div><div style="font-size:10px;color:var(--text-soft);margin-bottom:2px">Current price${stale?' <span title="Not updated today" style="color:var(--amber)">&#9651;</span>':''}</div><input class="den-inp" type="number" min="0" step="0.01" value="${v.currentPrice||''}" placeholder="0.00" style="width:110px;text-align:right" onblur="updateInvestment('${v.id}','currentPrice',this.value);updateInvestment('${v.id}','lastPriceUpdate',todayStr());renderDenPortfolio();renderDenNetWorth()"></div>
+          <div style="margin-left:auto;text-align:right"><div style="font-size:10px;color:var(--text-soft);margin-bottom:2px">Value</div><div style="font-size:15px;font-weight:600">${fmt(val)}</div></div>
+          ${basis?`<div style="text-align:right"><div style="font-size:10px;color:var(--text-soft);margin-bottom:2px">Gain / Loss</div><div class="${gl>=0?'den-gain':'den-loss'}" style="font-size:13px;font-weight:600">${gl>=0?'+':''}${fmt(gl)}${glPct!==null?' ('+glPct.toFixed(1)+'%)':''}</div></div>`:''}
+        </div>
+      </div>`;
+    });
+  });
+  el.innerHTML=html;
+}
+
+function renderDenGoals(){
+  const el=document.getElementById('den-goals');if(!el)return;
+  if(!savingsGoals.length){el.innerHTML='<div style="font-size:12px;color:var(--text-faint);text-align:center;padding:12px 0">No goals yet. Add a savings target.</div>';return;}
+  el.innerHTML=savingsGoals.map(g=>{
+    const curr=parseFloat(g.currentAmt)||0;
+    const tgt=parseFloat(g.targetAmt)||0;
+    const pct=tgt>0?Math.min(100,curr/tgt*100):0;
+    const pc=pct>=100?'':pct>=60?'warn':'over';
+    const remaining=tgt>curr?tgt-curr:0;
+    const expOpts='<option value="">— None —</option>'+CATS().flatMap(cat=>(expenses[cat]||[]).map(exp=>{const k=cat+'|'+exp.n;return`<option value="${esc(k)}"${g.linkedExpenseKey===k?' selected':''}>${esc(cat+' › '+exp.n)} (${fmt(moAmt(exp))}/mo)</option>`;})).join('');
+    return`<div class="den-item">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+        <input class="den-inp den-inp-nm" type="text" value="${esc(g.name)}" placeholder="Goal name" onblur="updateSavingsGoal('${g.id}','name',this.value)">
+        <button class="receipt-del" onclick="deleteSavingsGoal('${g.id}')" title="Delete">&#215;</button>
+      </div>
+      <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
+        <div><div style="font-size:10px;color:var(--text-soft);margin-bottom:2px">Saved so far</div><input class="den-inp" type="number" min="0" step="0.01" value="${curr||''}" placeholder="0.00" style="width:120px;text-align:right" onblur="updateSavingsGoal('${g.id}','currentAmt',this.value);renderDenGoals();renderDenNetWorth()"></div>
+        <div><div style="font-size:10px;color:var(--text-soft);margin-bottom:2px">Target</div><input class="den-inp" type="number" min="0" step="0.01" value="${tgt||''}" placeholder="0.00" style="width:120px;text-align:right" onblur="updateSavingsGoal('${g.id}','targetAmt',this.value);renderDenGoals();renderDenNetWorth()"></div>
+        ${tgt?`<div><div style="font-size:10px;color:var(--text-soft);margin-bottom:2px">Remaining</div><div style="font-size:13px;color:var(--text-mid);padding-bottom:4px">${fmt(remaining)}</div></div>`:''}
+      </div>
+      ${tgt?`<div class="progress-wrap" style="margin-top:8px"><div class="progress-fill ${pc}" style="width:${pct.toFixed(1)}%"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-soft);margin-top:3px"><span>${pct.toFixed(0)}% of goal</span><span>${fmt(tgt)} target</span></div>`:''}
+      <div class="den-field-row" style="margin-top:10px"><span class="den-field-lbl">Budget line</span><select class="den-inp" style="flex:1;height:28px" onchange="updateSavingsGoal('${g.id}','linkedExpenseKey',this.value)">${expOpts}</select></div>
+    </div>`;
+  }).join('');
+}
+
+// ── PRICE FEED ───────────────────────────────
+
+function applyPriceProvider(){
+  const prov=settings.priceProvider||'none';
+  const sel=document.getElementById('cfg-price-provider');if(sel)sel.value=prov;
+  const keyRow=document.getElementById('cfg-price-key-row');
+  const needsKey=prov!=='none'&&prov!=='coingecko';
+  if(keyRow)keyRow.style.display=needsKey?'flex':'none';
+  const keyInp=document.getElementById('cfg-price-apikey');if(keyInp)keyInp.value=settings.priceApiKey||'';
+  const notes=document.getElementById('cfg-price-notes');
+  if(notes){
+    const msgs={none:'',coingecko:'Free, no API key needed. Supports crypto only. Prices sourced from CoinGecko public API.',finnhub:'Free tier: 60 requests/min. Supports US stocks, ETFs, and crypto. Get a key at finnhub.io.',twelvedata:'Free tier: 800 requests/day. Supports global stocks, ETFs, and crypto. Get a key at twelvedata.com.',alphavantage:'Free tier: 25 requests/day. Supports US stocks, ETFs, and major crypto. Get a key at alphavantage.co.'};
+    notes.textContent=msgs[prov]||'';
+  }
+  renderDenPortfolioActions();
+}
+
+function updatePriceProvider(prov){
+  settings.priceProvider=prov;
+  triggerAutosave('settings');
+  applyPriceProvider();
+  renderDenPortfolio();
+}
+
+function savePriceApiKey(key){
+  settings.priceApiKey=key.trim();
+  triggerAutosave('settings');
+}
+
+function renderDenPortfolioActions(){
+  const el=document.getElementById('den-portfolio-actions');if(!el)return;
+  const prov=settings.priceProvider||'none';
+  if(prov==='none'||!investments.length){el.style.display='none';return;}
+  el.style.display='';
+  el.innerHTML=`<button class="btn" style="font-size:12px" onclick="fetchLivePrices()">&#8635; Refresh prices</button>`;
+}
+
+const CGIDS={BTC:'bitcoin',ETH:'ethereum',SOL:'solana',BNB:'binancecoin',ADA:'cardano',XRP:'ripple',DOGE:'dogecoin',DOT:'polkadot',MATIC:'matic-network',AVAX:'avalanche-2',LINK:'chainlink',LTC:'litecoin',UNI:'uniswap',ATOM:'cosmos',XLM:'stellar',ALGO:'algorand',NEAR:'near',FTM:'fantom',SAND:'the-sandbox',MANA:'decentraland',AXS:'axie-infinity',CRO:'crypto-com-chain',SHIB:'shiba-inu',TRX:'tron',ETC:'ethereum-classic',VET:'vechain',HBAR:'hedera-hashgraph',ICP:'internet-computer',FLOW:'flow',ARB:'arbitrum',OP:'optimism'};
+function cgId(sym){return CGIDS[sym.toUpperCase()]||sym.toLowerCase();}
+
+async function fetchLivePrices(){
+  const prov=settings.priceProvider||'none';if(prov==='none')return;
+  const statusEl=document.getElementById('den-price-status');
+  const btn=document.querySelector('#den-portfolio-actions button');
+  if(btn){btn.disabled=true;btn.textContent='Fetching…';}
+  if(statusEl){statusEl.style.display='';statusEl.style.color='var(--text-soft)';statusEl.textContent='Fetching prices…';}
+  try{
+    let updated=0;
+    if(prov==='coingecko')updated=await priceViaCoinGecko();
+    else if(prov==='finnhub')updated=await priceViaFinnhub();
+    else if(prov==='twelvedata')updated=await priceViaTwelveData();
+    else if(prov==='alphavantage')updated=await priceViaAlphaVantage();
+    triggerAutosave('den');renderDenPortfolio();renderDenNetWorth();
+    if(statusEl){statusEl.style.color='var(--green)';statusEl.textContent=`Updated ${updated} position${updated===1?'':'s'} — ${new Date().toLocaleTimeString()}`;}
+  }catch(e){
+    if(statusEl){statusEl.style.color='var(--red)';statusEl.textContent='Price fetch failed: '+(e.message||String(e));}
+  }finally{
+    if(btn){btn.disabled=false;btn.innerHTML='&#8635; Refresh prices';}
+  }
+}
+
+async function priceViaCoinGecko(){
+  const cryptos=investments.filter(v=>v.type==='crypto');
+  if(!cryptos.length)return 0;
+  const ids=cryptos.map(v=>cgId(v.priceId||v.symbol)).filter(Boolean).join(',');
+  const res=await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(ids)}&vs_currencies=usd`,{signal:AbortSignal.timeout(10000)});
+  if(!res.ok)throw new Error('CoinGecko HTTP '+res.status);
+  const data=await res.json();
+  let count=0;
+  cryptos.forEach(v=>{const slug=cgId(v.priceId||v.symbol);const price=data[slug]?.usd;if(price!=null){v.currentPrice=price;v.lastPriceUpdate=todayStr();count++;}});
+  return count;
+}
+
+async function priceViaFinnhub(){
+  const key=settings.priceApiKey;if(!key)throw new Error('Finnhub API key required');
+  const positions=investments.filter(v=>v.priceId||v.symbol);
+  const results=await Promise.allSettled(positions.map(async v=>{
+    const sym=encodeURIComponent(v.priceId||v.symbol);
+    const res=await fetch(`https://finnhub.io/api/v1/quote?symbol=${sym}&token=${encodeURIComponent(key)}`,{signal:AbortSignal.timeout(10000)});
+    if(!res.ok)throw new Error(res.status);
+    const data=await res.json();
+    if(data.c>0){v.currentPrice=data.c;v.lastPriceUpdate=todayStr();return true;}
+    return false;
+  }));
+  return results.filter(r=>r.status==='fulfilled'&&r.value).length;
+}
+
+async function priceViaTwelveData(){
+  const key=settings.priceApiKey;if(!key)throw new Error('Twelve Data API key required');
+  const positions=investments.filter(v=>v.priceId||v.symbol);if(!positions.length)return 0;
+  const syms=positions.map(v=>v.priceId||v.symbol).join(',');
+  const res=await fetch(`https://api.twelvedata.com/price?symbol=${encodeURIComponent(syms)}&apikey=${encodeURIComponent(key)}`,{signal:AbortSignal.timeout(15000)});
+  if(!res.ok)throw new Error('Twelve Data HTTP '+res.status);
+  const data=await res.json();
+  let count=0;
+  positions.forEach(v=>{
+    const sym=v.priceId||v.symbol;
+    const entry=positions.length===1?data:data[sym];
+    const price=parseFloat(entry?.price);
+    if(!isNaN(price)&&price>0){v.currentPrice=price;v.lastPriceUpdate=todayStr();count++;}
+  });
+  return count;
+}
+
+async function priceViaAlphaVantage(){
+  const key=settings.priceApiKey;if(!key)throw new Error('Alpha Vantage API key required');
+  const positions=investments.filter(v=>v.priceId||v.symbol);
+  let count=0;
+  for(let i=0;i<positions.length;i++){
+    const v=positions[i];
+    const sym=v.priceId||v.symbol;
+    const isCrypto=v.type==='crypto';
+    const url=isCrypto
+      ?`https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=${encodeURIComponent(sym)}&to_currency=USD&apikey=${encodeURIComponent(key)}`
+      :`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${encodeURIComponent(sym)}&apikey=${encodeURIComponent(key)}`;
+    try{
+      const res=await fetch(url,{signal:AbortSignal.timeout(10000)});if(!res.ok)continue;
+      const data=await res.json();
+      const price=isCrypto
+        ?parseFloat(data['Realtime Currency Exchange Rate']?.['5. Exchange Rate'])
+        :parseFloat(data['Global Quote']?.['05. price']);
+      if(!isNaN(price)&&price>0){v.currentPrice=price;v.lastPriceUpdate=todayStr();count++;}
+    }catch{}
+    if(i<positions.length-1)await new Promise(r=>setTimeout(r,250));
+  }
+  return count;
+}
+
+function addInvestment(type){
+  investments.push({id:uid(),name:'New position',symbol:'',type:type||'stock',units:0,costBasis:0,currentPrice:0,lastPriceUpdate:'',priceId:''});
+  triggerAutosave('den');renderDenPortfolio();renderDenNetWorth();
+}
+function deleteInvestment(id){
+  if(!confirm('Delete this investment position?'))return;
+  investments=investments.filter(v=>v.id!==id);
+  triggerAutosave('den');renderDenPortfolio();renderDenNetWorth();
+}
+function updateInvestment(id,field,value){
+  const v=investments.find(v=>v.id===id);if(!v)return;
+  v[field]=value;triggerAutosave('den');
+}
+
+function addSavingsGoal(){
+  savingsGoals.push({id:uid(),name:'New goal',targetAmt:0,currentAmt:0,linkedExpenseKey:''});
+  triggerAutosave('den');renderDenGoals();renderDenNetWorth();
+}
+function deleteSavingsGoal(id){
+  if(!confirm('Delete this savings goal?'))return;
+  savingsGoals=savingsGoals.filter(g=>g.id!==id);
+  triggerAutosave('den');renderDenGoals();renderDenNetWorth();
+}
+function updateSavingsGoal(id,field,value){
+  const g=savingsGoals.find(g=>g.id===id);if(!g)return;
+  g[field]=value;triggerAutosave('den');
+}
+
+function refreshAll(){runAutoArchive();if(runAutoPrune())triggerAutosave('prune');initExpenses();rebuildCatUI();processRecurringBills();buildNotifications();document.getElementById('cat-count-lbl')&&(document.getElementById('cat-count-lbl').textContent=CATS().length+' categories');populateMonthSelects();renderBuffers();updatePlanner();renderLogMetrics();renderReceiptList();if(document.getElementById('panel-report').classList.contains('active'))renderReport();applyDenPreview();if(document.getElementById('panel-den')?.classList.contains('active'))renderDen();}
 
 function gatherRows(){
   let rows=[];
@@ -3420,7 +3874,7 @@ function resetBudgetAndReceipts(){
   bufferPct={};
   receipts=[];
   vendors={};
-  recurringBills=[];financing=[];savingsGoals=[];
+  recurringBills=[];financing=[];savingsGoals=[];investments=[];
   archives={};
   syncMeta={version:0,lastEditedBy:'',lastEditedAt:'',lastPulledVersion:0,lastPushedAt:'',lastPulledAt:'',lastSyncedAt:''};
   localStorage.removeItem('hedgie_syncmeta');
@@ -3428,7 +3882,7 @@ function resetBudgetAndReceipts(){
   setGSB('info','Budget and receipts cleared','');
 }
 
-function resetAll(){if(!confirm('Erase ALL data including identity, sync credentials, budget, and receipts? This cannot be undone.'))return;income=[{n:'Primary salary',a:0},{n:'Side income',a:0}];categories=DEFAULT_CATS.map(c=>({...c}));expenses={};initExpenses();bufferPct={};receipts=[];vendors={};recurringBills=[];archives={};syncMeta={version:0,lastEditedBy:'',lastEditedAt:'',lastPulledVersion:0,lastPushedAt:'',lastPulledAt:'',lastSyncedAt:''};localStorage.removeItem('hedgie_syncmeta');settings={username:'',provider:'none',jsonbinId:'',jsonbinKey:'',gistId:'',gistToken:'',selfUrl:'',selfToken:'',dropboxToken:'',sharedKey:'',reminderDays:7,notifs:{bills:true,budget:true,yearly:true,sync:true,nudge:true},customNotifs:[]};saveSettings();document.getElementById('cfg-username').value='';document.getElementById('cfg-provider').value='none';onProviderChange(true);renderKeyDisplay();updateSyncStatus('idle');updateSyncButton();refreshAll();}
+function resetAll(){if(!confirm('Erase ALL data including identity, sync credentials, budget, and receipts? This cannot be undone.'))return;income=[{n:'Primary salary',a:0},{n:'Side income',a:0}];categories=DEFAULT_CATS.map(c=>({...c}));expenses={};initExpenses();bufferPct={};receipts=[];vendors={};recurringBills=[];financing=[];savingsGoals=[];investments=[];archives={};syncMeta={version:0,lastEditedBy:'',lastEditedAt:'',lastPulledVersion:0,lastPushedAt:'',lastPulledAt:'',lastSyncedAt:''};localStorage.removeItem('hedgie_syncmeta');settings={username:'',provider:'none',jsonbinId:'',jsonbinKey:'',gistId:'',gistToken:'',selfUrl:'',selfToken:'',dropboxToken:'',sharedKey:'',reminderDays:7,notifs:{bills:true,budget:true,yearly:true,sync:true,nudge:true},customNotifs:[]};saveSettings();document.getElementById('cfg-username').value='';document.getElementById('cfg-provider').value='none';onProviderChange(true);renderKeyDisplay();updateSyncStatus('idle');updateSyncButton();refreshAll();}
 
 // ── INIT ──────────────────────────────────────
 initExpenses();

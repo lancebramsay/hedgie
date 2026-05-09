@@ -4,6 +4,49 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
+## [1.9.0] — 2026-05-09
+
+### New: Den tab (Preview)
+
+Enable via **Settings → Den Preview** to unlock a new fourth tab for tracking long-term assets and liabilities alongside your monthly budget.
+
+**Liabilities**
+- Track loan, credit, lease, and other financing accounts
+- Fields: original balance, current balance, interest rate, term (months), and start date
+- Payoff estimate calculated automatically via amortization formula (or simple division for 0% accounts)
+- Link each account to a budget expense line for cross-reference
+- Receipts can be tagged to a financing account from the log form when Den Preview is on
+
+**Portfolio**
+- Track stock, ETF, crypto, and other investment positions
+- Fields: symbol, name, type, units held, cost basis, and current price
+- Gain/loss and percentage shown per position and per group
+- Staleness indicator (amber triangle) when the current price hasn't been updated today
+
+**Savings goals**
+- Named savings targets with a current saved amount and a target amount
+- Progress bar, remaining balance, and percentage to goal
+- Link each goal to a budget expense line
+
+**Net worth summary with pie chart**
+- SVG donut chart shows each asset class as a share of total worth
+- Segments: loan equity (paid-off portion of liabilities), stocks, ETFs, crypto, other, savings
+- Metrics row: total assets, total liabilities, net worth
+
+**Price feed — live stock and crypto prices**
+- Four optional providers, configured in Settings → Den Preview → Price Feed:
+  - **CoinGecko** — crypto only, free, no API key required; uses CoinGecko coin slugs
+  - **Finnhub** — stocks + crypto, free tier (60 req/min); parallel fetch per position
+  - **Twelve Data** — stocks + crypto, free tier (800 req/day); batched symbol request
+  - **Alpha Vantage** — stocks + crypto, free tier (25 req/day); sequential with 250 ms spacing
+- **Refresh prices** button appears in the Portfolio card when a provider is active
+- Per-position price ID field (CoinGecko slug, exchange-prefixed symbol, etc.) shown when a provider is configured; defaults to the ticker symbol if left blank
+- API keys are stored on-device in localStorage only and are never included in cloud sync payloads
+- Fetched prices update `currentPrice` and stamp `lastPriceUpdate` on each position for staleness tracking
+- Success and error states shown inline below the refresh button
+
+---
+
 ## [1.8.4] — 2026-05-02
 
 ### Changes
