@@ -3933,7 +3933,7 @@ async function loadDenChart(){
   results.forEach((r,i)=>{
     if(r.status!=='fulfilled'||!r.value||r.value.length<2)return;
     const units=parseFloat(eligible[i].units)||0;
-    const purchaseTs=eligible[i].purchaseDate?new Date(eligible[i].purchaseDate).getTime():0;
+    const purchaseTs=denChartRange==='SINCE'&&eligible[i].purchaseDate?new Date(eligible[i].purchaseDate).getTime():0;
     const dateMap={};
     r.value.forEach(pt=>{
       if(!purchaseTs||pt.t>=purchaseTs){const d=new Date(pt.t).toISOString().slice(0,10);dateMap[d]=pt.p;}
