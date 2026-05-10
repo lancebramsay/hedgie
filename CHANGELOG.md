@@ -4,6 +4,28 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
+## [2.1.0] — 2026-05-09
+
+### New: Performance chart, CD / Savings product type
+
+**Performance chart**
+- A new **Performance** card appears in the Den tab when at least one stock, ETF, or crypto position is in the portfolio
+- Trading-style line chart with gradient fill, Y-axis price labels, and X-axis date labels
+- Range selector: 1M, 3M, 6M, 1Y (default)
+- Position selector dropdown — choose any eligible position to chart
+- Historical price data fetched from the configured price feed provider (CoinGecko, Finnhub, Twelve Data, or Alpha Vantage)
+- Chart is lazy-loaded: data is fetched once when the card first renders, not on every Den re-render
+
+**CD / Savings product type**
+- New **+ CD / Savings** button in the Portfolio card adds a savings product entry
+- Fields: Name, Principal ($), APY (%), Deposit date
+- Current value calculated automatically via compound interest: `principal × (1 + apy/100)^years`
+- CD entries display a compound interest projection curve instead of a live price chart
+- CD / Savings appears as its own segment in both pie charts (portfolio breakdown and net worth)
+- CD entries are excluded from gain/loss calculations (no cost-basis comparison)
+
+---
+
 ## [2.0] — 2026-05-09
 
 ### New: Den tab (Preview)
