@@ -17,6 +17,13 @@ All notable changes to Open Hedgie are documented here.
 - Each position's data is filtered to start on its own purchase date — positions not yet held on a given date contribute $0 to the portfolio total, accurately reflecting when each asset entered the portfolio
 - Falls back to 1Y range with a prompt if no purchase dates have been set
 
+### Fixes
+
+**Den tab layout**
+- Both breakdown pie charts now use a consistent left-aligned layout so the pies line up vertically across cards
+- Portfolio Breakdown moved to its own standalone card, separated from the positions list
+- Den tab order: Net Worth metrics → Net Worth Breakdown → Portfolio Breakdown → Performance → Liabilities → Portfolio positions → Savings goals
+
 ---
 
 ## [2.1.2] — 2026-05-10
@@ -24,13 +31,11 @@ All notable changes to Open Hedgie are documented here.
 ### Fixes
 
 **Pie chart layout**
-- Pie charts in Net Worth and Portfolio Breakdown are now centered within their cards rather than pinned to the left edge
 - Legend no longer stretches to fill remaining card width; pie and legend stay visually grouped together
 - SVG reduced from 144px to 120px for a more balanced proportion
 
 **Den tab card order**
-- Portfolio card moved directly below Net Worth so both pie charts appear together
-- New order: Net Worth → Portfolio → Performance → Liabilities → Savings goals
+- Portfolio card moved directly below Net Worth so both pie charts appear closer together
 
 **Net worth metrics**
 - Net worth, Total assets, and Total debt now appear as prominent metric boxes at the top of the Den tab, matching the layout of the monthly report

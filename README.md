@@ -47,11 +47,14 @@ Optional cloud sync lets multiple household members share data with signed and o
 
 Enable via **Settings → Den Preview** to unlock a fourth tab for tracking long-term assets and liabilities alongside your monthly budget. All Den data is stored in the shared sync payload immediately, so it survives cloud sync and is ready for native Den features in a future phase.
 
-- **Liabilities** — loan, credit, lease, and other financing accounts with balance tracking, interest rate, term, payoff estimate, and budget line linking; receipt tagging available from the log form
-- **Portfolio** — stock, ETF, crypto, and other investment positions with units, cost basis, current price, and gain/loss per position and group
-- **Savings goals** — named targets with a current amount, target, progress bar, and budget line link
-- **Net worth summary** — SVG donut pie chart breaking down asset classes (loan equity, stocks, ETFs, crypto, other, savings) with total assets, liabilities, and net worth
-- **Live price feed** — optional API connection for current stock and crypto prices; four providers: CoinGecko (free, no key), Finnhub, Twelve Data, Alpha Vantage; API keys stay on-device and are never synced
+- **Net worth metrics** — prominent boxes at the top of the tab: Net worth, Total assets, Total debt, Portfolio G/L
+- **Net Worth Breakdown** — donut pie chart showing equity, stocks, ETFs, crypto, CD/savings, and savings goals as a share of total worth
+- **Portfolio Breakdown** — second donut pie chart showing composition of the investment portfolio only
+- **Liabilities** — loan, credit, lease, and other financing accounts with balance, interest rate, term, and payoff estimate; optional asset value field for equity-building debts (mortgage, auto) — equity = max(0, asset value − current balance); receipt tagging available from the log form
+- **Portfolio** — stock, ETF, crypto, CD/Savings, and other investment positions; CD/Savings entries use principal + APY + deposit date to calculate compound interest value automatically; optional purchase date per position
+- **Performance chart** — trading-style aggregate portfolio value chart; range buttons 1M / 3M / 6M / 1Y / Since purchase; Since purchase anchors the chart to each position's purchase date; historical data from the configured price feed
+- **Savings goals** — named targets with current saved amount, target, progress bar, and budget line link
+- **Live price feed** — four providers: CoinGecko (free, crypto only, no key), Finnhub, Twelve Data, Alpha Vantage; API keys stay on-device in localStorage and are never synced
 
 ### App & device
 - Dark mode — toggle in tab bar, synced across devices via cloud payload
