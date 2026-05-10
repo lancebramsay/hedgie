@@ -4,7 +4,7 @@ A lightweight household budget planner that runs entirely from a single HTML fil
 
 **Stable:** [hedgie.pages.dev](https://hedgie.pages.dev) — Cloudflare Pages, fully tested releases<br>
 **Pilot:** [lancebramsay.github.io/hedgie](https://lancebramsay.github.io/hedgie) — GitHub Pages, latest updates<br>
-**Current stable:** v1.8.4 | **Pilot:** v2.1.3
+**Current stable:** v1.8.4 | **Pilot:** v2.1.4
 
 ---
 
@@ -48,8 +48,8 @@ Optional cloud sync lets multiple household members share data with signed and o
 Enable via **Settings → Den Preview** to unlock a fourth tab for tracking long-term assets and liabilities alongside your monthly budget. All Den data is stored in the shared sync payload immediately, so it survives cloud sync and is ready for native Den features in a future phase.
 
 - **Net worth metrics** — prominent boxes at the top of the tab: Net worth, Total assets, Total debt, Portfolio G/L
-- **Net Worth Breakdown** — donut pie chart showing equity, stocks, ETFs, crypto, CD/savings, and savings goals as a share of total worth
-- **Portfolio Breakdown** — second donut pie chart showing composition of the investment portfolio only
+- **Net Worth** — donut pie chart showing equity, stocks, ETFs, crypto, CD/savings, and savings goals as a share of total worth
+- **Portfolio Mix** — second donut pie chart showing composition of the investment portfolio only
 - **Liabilities** — loan, credit, lease, and other financing accounts with balance, interest rate, term, and payoff estimate; optional asset value field for equity-building debts (mortgage, auto) — equity = max(0, asset value − current balance); receipt tagging available from the log form
 - **Portfolio** — stock, ETF, crypto, CD/Savings, and other investment positions; CD/Savings entries use principal + APY + deposit date to calculate compound interest value automatically; optional purchase date per position
 - **Performance chart** — trading-style aggregate portfolio value chart; range buttons 1M / 3M / 6M / 1Y / Since purchase; Since purchase anchors the chart to each position's purchase date; historical data from the configured price feed

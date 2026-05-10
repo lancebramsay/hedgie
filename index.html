@@ -324,7 +324,7 @@ select{cursor:pointer}
       <ellipse cx="20" cy="48" rx="5" ry="3" fill="#c9a882"/>
       <ellipse cx="32" cy="49" rx="5" ry="3" fill="#c9a882"/>
     </svg>
-    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v2.1.3</div></div>
+    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v2.1.4</div></div>
   </div>
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('log')" id="tab-log">
@@ -588,7 +588,7 @@ select{cursor:pointer}
     </div>
   </div>
   <div class="hint">Use the gear icon &#x2699; to configure cloud sync, shared keys, and user settings</div>
-  <div class="hint" style="margin-top:4px">Open Hedgie · v2.1.3 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
+  <div class="hint" style="margin-top:4px">Open Hedgie · v2.1.4 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
   <div class="hint" style="margin-top:8px" id="donate-btn-planner"></div>
 </div><!-- /panel-planner -->
 
@@ -3539,7 +3539,7 @@ function renderDenNetWorth(){
       ${portVal&&costBasis?`<div class="metric"><div class="metric-label">Portfolio G/L</div><div class="metric-val ${gl>=0?'pos':'neg'}">${gl>=0?'+':''}${fmt(gl)}</div></div>`:''}
     </div>
     ${totalVisualized>0?`<div class="card" style="margin-bottom:1rem">
-      <div class="card-hdr" style="margin-bottom:12px"><span class="card-title">Breakdown</span></div>
+      <div class="card-hdr" style="margin-bottom:12px"><span class="card-title">Net Worth</span></div>
       <div style="display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap">
         ${pie}
         <div style="min-width:150px">${legend}</div>
@@ -3651,7 +3651,7 @@ function renderDenPortfolioChart(){
     </div>`;
   }).join('');
   el.innerHTML=`<div class="card" style="margin-bottom:1rem">
-    <div class="card-hdr" style="margin-bottom:12px"><span class="card-title">Portfolio breakdown</span><span class="card-sub">${fmt(total)}</span></div>
+    <div class="card-hdr" style="margin-bottom:12px"><span class="card-title">Portfolio Mix</span><span class="card-sub">${fmt(total)}</span></div>
     <div style="display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap">
       ${pie}
       <div style="min-width:150px">${legend}</div>
@@ -3683,7 +3683,7 @@ function renderDenPortfolio(){
       const isCD=v.type==='cd';
       html+=`<div class="den-item" style="margin-bottom:6px">
         <div style="display:flex;gap:8px;align-items:center">
-          ${isCD?`<span style="font-size:13px">🏦</span>`:`<input class="den-inp" type="text" value="${esc(v.symbol||'')}" placeholder="SYM" style="width:64px;font-weight:600;text-transform:uppercase;text-align:center" onblur="updateInvestment('${v.id}','symbol',this.value.toUpperCase())">`}
+          ${isCD?`<span style="font-size:13px">🏦</span>`:`<input class="den-inp" type="text" value="${esc(v.symbol||'')}" placeholder="SYM" style="width:64px;font-weight:600;text-transform:uppercase;text-align:center" onblur="updateInvestment('${v.id}','symbol',this.value.toUpperCase());invalidateDenChartCache();renderDenChartCard()">`}
           <input class="den-inp den-inp-nm" type="text" value="${esc(v.name)}" placeholder="Name" onblur="updateInvestment('${v.id}','name',this.value)">
           <select class="den-inp" style="width:88px;height:28px" onchange="updateInvestment('${v.id}','type',this.value);if(this.value==='cd'){updateInvestment('${v.id}','units',1);recalcCDValue('${v.id}');}renderDen()">
             <option value="stock"${v.type==='stock'?' selected':''}>Stock</option>
@@ -3694,7 +3694,7 @@ function renderDenPortfolio(){
           </select>
           <button class="receipt-del" onclick="deleteInvestment('${v.id}')" title="Delete">&#215;</button>
         </div>
-        ${!isCD&&showPriceId?`<div style="display:flex;gap:8px;align-items:center;margin-top:7px"><span style="font-size:11px;color:var(--text-soft);white-space:nowrap;min-width:90px;flex-shrink:0">${priceIdMeta.label}</span><input class="den-inp" style="flex:1" type="text" value="${esc(v.priceId||v.symbol||'')}" placeholder="${esc(priceIdMeta.ph)}" onblur="updateInvestment('${v.id}','priceId',this.value)"></div>`:''}
+        ${!isCD&&showPriceId?`<div style="display:flex;gap:8px;align-items:center;margin-top:7px"><span style="font-size:11px;color:var(--text-soft);white-space:nowrap;min-width:90px;flex-shrink:0">${priceIdMeta.label}</span><input class="den-inp" style="flex:1" type="text" value="${esc(v.priceId||v.symbol||'')}" placeholder="${esc(priceIdMeta.ph)}" onblur="updateInvestment('${v.id}','priceId',this.value);invalidateDenChartCache();renderDenChartCard()"></div>`:''}
         ${isCD?`
         <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-top:8px">
           <div><div style="font-size:10px;color:var(--text-soft);margin-bottom:2px">Principal ($)</div><input class="den-inp" type="number" min="0" step="0.01" value="${v.costBasis||''}" placeholder="0.00" style="width:120px;text-align:right" onblur="updateInvestment('${v.id}','costBasis',this.value);recalcCDValue('${v.id}');renderDenPortfolio();renderDenPortfolioChart();renderDenNetWorth()"></div>
@@ -3706,7 +3706,7 @@ function renderDenPortfolio(){
         <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-top:8px">
           <div><div style="font-size:10px;color:var(--text-soft);margin-bottom:2px">Units / shares</div><input class="den-inp" type="number" min="0" step="any" value="${v.units||''}" placeholder="0" style="width:100px;text-align:right" onblur="updateInvestment('${v.id}','units',this.value);renderDenPortfolio();renderDenNetWorth()"></div>
           <div><div style="font-size:10px;color:var(--text-soft);margin-bottom:2px">Cost basis ($)</div><input class="den-inp" type="number" min="0" step="0.01" value="${v.costBasis||''}" placeholder="0.00" style="width:110px;text-align:right" onblur="updateInvestment('${v.id}','costBasis',this.value);renderDenPortfolio();renderDenNetWorth()"></div>
-          <div><div style="font-size:10px;color:var(--text-soft);margin-bottom:2px">Purchase date</div><input class="den-inp" type="date" value="${v.purchaseDate||''}" style="width:140px" onblur="updateInvestment('${v.id}','purchaseDate',this.value);const ca=document.getElementById('den-chart-area');if(ca)ca.innerHTML='';renderDenChartCard()"></div>
+          <div><div style="font-size:10px;color:var(--text-soft);margin-bottom:2px">Purchase date</div><input class="den-inp" type="date" value="${v.purchaseDate||''}" style="width:140px" onblur="updateInvestment('${v.id}','purchaseDate',this.value);invalidateDenChartCache();renderDenChartCard()"></div>
           <div><div style="font-size:10px;color:var(--text-soft);margin-bottom:2px">Current price${stale?' <span title="Not updated today" style="color:var(--amber)">&#9651;</span>':''}</div><input class="den-inp" type="number" min="0" step="0.01" value="${v.currentPrice||''}" placeholder="0.00" style="width:110px;text-align:right" onblur="updateInvestment('${v.id}','currentPrice',this.value);updateInvestment('${v.id}','lastPriceUpdate',todayStr());renderDenPortfolio();renderDenNetWorth()"></div>
           <div style="margin-left:auto;text-align:right"><div style="font-size:10px;color:var(--text-soft);margin-bottom:2px">Value</div><div style="font-size:15px;font-weight:600">${fmt(val)}</div></div>
           ${basis?`<div style="text-align:right"><div style="font-size:10px;color:var(--text-soft);margin-bottom:2px">Gain / Loss</div><div class="${gl>=0?'den-gain':'den-loss'}" style="font-size:13px;font-weight:600">${gl>=0?'+':''}${fmt(gl)}${glPct!==null?' ('+glPct.toFixed(1)+'%)':''}</div></div>`:''}
@@ -3765,7 +3765,9 @@ function updatePriceProvider(prov){
   settings.priceProvider=prov;
   saveSettings();triggerAutosave('settings');
   applyPriceProvider();
+  invalidateDenChartCache();
   renderDenPortfolio();
+  renderDenChartCard();
 }
 
 function savePriceApiKey(key){
@@ -3797,7 +3799,7 @@ async function fetchLivePrices(){
     else if(prov==='twelvedata')updated=await priceViaTwelveData();
     else if(prov==='alphavantage')updated=await priceViaAlphaVantage();
     triggerAutosave('den');renderDenPortfolio();renderDenNetWorth();
-    const ca=document.getElementById('den-chart-area');if(ca)ca.innerHTML='';renderDenChartCard();
+    invalidateDenChartCache();renderDenChartCard();
     if(statusEl){statusEl.style.color='var(--green)';statusEl.textContent=`Updated ${updated} position${updated===1?'':'s'} — ${new Date().toLocaleTimeString()}`;}
   }catch(e){
     if(statusEl){statusEl.style.color='var(--red)';statusEl.textContent='Price fetch failed: '+(e.message||String(e));}
@@ -3877,6 +3879,13 @@ async function priceViaAlphaVantage(){
 
 let denChartRange='1Y';
 let denChartAbort=null;
+let denChartCache=null;
+
+function invalidateDenChartCache(){
+  denChartCache=null;
+  const area=document.getElementById('den-chart-area');
+  if(area)area.innerHTML='';
+}
 
 function renderDenChartCard(){
   const card=document.getElementById('den-chart-card');if(!card)return;
@@ -3884,8 +3893,7 @@ function renderDenChartCard(){
   card.style.display=eligible.length?'':'none';
   if(!eligible.length)return;
   updateDenChartRangeBtns();
-  const area=document.getElementById('den-chart-area');
-  if(area&&!area.innerHTML.trim())loadDenChart();
+  loadDenChart();
 }
 
 function updateDenChartRangeBtns(){
@@ -3909,44 +3917,70 @@ async function loadDenChart(){
   const eligible=investments.filter(v=>v.type!=='cd'&&(parseFloat(v.units)||0)>0&&(v.priceId||v.symbol));
   if(!eligible.length){area.innerHTML='<div style="font-size:12px;color:var(--text-faint);text-align:center;padding:24px 0">Add a stock, ETF, or crypto position to see performance.</div>';return;}
   if(prov==='none'){area.innerHTML='<div style="font-size:12px;color:var(--text-faint);text-align:center;padding:24px 0">Configure a price feed in Settings → Den Preview to load historical data.</div>';if(status)status.textContent='';return;}
-  // Compute fetch window
-  let days,sinceNote='';
-  if(denChartRange==='SINCE'){
-    const purchaseTimes=eligible.map(v=>v.purchaseDate?new Date(v.purchaseDate).getTime():null).filter(Boolean);
-    if(purchaseTimes.length){
-      days=Math.ceil((Date.now()-Math.min(...purchaseTimes))/86400000)+14;
-    }else{
-      days=365;sinceNote='Add a purchase date to each position to use Since purchase.';
-    }
-  }else{
-    days={'1M':30,'3M':90,'6M':180,'1Y':365}[denChartRange]||365;
-  }
+  const posKey=eligible.map(v=>v.id+':'+(v.priceId||v.symbol)).join('|');
+  const purchaseTimes=eligible.map(v=>v.purchaseDate?new Date(v.purchaseDate).getTime():null).filter(Boolean);
+  const sinceMaxDays=purchaseTimes.length?Math.ceil((Date.now()-Math.min(...purchaseTimes))/86400000)+14:0;
+  const maxDays=Math.max(365,sinceMaxDays);
+  const cacheValid=denChartCache&&denChartCache.provider===prov&&denChartCache.posKey===posKey&&denChartCache.maxDays>=maxDays;
+  if(cacheValid){renderDenChartFromCache(eligible,ctl,status);return;}
   area.innerHTML='<div style="font-size:12px;color:var(--text-soft);text-align:center;padding:24px 0">Loading…</div>';
-  if(status)status.textContent=sinceNote;
+  if(status)status.textContent='';
   const fetches=eligible.map(v=>{
     const sym=v.priceId||v.symbol;
-    if(prov==='coingecko')return chartViaCoinGecko(sym,days,ctl.signal);
-    if(prov==='finnhub')return chartViaFinnhub(sym,days,ctl.signal);
-    if(prov==='twelvedata')return chartViaTwelveData(sym,days,ctl.signal);
-    if(prov==='alphavantage')return chartViaAlphaVantage(sym,days,ctl.signal);
+    if(prov==='coingecko')return chartViaCoinGecko(sym,maxDays,ctl.signal);
+    if(prov==='finnhub')return chartViaFinnhub(sym,maxDays,ctl.signal);
+    if(prov==='twelvedata')return chartViaTwelveData(sym,maxDays,ctl.signal);
+    if(prov==='alphavantage')return chartViaAlphaVantage(sym,maxDays,ctl.signal);
     return Promise.reject(new Error('No provider'));
   });
   const results=await Promise.allSettled(fetches);
   if(ctl.signal.aborted)return;
-  const posMaps=[];
+  const series={};
+  const fetchErrors=[];
   results.forEach((r,i)=>{
-    if(r.status!=='fulfilled'||!r.value||r.value.length<2)return;
-    const units=parseFloat(eligible[i].units)||0;
-    const purchaseTs=denChartRange==='SINCE'&&eligible[i].purchaseDate?new Date(eligible[i].purchaseDate).getTime():0;
+    if(r.status==='fulfilled'&&r.value&&r.value.length>=2){
+      series[eligible[i].id]={sym:eligible[i].priceId||eligible[i].symbol,pts:r.value};
+    }else if(r.status==='rejected'&&r.reason?.name!=='AbortError'){
+      fetchErrors.push(r.reason?.message||String(r.reason));
+    }
+  });
+  if(!Object.keys(series).length){
+    area.innerHTML=`<div style="font-size:12px;color:var(--red);text-align:center;padding:24px 0">Could not load chart data${fetchErrors.length?' — '+fetchErrors[0]:''}.<br><span style="font-size:11px;color:var(--text-soft)">Check symbol and API key, or wait a moment and try again.</span></div>`;
+    return;
+  }
+  denChartCache={provider:prov,posKey,maxDays,series};
+  renderDenChartFromCache(eligible,ctl,status);
+}
+
+function renderDenChartFromCache(eligible,ctl,status){
+  const area=document.getElementById('den-chart-area');
+  if(!area||!denChartCache)return;
+  if(ctl&&ctl.signal.aborted)return;
+  const now=Date.now();
+  let rangeDays,sinceNote='';
+  if(denChartRange==='SINCE'){
+    const purchaseTimes=eligible.map(v=>v.purchaseDate?new Date(v.purchaseDate).getTime():null).filter(Boolean);
+    if(!purchaseTimes.length)sinceNote='Add a purchase date to each position to use Since purchase.';
+    rangeDays=purchaseTimes.length?Math.ceil((now-Math.min(...purchaseTimes))/86400000)+14:365;
+  }else{
+    rangeDays={'1M':30,'3M':90,'6M':180,'1Y':365}[denChartRange]||365;
+  }
+  const cutoff=now-rangeDays*86400000;
+  const posMaps=[];
+  eligible.forEach(v=>{
+    const cached=denChartCache.series[v.id];if(!cached)return;
+    const units=parseFloat(v.units)||0;
+    const purchaseTs=denChartRange==='SINCE'&&v.purchaseDate?new Date(v.purchaseDate).getTime():0;
+    const effectiveCutoff=Math.max(cutoff,purchaseTs);
     const dateMap={};
-    r.value.forEach(pt=>{
-      if(!purchaseTs||pt.t>=purchaseTs){const d=new Date(pt.t).toISOString().slice(0,10);dateMap[d]=pt.p;}
+    cached.pts.forEach(pt=>{
+      if(pt.t>=effectiveCutoff){const d=new Date(pt.t).toISOString().slice(0,10);dateMap[d]=pt.p;}
     });
-    posMaps.push({units,dateMap});
+    if(Object.keys(dateMap).length>0)posMaps.push({units,dateMap});
   });
   if(!posMaps.length){
-    const errs=results.filter(r=>r.status==='rejected'&&r.reason?.name!=='AbortError').map(r=>r.reason?.message||String(r.reason));
-    area.innerHTML=`<div style="font-size:12px;color:var(--red);text-align:center;padding:24px 0">Could not load chart data${errs.length?' — '+errs[0]:''}.<br><span style="font-size:11px;color:var(--text-soft)">Check symbol and API key, or wait a moment and try again.</span></div>`;
+    area.innerHTML='<div style="font-size:12px;color:var(--text-faint);text-align:center;padding:24px 0">Not enough data for this range.</div>';
+    if(status)status.textContent=sinceNote;
     return;
   }
   const allDates=[...new Set(posMaps.flatMap(m=>Object.keys(m.dateMap)))].sort();
@@ -3957,9 +3991,9 @@ async function loadDenChart(){
     posMaps.forEach((m,i)=>{if(m.dateMap[d]!==undefined)lastPrices[i]=m.dateMap[d];total+=lastPrices[i]*m.units;});
     if(total>0)pts.push({t:new Date(d).getTime(),p:total});
   });
-  if(pts.length<2){area.innerHTML='<div style="font-size:12px;color:var(--text-faint);text-align:center;padding:24px 0">Not enough data points.</div>';return;}
+  if(pts.length<2){area.innerHTML='<div style="font-size:12px;color:var(--text-faint);text-align:center;padding:24px 0">Not enough data points for this range.</div>';return;}
   renderLineChart(pts,area);
-  if(status)status.textContent=`${posMaps.length} position${posMaps.length===1?'':'s'} · ${pts.length} data points · ${denChartRange}`;
+  if(status)status.textContent=`${posMaps.length} position${posMaps.length===1?'':'s'} · ${pts.length} data points · ${denChartRange}${sinceNote?' · '+sinceNote:''}`;
 }
 
 function recalcCDValue(id){
@@ -4072,12 +4106,14 @@ async function chartViaAlphaVantage(sym,days,sig){
 function addInvestment(type){
   const isCD=type==='cd';
   investments.push({id:uid(),name:isCD?'New CD / Savings':'New position',symbol:'',type:type||'stock',units:isCD?1:0,costBasis:0,currentPrice:0,lastPriceUpdate:'',priceId:'',apy:0,depositDate:'',purchaseDate:''});
-  triggerAutosave('den');renderDenPortfolio();renderDenNetWorth();
+  invalidateDenChartCache();
+  triggerAutosave('den');renderDenPortfolio();renderDenNetWorth();renderDenChartCard();
 }
 function deleteInvestment(id){
   if(!confirm('Delete this investment position?'))return;
   investments=investments.filter(v=>v.id!==id);
-  triggerAutosave('den');renderDenPortfolio();renderDenNetWorth();
+  invalidateDenChartCache();
+  triggerAutosave('den');renderDenPortfolio();renderDenNetWorth();renderDenChartCard();
 }
 function updateInvestment(id,field,value){
   const v=investments.find(v=>v.id===id);if(!v)return;

@@ -4,6 +4,25 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
+## [2.1.4] — 2026-05-09
+
+### New: Performance chart caching
+
+**Single fetch, instant range switching**
+- The Performance chart now fetches historical price data once per session (or until positions change), covering the maximum window needed across all ranges
+- Switching between 1M / 3M / 6M / 1Y / Since purchase range buttons is now instant — data is filtered client-side from the cached fetch rather than triggering a new API call each time
+- Reduces API requests dramatically: N calls per range switch → 1 call per session per position set
+
+**Cache invalidation**
+- Cache clears automatically when: the price feed provider changes, a position's ticker symbol or price ID is edited, a purchase date changes, a position is added or deleted, or Refresh Prices completes (to pick up any updated data)
+
+### Renamed charts
+
+- **Breakdown** renamed to **Net Worth** — the net worth composition donut chart in the Den tab
+- **Portfolio breakdown** renamed to **Portfolio Mix** — the investment portfolio composition donut chart
+
+---
+
 ## [2.1.3] — 2026-05-10
 
 ### New: Purchase date on portfolio positions
