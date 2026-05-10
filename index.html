@@ -3540,7 +3540,7 @@ function renderDenNetWorth(){
       ${portVal&&costBasis?`<div class="metric"><div class="metric-label">Portfolio G/L</div><div class="metric-val ${gl>=0?'pos':'neg'}">${gl>=0?'+':''}${fmt(gl)}</div></div>`:''}
     </div>
     ${totalVisualized>0?`<div class="card" style="margin-bottom:1rem">
-      <div class="card-hdr" style="margin-bottom:12px"><span class="card-title">Net Worth</span></div>
+      <div class="card-hdr" style="margin-bottom:12px"><span class="card-title">Net Worth</span><span class="card-sub">${fmt(netWorth)}</span></div>
       <div style="display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap">
         ${pie}
         <div style="min-width:150px">${legend}</div>
@@ -4012,7 +4012,11 @@ function renderDenChartFromCache(eligible,cache,ctl,status,isIntraday){
     return;
   }
   const allKeys=[...new Set(posMaps.flatMap(m=>Object.keys(m.dateMap)))].sort((a,b)=>+a-+b||a.localeCompare(b));
-  const lastPrices=posMaps.map(()=>0);
+  // For intraday, pre-seed each position with its first known price so the chart
+  // reflects pure price movement rather than treating mid-window data arrivals as gains.
+  const lastPrices=isIntraday
+    ?posMaps.map(m=>{const k=Object.keys(m.dateMap).sort((a,b)=>+a-+b)[0];return k!==undefined?m.dateMap[k]:0;})
+    :posMaps.map(()=>0);
   const pts=[];
   allKeys.forEach(d=>{
     let total=0;
