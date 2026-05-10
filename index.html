@@ -831,14 +831,14 @@ select{cursor:pointer}
               <span style="font-size:12px;color:var(--text-soft);white-space:nowrap;min-width:60px">Provider</span>
               <select id="cfg-price-provider" class="den-inp" style="flex:1;height:28px" onchange="updatePriceProvider(this.value)">
                 <option value="none">None — manual only</option>
-                <option value="coingecko">CoinGecko — crypto, free, no key</option>
+                <option value="coingecko">CoinGecko — crypto, free (optional key)</option>
                 <option value="finnhub">Finnhub — stocks + crypto, free key</option>
                 <option value="twelvedata">Twelve Data — stocks + crypto, free key</option>
                 <option value="alphavantage">Alpha Vantage — stocks + crypto, free key</option>
               </select>
             </div>
             <div id="cfg-price-key-row" style="display:none;gap:8px;align-items:center;margin-bottom:8px">
-              <span style="font-size:12px;color:var(--text-soft);white-space:nowrap;min-width:60px">API key</span>
+              <span id="cfg-price-key-lbl" style="font-size:12px;color:var(--text-soft);white-space:nowrap;min-width:60px">API key</span>
               <input id="cfg-price-apikey" class="den-inp" type="password" style="flex:1" placeholder="Paste API key" onblur="savePriceApiKey(this.value)">
             </div>
             <div id="cfg-price-notes" style="font-size:11px;color:var(--text-soft);line-height:1.5"></div>
@@ -3814,12 +3814,17 @@ function applyPriceProvider(){
   const prov=settings.priceProvider||'none';
   const sel=document.getElementById('cfg-price-provider');if(sel)sel.value=prov;
   const keyRow=document.getElementById('cfg-price-key-row');
-  const needsKey=prov!=='none'&&prov!=='coingecko';
-  if(keyRow)keyRow.style.display=needsKey?'flex':'none';
-  const keyInp=document.getElementById('cfg-price-apikey');if(keyInp)keyInp.value=settings.priceApiKey||'';
+  if(keyRow)keyRow.style.display=prov!=='none'?'flex':'none';
+  const keyInp=document.getElementById('cfg-price-apikey');
+  if(keyInp){
+    keyInp.value=prov==='coingecko'?(settings.cgApiKey||''):(settings.priceApiKey||'');
+    keyInp.placeholder=prov==='coingecko'?'Optional demo key (free at coingecko.com)':'Paste API key';
+  }
+  const keyLbl=document.getElementById('cfg-price-key-lbl');
+  if(keyLbl)keyLbl.textContent=prov==='coingecko'?'Demo key':'API key';
   const notes=document.getElementById('cfg-price-notes');
   if(notes){
-    const msgs={none:'',coingecko:'Free, no API key needed. Supports crypto only. Prices sourced from CoinGecko public API.',finnhub:'Free tier: 60 requests/min. Supports US stocks, ETFs, and crypto. Get a key at finnhub.io.',twelvedata:'Free tier: 800 requests/day. Supports global stocks, ETFs, and crypto. Get a key at twelvedata.com.',alphavantage:'Free tier: 25 requests/day. Supports US stocks, ETFs, and major crypto. Get a key at alphavantage.co.'};
+    const msgs={none:'',coingecko:'Supports crypto only. No key required, but a free demo key (coingecko.com/en/api) improves reliability on mobile networks where shared IPs hit the unauthenticated rate limit.',finnhub:'Free tier: 60 requests/min. Supports US stocks, ETFs, and crypto. Get a key at finnhub.io.',twelvedata:'Free tier: 800 requests/day. Supports global stocks, ETFs, and crypto. Get a key at twelvedata.com.',alphavantage:'Free tier: 25 requests/day. Supports US stocks, ETFs, and major crypto. Get a key at alphavantage.co.'};
     notes.textContent=msgs[prov]||'';
   }
   renderDenPortfolioActions();
@@ -3835,7 +3840,9 @@ function updatePriceProvider(prov){
 }
 
 function savePriceApiKey(key){
-  settings.priceApiKey=key.trim();
+  const prov=settings.priceProvider||'none';
+  if(prov==='coingecko')settings.cgApiKey=key.trim();
+  else settings.priceApiKey=key.trim();
   saveSettings();triggerAutosave('settings');
 }
 
@@ -3872,11 +3879,14 @@ async function fetchLivePrices(){
   }
 }
 
+function mkSignal(ms){if(typeof AbortSignal?.timeout==='function')return AbortSignal.timeout(ms);const ac=new AbortController();setTimeout(()=>ac.abort(),ms);return ac.signal;}
+function cgKeyParam(){const k=settings.cgApiKey;return k?'&x_cg_demo_api_key='+encodeURIComponent(k):'';}
+
 async function priceViaCoinGecko(){
   const cryptos=investments.filter(v=>v.type==='crypto');
   if(!cryptos.length)return 0;
   const ids=cryptos.map(v=>cgId(v.priceId||v.symbol)).filter(Boolean).join(',');
-  const res=await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(ids)}&vs_currencies=usd`,{signal:AbortSignal.timeout(10000)});
+  const res=await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${encodeURIComponent(ids)}&vs_currencies=usd${cgKeyParam()}`,{signal:mkSignal(10000)});
   if(!res.ok)throw new Error('CoinGecko HTTP '+res.status);
   const data=await res.json();
   let count=0;
@@ -3889,7 +3899,7 @@ async function priceViaFinnhub(){
   const positions=investments.filter(v=>v.priceId||v.symbol);
   const results=await Promise.allSettled(positions.map(async v=>{
     const sym=encodeURIComponent(v.priceId||v.symbol);
-    const res=await fetch(`https://finnhub.io/api/v1/quote?symbol=${sym}&token=${encodeURIComponent(key)}`,{signal:AbortSignal.timeout(10000)});
+    const res=await fetch(`https://finnhub.io/api/v1/quote?symbol=${sym}&token=${encodeURIComponent(key)}`,{signal:mkSignal(10000)});
     if(!res.ok)throw new Error(res.status);
     const data=await res.json();
     if(data.c>0){v.currentPrice=data.c;v.lastPriceUpdate=todayStr();return true;}
@@ -3902,7 +3912,7 @@ async function priceViaTwelveData(){
   const key=settings.priceApiKey;if(!key)throw new Error('Twelve Data API key required');
   const positions=investments.filter(v=>v.priceId||v.symbol);if(!positions.length)return 0;
   const syms=positions.map(v=>v.priceId||v.symbol).join(',');
-  const res=await fetch(`https://api.twelvedata.com/price?symbol=${encodeURIComponent(syms)}&apikey=${encodeURIComponent(key)}`,{signal:AbortSignal.timeout(15000)});
+  const res=await fetch(`https://api.twelvedata.com/price?symbol=${encodeURIComponent(syms)}&apikey=${encodeURIComponent(key)}`,{signal:mkSignal(15000)});
   if(!res.ok)throw new Error('Twelve Data HTTP '+res.status);
   const data=await res.json();
   let count=0;
@@ -3927,7 +3937,7 @@ async function priceViaAlphaVantage(){
       ?`https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=${encodeURIComponent(sym)}&to_currency=USD&apikey=${encodeURIComponent(key)}`
       :`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${encodeURIComponent(sym)}&apikey=${encodeURIComponent(key)}`;
     try{
-      const res=await fetch(url,{signal:AbortSignal.timeout(10000)});if(!res.ok)continue;
+      const res=await fetch(url,{signal:mkSignal(10000)});if(!res.ok)continue;
       const data=await res.json();
       const price=isCrypto
         ?parseFloat(data['Realtime Currency Exchange Rate']?.['5. Exchange Rate'])
@@ -4159,7 +4169,7 @@ function renderLineChart(points,el,isIntraday){
 
 async function chartViaCoinGecko(sym,days,sig){
   const id=cgId(sym);
-  const res=await fetch(`https://api.coingecko.com/api/v3/coins/${encodeURIComponent(id)}/market_chart?vs_currency=usd&days=${days}`,{signal:sig||AbortSignal.timeout(12000)});
+  const res=await fetch(`https://api.coingecko.com/api/v3/coins/${encodeURIComponent(id)}/market_chart?vs_currency=usd&days=${days}${cgKeyParam()}`,{signal:sig||mkSignal(12000)});
   if(!res.ok)throw new Error('CoinGecko HTTP '+res.status);
   const data=await res.json();
   return(data.prices||[]).map(([t,p])=>({t,p}));
@@ -4168,7 +4178,7 @@ async function chartViaCoinGecko(sym,days,sig){
 async function chartViaFinnhub(sym,days,sig){
   const key=settings.priceApiKey;if(!key)throw new Error('API key required');
   const to=Math.floor(Date.now()/1000),from=to-days*86400;
-  const res=await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=${encodeURIComponent(sym)}&resolution=D&from=${from}&to=${to}&token=${encodeURIComponent(key)}`,{signal:sig||AbortSignal.timeout(12000)});
+  const res=await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=${encodeURIComponent(sym)}&resolution=D&from=${from}&to=${to}&token=${encodeURIComponent(key)}`,{signal:sig||mkSignal(12000)});
   if(!res.ok)throw new Error('Finnhub HTTP '+res.status);
   const data=await res.json();
   if(data.s==='no_data')throw new Error('No data for this symbol');
@@ -4177,7 +4187,7 @@ async function chartViaFinnhub(sym,days,sig){
 
 async function chartViaTwelveData(sym,days,sig){
   const key=settings.priceApiKey;if(!key)throw new Error('API key required');
-  const res=await fetch(`https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(sym)}&interval=1day&outputsize=${Math.min(days,500)}&apikey=${encodeURIComponent(key)}`,{signal:sig||AbortSignal.timeout(12000)});
+  const res=await fetch(`https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(sym)}&interval=1day&outputsize=${Math.min(days,500)}&apikey=${encodeURIComponent(key)}`,{signal:sig||mkSignal(12000)});
   if(!res.ok)throw new Error('Twelve Data HTTP '+res.status);
   const data=await res.json();
   if(data.status==='error')throw new Error(data.message||'Error');
@@ -4190,7 +4200,7 @@ async function chartViaAlphaVantage(sym,days,sig){
   const url=isCrypto
     ?`https://www.alphavantage.co/query?function=DIGITAL_CURRENCY_DAILY&symbol=${encodeURIComponent(sym)}&market=USD&apikey=${encodeURIComponent(key)}`
     :`https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${encodeURIComponent(sym)}&outputsize=full&apikey=${encodeURIComponent(key)}`;
-  const res=await fetch(url,{signal:sig||AbortSignal.timeout(15000)});
+  const res=await fetch(url,{signal:sig||mkSignal(15000)});
   if(!res.ok)throw new Error('Alpha Vantage HTTP '+res.status);
   const data=await res.json();
   const series=data['Time Series (Digital Currency Daily)']||data['Time Series (Daily)'];
@@ -4202,7 +4212,7 @@ async function chartViaAlphaVantage(sym,days,sig){
 async function chartViaFinnhubIntraday(sym,sig){
   const key=settings.priceApiKey;if(!key)throw new Error('API key required');
   const to=Math.floor(Date.now()/1000),from=to-86400;
-  const res=await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=${encodeURIComponent(sym)}&resolution=60&from=${from}&to=${to}&token=${encodeURIComponent(key)}`,{signal:sig||AbortSignal.timeout(12000)});
+  const res=await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=${encodeURIComponent(sym)}&resolution=60&from=${from}&to=${to}&token=${encodeURIComponent(key)}`,{signal:sig||mkSignal(12000)});
   if(!res.ok)throw new Error('Finnhub HTTP '+res.status);
   const data=await res.json();
   if(data.s==='no_data')throw new Error('No data for this symbol');
@@ -4211,7 +4221,7 @@ async function chartViaFinnhubIntraday(sym,sig){
 
 async function chartViaTwelveDataIntraday(sym,sig){
   const key=settings.priceApiKey;if(!key)throw new Error('API key required');
-  const res=await fetch(`https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(sym)}&interval=1h&outputsize=24&apikey=${encodeURIComponent(key)}`,{signal:sig||AbortSignal.timeout(12000)});
+  const res=await fetch(`https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(sym)}&interval=1h&outputsize=24&apikey=${encodeURIComponent(key)}`,{signal:sig||mkSignal(12000)});
   if(!res.ok)throw new Error('Twelve Data HTTP '+res.status);
   const data=await res.json();
   if(data.status==='error')throw new Error(data.message||'Error');
@@ -4222,7 +4232,7 @@ async function chartViaAlphaVantageIntraday(sym,sig){
   const key=settings.priceApiKey;if(!key)throw new Error('API key required');
   const isCrypto=investments.find(v=>(v.priceId||v.symbol)===sym)?.type==='crypto';
   if(isCrypto)return chartViaAlphaVantage(sym,2,sig);
-  const res=await fetch(`https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${encodeURIComponent(sym)}&interval=60min&outputsize=compact&apikey=${encodeURIComponent(key)}`,{signal:sig||AbortSignal.timeout(15000)});
+  const res=await fetch(`https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${encodeURIComponent(sym)}&interval=60min&outputsize=compact&apikey=${encodeURIComponent(key)}`,{signal:sig||mkSignal(15000)});
   if(!res.ok)throw new Error('Alpha Vantage HTTP '+res.status);
   const data=await res.json();
   const series=data['Time Series (60min)'];
