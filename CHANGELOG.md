@@ -4,6 +4,21 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
+## [2.1.3] — 2026-05-10
+
+### New: Purchase date on portfolio positions
+
+**Purchase date field**
+- Stock, ETF, crypto, and other positions now have an optional **Purchase date** field in the portfolio card
+- Stored per position; survives cloud sync alongside other portfolio data
+
+**Performance chart — Since purchase range**
+- New **Since purchase** button in the Performance chart fetches history from the earliest purchase date across all charted positions
+- Each position's data is filtered to start on its own purchase date — positions not yet held on a given date contribute $0 to the portfolio total, accurately reflecting when each asset entered the portfolio
+- Falls back to 1Y range with a prompt if no purchase dates have been set
+
+---
+
 ## [2.1.2] — 2026-05-10
 
 ### Fixes
