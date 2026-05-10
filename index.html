@@ -601,6 +601,20 @@ select{cursor:pointer}
     </div>
   </div>
   <div id="den-net-worth"></div>
+  <div class="card">
+    <div class="card-hdr">
+      <span class="card-title">Portfolio</span>
+      <div class="btn-row">
+        <button class="btn" style="font-size:12px" onclick="addInvestment('stock')">+ Stock / ETF</button>
+        <button class="btn" style="font-size:12px" onclick="addInvestment('crypto')">+ Crypto</button>
+        <button class="btn" style="font-size:12px" onclick="addInvestment('cd')">+ CD / Savings</button>
+      </div>
+    </div>
+    <div id="den-portfolio-chart"></div>
+    <div id="den-portfolio-actions" style="display:none;padding:0 0 8px"></div>
+    <div id="den-price-status" style="display:none;font-size:11px;color:var(--text-soft);padding-bottom:8px"></div>
+    <div id="den-portfolio"></div>
+  </div>
   <div class="card" id="den-chart-card" style="display:none">
     <div class="card-hdr" style="margin-bottom:10px">
       <span class="card-title">Performance</span>
@@ -620,20 +634,6 @@ select{cursor:pointer}
       <button class="btn" style="font-size:12px" onclick="addFinancingAcct()">+ Add</button>
     </div>
     <div id="den-liabilities"></div>
-  </div>
-  <div class="card">
-    <div class="card-hdr">
-      <span class="card-title">Portfolio</span>
-      <div class="btn-row">
-        <button class="btn" style="font-size:12px" onclick="addInvestment('stock')">+ Stock / ETF</button>
-        <button class="btn" style="font-size:12px" onclick="addInvestment('crypto')">+ Crypto</button>
-        <button class="btn" style="font-size:12px" onclick="addInvestment('cd')">+ CD / Savings</button>
-      </div>
-    </div>
-    <div id="den-portfolio-chart"></div>
-    <div id="den-portfolio-actions" style="display:none;padding:0 0 8px"></div>
-    <div id="den-price-status" style="display:none;font-size:11px;color:var(--text-soft);padding-bottom:8px"></div>
-    <div id="den-portfolio"></div>
   </div>
   <div class="card">
     <div class="card-hdr">

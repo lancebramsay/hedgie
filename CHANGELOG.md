@@ -13,6 +13,10 @@ All notable changes to Open Hedgie are documented here.
 - Legend no longer stretches to fill remaining card width; pie and legend stay visually grouped together
 - SVG reduced from 144px to 120px for a more balanced proportion
 
+**Den tab card order**
+- Portfolio card moved directly below Net Worth so both pie charts appear together
+- New order: Net Worth → Portfolio → Performance → Liabilities → Savings goals
+
 ---
 
 ## [2.1.1] — 2026-05-10
