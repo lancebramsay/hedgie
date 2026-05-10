@@ -4020,7 +4020,7 @@ function renderDenChartFromCache(eligible,cache,ctl,status,isIntraday){
     if(total>0)pts.push({t:isIntraday?parseInt(d):new Date(d).getTime(),p:total});
   });
   if(pts.length<2){area.innerHTML='<div style="font-size:12px;color:var(--text-faint);text-align:center;padding:24px 0">Not enough data points for this range.</div>';return;}
-  renderLineChart(pts,area);
+  renderLineChart(pts,area,isIntraday);
   if(status)status.textContent=`${posMaps.length} position${posMaps.length===1?'':'s'} · ${pts.length} data points · ${denChartRange}`;
 }
 
@@ -4052,7 +4052,7 @@ function renderCDChart(v,el,days){
   renderLineChart(pts,el);
 }
 
-function renderLineChart(points,el){
+function renderLineChart(points,el,isIntraday){
   const W=560,H=180,pd={t:12,r:16,b:28,l:62};
   const iW=W-pd.l-pd.r,iH=H-pd.t-pd.b;
   const prices=points.map(p=>p.p),ts=points.map(p=>p.t);
@@ -4066,6 +4066,7 @@ function renderLineChart(points,el){
   const path=points.map((pt,i)=>(i?'L':'M')+xf(i).toFixed(1)+','+yf(pt.p).toFixed(1)).join('');
   const fill=`${path}L${xf(points.length-1).toFixed(1)},${(pd.t+iH).toFixed(1)}L${pd.l},${(pd.t+iH).toFixed(1)}Z`;
   const fmtP=v=>v>=1e6?'$'+(v/1e6).toFixed(2)+'M':v>=1000?'$'+(v/1000).toFixed(1)+'k':v>=1?'$'+v.toFixed(2):'$'+v.toFixed(4);
+  const fmtX=t=>isIntraday?new Date(t).toLocaleTimeString('en-US',{hour:'numeric',hour12:true}):new Date(t).toLocaleDateString('en-US',{month:'short',day:'numeric'});
   const yticks=Array.from({length:4},(_,i)=>{
     const val=minP+rng/3*i,yp=yf(val).toFixed(1);
     return`<line x1="${pd.l}" y1="${yp}" x2="${W-pd.r}" y2="${yp}" stroke="var(--border-light)" stroke-width="1"/>
@@ -4073,7 +4074,7 @@ function renderLineChart(points,el){
   }).join('');
   const xticks=Array.from({length:4},(_,i)=>{
     const idx=Math.round(i/3*(points.length-1)),xp=xf(idx).toFixed(1);
-    return`<text x="${xp}" y="${H-pd.b+12}" text-anchor="middle" style="font-size:9px;fill:var(--text-faint)">${new Date(ts[idx]).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</text>`;
+    return`<text x="${xp}" y="${H-pd.b+12}" text-anchor="middle" style="font-size:9px;fill:var(--text-faint)">${fmtX(ts[idx])}</text>`;
   }).join('');
   const chg=prices[prices.length-1]-prices[0];
   const chgPct=prices[0]?chg/prices[0]*100:0;
