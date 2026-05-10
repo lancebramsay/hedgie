@@ -616,6 +616,7 @@ select{cursor:pointer}
         <button class="btn" style="font-size:12px" onclick="addInvestment('crypto')">+ Crypto</button>
       </div>
     </div>
+    <div id="den-portfolio-chart"></div>
     <div id="den-portfolio-actions" style="display:none;padding:0 0 8px"></div>
     <div id="den-price-status" style="display:none;font-size:11px;color:var(--text-soft);padding-bottom:8px"></div>
     <div id="den-portfolio"></div>
@@ -3451,6 +3452,7 @@ function findExpByKey(key){
 function renderDen(){
   renderDenNetWorth();
   renderDenLiabilities();
+  renderDenPortfolioChart();
   renderDenPortfolio();
   renderDenGoals();
   applyDenOpenStates();
@@ -3604,6 +3606,39 @@ function renderDenLiabilities(){
   }).join('');
 }
 
+function renderDenPortfolioChart(){
+  const el=document.getElementById('den-portfolio-chart');if(!el)return;
+  const byType=t=>investments.filter(v=>v.type===t).reduce((s,v)=>s+(parseFloat(v.units)||0)*(parseFloat(v.currentPrice)||0),0);
+  const stockVal=byType('stock'),etfVal=byType('etf'),cryptoVal=byType('crypto'),otherVal=byType('other');
+  const savingsAmt=savingsGoals.reduce((s,g)=>s+(parseFloat(g.currentAmt)||0),0);
+  const total=stockVal+etfVal+cryptoVal+otherVal+savingsAmt;
+  if(!total){el.innerHTML='';return;}
+  const segs=[
+    {label:'Stocks',value:stockVal,color:'#3a6b4a'},
+    {label:'ETFs',value:etfVal,color:'#2a8b8b'},
+    {label:'Crypto',value:cryptoVal,color:'#7c5a8b'},
+    {label:'Other',value:otherVal,color:'#8b6340'},
+    {label:'Savings',value:savingsAmt,color:'#b87820'},
+  ].filter(s=>s.value>0);
+  const pie=buildDenPie(segs,total);
+  const legend=segs.map(s=>{
+    const pct=(s.value/total*100).toFixed(1);
+    return`<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
+      <span style="width:8px;height:8px;border-radius:50%;background:${s.color};flex-shrink:0;display:inline-block"></span>
+      <span style="font-size:12px;color:var(--text-mid);flex:1">${s.label}</span>
+      <span style="font-size:12px;font-weight:600;color:var(--text)">${fmt(s.value)}</span>
+      <span style="font-size:11px;color:var(--text-soft);min-width:36px;text-align:right">${pct}%</span>
+    </div>`;
+  }).join('');
+  el.innerHTML=`<div style="display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap;padding-bottom:12px;margin-bottom:12px;border-bottom:1px solid var(--border-light)">
+    ${pie}
+    <div style="flex:1;min-width:140px">
+      <div style="font-size:11px;font-weight:600;color:var(--text-faint);letter-spacing:0.4px;margin-bottom:8px">PORTFOLIO BREAKDOWN · ${fmt(total)}</div>
+      ${legend}
+    </div>
+  </div>`;
+}
+
 function renderDenPortfolio(){
   const el=document.getElementById('den-portfolio');if(!el)return;
   const prov=settings.priceProvider||'none';
@@ -3667,8 +3702,8 @@ function renderDenGoals(){
         <button class="receipt-del" onclick="deleteSavingsGoal('${g.id}')" title="Delete">&#215;</button>
       </div>
       <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
-        <div><div style="font-size:10px;color:var(--text-soft);margin-bottom:2px">Saved so far</div><input class="den-inp" type="number" min="0" step="0.01" value="${curr||''}" placeholder="0.00" style="width:120px;text-align:right" onblur="updateSavingsGoal('${g.id}','currentAmt',this.value);renderDenGoals();renderDenNetWorth()"></div>
-        <div><div style="font-size:10px;color:var(--text-soft);margin-bottom:2px">Target</div><input class="den-inp" type="number" min="0" step="0.01" value="${tgt||''}" placeholder="0.00" style="width:120px;text-align:right" onblur="updateSavingsGoal('${g.id}','targetAmt',this.value);renderDenGoals();renderDenNetWorth()"></div>
+        <div><div style="font-size:10px;color:var(--text-soft);margin-bottom:2px">Saved so far</div><input class="den-inp" type="number" min="0" step="0.01" value="${curr||''}" placeholder="0.00" style="width:120px;text-align:right" onblur="updateSavingsGoal('${g.id}','currentAmt',this.value);renderDenGoals();renderDenPortfolioChart();renderDenNetWorth()"></div>
+        <div><div style="font-size:10px;color:var(--text-soft);margin-bottom:2px">Target</div><input class="den-inp" type="number" min="0" step="0.01" value="${tgt||''}" placeholder="0.00" style="width:120px;text-align:right" onblur="updateSavingsGoal('${g.id}','targetAmt',this.value);renderDenGoals();renderDenPortfolioChart();renderDenNetWorth()"></div>
         ${tgt?`<div><div style="font-size:10px;color:var(--text-soft);margin-bottom:2px">Remaining</div><div style="font-size:13px;color:var(--text-mid);padding-bottom:4px">${fmt(remaining)}</div></div>`:''}
       </div>
       ${tgt?`<div class="progress-wrap" style="margin-top:8px"><div class="progress-fill ${pc}" style="width:${pct.toFixed(1)}%"></div></div>
@@ -3822,12 +3857,12 @@ function updateInvestment(id,field,value){
 
 function addSavingsGoal(){
   savingsGoals.push({id:uid(),name:'New goal',targetAmt:0,currentAmt:0,linkedExpenseKey:''});
-  triggerAutosave('den');renderDenGoals();renderDenNetWorth();
+  triggerAutosave('den');renderDenGoals();renderDenPortfolioChart();renderDenNetWorth();
 }
 function deleteSavingsGoal(id){
   if(!confirm('Delete this savings goal?'))return;
   savingsGoals=savingsGoals.filter(g=>g.id!==id);
-  triggerAutosave('den');renderDenGoals();renderDenNetWorth();
+  triggerAutosave('den');renderDenGoals();renderDenPortfolioChart();renderDenNetWorth();
 }
 function updateSavingsGoal(id,field,value){
   const g=savingsGoals.find(g=>g.id===id);if(!g)return;
