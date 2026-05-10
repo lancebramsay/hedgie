@@ -3532,9 +3532,9 @@ function renderDenNetWorth(){
   }).join('');
   el.innerHTML=`<div class="card" style="margin-bottom:1rem">
     <div class="card-hdr" style="margin-bottom:12px"><span class="card-title">Net worth</span></div>
-    <div style="display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap;margin-bottom:1rem">
+    <div style="display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap;justify-content:center;margin-bottom:1rem">
       ${pie||''}
-      <div style="flex:1;min-width:150px">${legend||'<div style="font-size:12px;color:var(--text-faint)">Add asset values to liabilities or portfolio positions to see your breakdown</div>'}</div>
+      <div style="min-width:150px;max-width:280px">${legend||'<div style="font-size:12px;color:var(--text-faint)">Add asset values to liabilities or portfolio positions to see your breakdown</div>'}</div>
     </div>
     <div class="metrics-row" style="margin-bottom:0">
       <div class="metric"><div class="metric-label">Net worth</div><div class="metric-val ${netWorth>=0?'pos':'neg'}">${fmt(netWorth)}</div></div>
@@ -3549,7 +3549,7 @@ function buildDenPie(segs,total){
   const cx=72,cy=72,r=56,ir=26,p=n=>n.toFixed(2);
   // Handle single-segment case (full ring)
   if(segs.length===1){
-    return`<div style="flex-shrink:0"><svg viewBox="0 0 144 144" width="144" height="144" aria-hidden="true"><circle cx="${cx}" cy="${cy}" r="${r}" fill="${segs[0].color}"/><circle cx="${cx}" cy="${cy}" r="${ir}" fill="var(--warm-white)"/></svg></div>`;
+    return`<div style="flex-shrink:0;width:120px;height:120px"><svg viewBox="0 0 144 144" width="120" height="120" aria-hidden="true"><circle cx="${cx}" cy="${cy}" r="${r}" fill="${segs[0].color}"/><circle cx="${cx}" cy="${cy}" r="${ir}" fill="var(--warm-white)"/></svg></div>`;
   }
   let angle=-Math.PI/2,paths='';
   segs.forEach(seg=>{
@@ -3564,7 +3564,7 @@ function buildDenPie(segs,total){
     paths+=`<path d="M${p(ox1)},${p(oy1)} A${r},${r},0,${large},1,${p(ox2)},${p(oy2)} L${p(ix2)},${p(iy2)} A${ir},${ir},0,${large},0,${p(ix1)},${p(iy1)} Z" fill="${seg.color}" stroke="var(--warm-white)" stroke-width="2"/>`;
     angle=end;
   });
-  return`<div style="flex-shrink:0"><svg viewBox="0 0 144 144" width="144" height="144" aria-hidden="true">${paths}</svg></div>`;
+  return`<div style="flex-shrink:0;width:120px;height:120px"><svg viewBox="0 0 144 144" width="120" height="120" aria-hidden="true">${paths}</svg></div>`;
 }
 
 function renderDenLiabilities(){
@@ -3647,9 +3647,9 @@ function renderDenPortfolioChart(){
       <span style="font-size:11px;color:var(--text-soft);min-width:36px;text-align:right">${pct}%</span>
     </div>`;
   }).join('');
-  el.innerHTML=`<div style="display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap;padding-bottom:12px;margin-bottom:12px;border-bottom:1px solid var(--border-light)">
+  el.innerHTML=`<div style="display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap;justify-content:center;padding-bottom:12px;margin-bottom:12px;border-bottom:1px solid var(--border-light)">
     ${pie}
-    <div style="flex:1;min-width:140px">
+    <div style="min-width:140px;max-width:260px">
       <div style="font-size:11px;font-weight:600;color:var(--text-faint);letter-spacing:0.4px;margin-bottom:8px">PORTFOLIO BREAKDOWN · ${fmt(total)}</div>
       ${legend}
     </div>
