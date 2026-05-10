@@ -4,6 +4,23 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
+## [2.1.1] — 2026-05-10
+
+### Fixes
+
+**Price provider preference now persists across refreshes**
+- Selecting a price feed provider (CoinGecko, Finnhub, Twelve Data, Alpha Vantage) now saves immediately to localStorage
+- Previously, the preference was only pushed to cloud sync; a force-refresh would revert to "None" by re-reading stale localStorage
+
+**Performance chart — aggregate portfolio view**
+- The Performance chart now shows total portfolio value over time across all eligible positions (stocks, ETFs, crypto), rather than charting a single selected position
+- Historical data is fetched for all positions in parallel; values are aligned by date with forward-fill and summed into one curve
+- The position selector dropdown has been removed
+- Chart automatically reloads after Refresh Prices completes
+- Performance card moved to appear directly below Net Worth in the Den tab
+
+---
+
 ## [2.1.0] — 2026-05-09
 
 ### New: Performance chart, CD / Savings product type
