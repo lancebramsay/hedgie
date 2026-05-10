@@ -4,6 +4,33 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
+## [2.2.0] — 2026-05-10
+
+### New: Receipt → portfolio position link
+
+**Log receipts as portfolio purchases**
+- Stock, ETF, crypto, and other investment positions can now be linked directly from the receipt log form
+- When logging a purchase, a new **Portfolio purchase** dropdown (Den Preview only) lets you tag the receipt to a specific portfolio position
+- An optional **Units** field captures how many shares or tokens were acquired in the transaction
+- Tagged receipts show a `◆ Position Name · X units` label in the receipt list for quick identification
+- Receipt edit form also supports setting and updating the position link and unit count
+
+**Automatic cost basis and units from receipts**
+- Linked receipts automatically contribute to a position's cost basis — no need to manually enter what you already logged
+- Unit counts from linked receipts are summed and added to any manually entered units
+- The earliest linked receipt date serves as the effective purchase date for performance chart calculations when no manual purchase date is set
+- Manual **Units / shares** and **Cost basis** fields in the portfolio card become "Additional units" and "Additional basis" when receipts are present — they supplement the receipt-derived values rather than replace them
+
+**Purchases from receipts section**
+- Each portfolio position that has linked receipts shows a **Purchases from receipts** list below its detail fields
+- The list shows date, vendor, amount, and units per receipt, with a subtotal row at the bottom
+
+**Den values reflect effective totals**
+- Portfolio value, gain/loss, and cost basis in the positions list, group headers, Net Worth pie, Portfolio Mix pie, and net worth metrics all incorporate receipt-derived units and basis automatically
+- No re-entry required — data already in the log powers the portfolio view
+
+---
+
 ## [2.1.5] — 2026-05-10
 
 ### New: 1D and 1W chart ranges; purchase-date-aware performance for all ranges

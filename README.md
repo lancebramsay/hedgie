@@ -4,7 +4,7 @@ A lightweight household budget planner that runs entirely from a single HTML fil
 
 **Stable:** [hedgie.pages.dev](https://hedgie.pages.dev) — Cloudflare Pages, fully tested releases<br>
 **Pilot:** [lancebramsay.github.io/hedgie](https://lancebramsay.github.io/hedgie) — GitHub Pages, latest updates<br>
-**Current stable:** v1.8.4 | **Pilot:** v2.1.5
+**Current stable:** v1.8.4 | **Pilot:** v2.2.0
 
 ---
 
@@ -51,7 +51,7 @@ Enable via **Settings → Den Preview** to unlock a fourth tab for tracking long
 - **Net Worth** — donut pie chart showing equity, stocks, ETFs, crypto, CD/savings, and savings goals as a share of total worth
 - **Portfolio Mix** — second donut pie chart showing composition of the investment portfolio only
 - **Liabilities** — loan, credit, lease, and other financing accounts with balance, interest rate, term, and payoff estimate; optional asset value field for equity-building debts (mortgage, auto) — equity = max(0, asset value − current balance); receipt tagging available from the log form
-- **Portfolio** — stock, ETF, crypto, CD/Savings, and other investment positions; CD/Savings entries use principal + APY + deposit date to calculate compound interest value automatically; optional purchase date per position
+- **Portfolio** — stock, ETF, crypto, CD/Savings, and other investment positions; CD/Savings entries use principal + APY + deposit date to calculate compound interest value automatically; optional purchase date per position; log receipts can be linked to portfolio positions to auto-track cost basis and units from purchase history
 - **Performance chart** — trading-style aggregate portfolio value chart; range buttons 1D / 1W / 1M / 3M / 6M / 1Y; all ranges are purchase-date-aware — positions contribute $0 before the date they were bought; 1D uses intraday (hourly) data; historical data from the configured price feed
 - **Savings goals** — named targets with current saved amount, target, progress bar, and budget line link
 - **Live price feed** — four providers: CoinGecko (free, crypto only, no key), Finnhub, Twelve Data, Alpha Vantage; API keys stay on-device in localStorage and are never synced

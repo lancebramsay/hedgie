@@ -324,7 +324,7 @@ select{cursor:pointer}
       <ellipse cx="20" cy="48" rx="5" ry="3" fill="#c9a882"/>
       <ellipse cx="32" cy="49" rx="5" ry="3" fill="#c9a882"/>
     </svg>
-    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v2.1.5</div></div>
+    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v2.2.0</div></div>
   </div>
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('log')" id="tab-log">
@@ -464,6 +464,11 @@ select{cursor:pointer}
       <div class="full" id="den-log-fields" style="display:none">
         <label>Payment towards <span style="opacity:0.5;font-weight:400">(Den)</span></label>
         <select id="log-finance-id"><option value="">None</option></select>
+        <label style="margin-top:8px;display:block">Portfolio purchase <span style="opacity:0.5;font-weight:400">(Den)</span></label>
+        <div style="display:flex;gap:6px;align-items:center;margin-top:4px">
+          <select id="log-investment-id" style="flex:1" onchange="updateDenLogFieldVisibility()"><option value="">None</option></select>
+          <input type="number" id="log-investment-units" min="0" step="any" placeholder="Units" style="width:80px;display:none">
+        </div>
       </div>
       <div class="full" style="display:flex;justify-content:flex-end;gap:8px;margin-top:4px">
         <button class="btn primary" style="height:40px;min-width:140px;font-size:14px" onclick="addReceipt()">Add to log</button>
@@ -588,7 +593,7 @@ select{cursor:pointer}
     </div>
   </div>
   <div class="hint">Use the gear icon &#x2699; to configure cloud sync, shared keys, and user settings</div>
-  <div class="hint" style="margin-top:4px">Open Hedgie · v2.1.5 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
+  <div class="hint" style="margin-top:4px">Open Hedgie · v2.2.0 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
   <div class="hint" style="margin-top:8px" id="donate-btn-planner"></div>
 </div><!-- /panel-planner -->
 
@@ -2973,7 +2978,9 @@ function addReceipt(){
   if(amt<=0){document.getElementById('log-amt').focus();return;}
   saveVendor(vendor,cat);
   const financeId=settings.denPreview?(document.getElementById('log-finance-id')?.value||''):'';
-  const denMeta=Object.assign({},financeId&&{financeId});
+  const investmentId=settings.denPreview?(document.getElementById('log-investment-id')?.value||''):'';
+  const investmentUnits=investmentId?(document.getElementById('log-investment-units')?.value.trim()||''):'';
+  const denMeta={...(financeId&&{financeId}),...(investmentId&&{investmentId}),...(investmentUnits&&{investmentUnits})};
   // Handle recurring bill
   if(currentRecurring==='monthly'){
     const day=parseInt(document.getElementById('log-recur-day').value)||new Date().getDate();
@@ -2999,7 +3006,11 @@ function addReceipt(){
   document.getElementById('log-vendor').value='';
   document.getElementById('log-note').value='';
   document.getElementById('log-date').value=todayStr();
-  if(settings.denPreview){const fSel=document.getElementById('log-finance-id');if(fSel)fSel.value='';}
+  if(settings.denPreview){
+    const fSel=document.getElementById('log-finance-id');if(fSel)fSel.value='';
+    const iSel=document.getElementById('log-investment-id');if(iSel)iSel.value='';
+    const uInp=document.getElementById('log-investment-units');if(uInp)uInp.value='';
+  }
   updateDenLogFieldVisibility();
   setRecurring('none');
   populateMonthSelects();renderLogMetrics();renderReceiptList();
@@ -3030,7 +3041,7 @@ function renderReceiptList(){
   const logTotal=recs.reduce((s,r)=>s+r.amt,0);
   el.innerHTML=recs.map(r=>{
     if(editingReceiptId===r.id) return renderReceiptEditForm(r);
-    return `<div class="receipt-row"><div class="cat-dot" style="background:${catColor(r.cat)}"></div><div class="receipt-info"><div class="receipt-store" style="display:flex;align-items:center;gap:5px">${esc(r.vendor||r.cat)}${recurBadge(r)}</div><div class="receipt-meta">${esc(r.cat)} &middot; ${fmtDate(r.date)}</div>${r.note?`<div class="receipt-note" onclick="toggleNoteExpand(event,this)" title="Tap to expand">${esc(r.note)}</div>`:``}${r.financeId&&getFinancingName(r.financeId)?`<div class="receipt-note" style="color:var(--text-soft)">&#9670; ${esc(getFinancingName(r.financeId))}</div>`:''}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><div class="receipt-amt">${fmtDec(r.amt)}</div>${r.by?`<div class="receipt-by" style="color:${getUserColor(r.by)}">${esc(r.by)}</div>`:''}</div><button class="receipt-edit" onclick="startEditReceipt('${r.id}')" title="Edit">&#9998;</button><button class="receipt-del" onclick="deleteReceipt('${r.id}')">&#215;</button></div>`;
+    return `<div class="receipt-row"><div class="cat-dot" style="background:${catColor(r.cat)}"></div><div class="receipt-info"><div class="receipt-store" style="display:flex;align-items:center;gap:5px">${esc(r.vendor||r.cat)}${recurBadge(r)}</div><div class="receipt-meta">${esc(r.cat)} &middot; ${fmtDate(r.date)}</div>${r.note?`<div class="receipt-note" onclick="toggleNoteExpand(event,this)" title="Tap to expand">${esc(r.note)}</div>`:``}${r.financeId&&getFinancingName(r.financeId)?`<div class="receipt-note" style="color:var(--text-soft)">&#9670; ${esc(getFinancingName(r.financeId))}</div>`:''}${r.investmentId&&getInvestmentName(r.investmentId)?`<div class="receipt-note" style="color:var(--text-soft)">&#9670; ${esc(getInvestmentName(r.investmentId))}${r.investmentUnits?' · '+r.investmentUnits+' units':''}</div>`:''}</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><div class="receipt-amt">${fmtDec(r.amt)}</div>${r.by?`<div class="receipt-by" style="color:${getUserColor(r.by)}">${esc(r.by)}</div>`:''}</div><button class="receipt-edit" onclick="startEditReceipt('${r.id}')" title="Edit">&#9998;</button><button class="receipt-del" onclick="deleteReceipt('${r.id}')">&#215;</button></div>`;
   }).join('')+`<div class="receipt-total"><span>${recs.length} item${recs.length!==1?'s':''}</span><span>${fmtDec(logTotal)}</span></div>`;
 }
 
@@ -3048,6 +3059,12 @@ function renderReceiptEditForm(r){
   if(settings.denPreview&&financing.length){
     const finOpts='<option value="">None</option>'+financing.map(f=>`<option value="${f.id}"${r.financeId===f.id?' selected':''}>${esc(f.name)}${f.type&&f.type!=='other'?' ('+f.type+')':''}</option>`).join('');
     html+=`<div class="full"><label>Payment towards</label><select id="re-fin-${r.id}">${finOpts}</select></div>`;
+  }
+  if(settings.denPreview&&investments.length){
+    const invOpts='<option value="">None</option>'+investments.map(v=>`<option value="${v.id}"${r.investmentId===v.id?' selected':''}>${esc(v.name||(v.symbol||'Position'))}${v.symbol&&v.name?' ('+esc(v.symbol)+')':''}</option>`).join('');
+    html+=`<div class="full"><label>Portfolio purchase</label><select id="re-inv-${r.id}">${invOpts}</select></div>`;
+    const selPos=investments.find(v=>v.id===r.investmentId);
+    if(!selPos||selPos.type!=='cd')html+=`<div><label>Units purchased</label><input type="number" id="re-inv-units-${r.id}" min="0" step="any" value="${r.investmentUnits||''}" placeholder="(optional)"></div>`;
   }
   if(bill){
     if(bill.freq==='yearly'){
@@ -3095,6 +3112,10 @@ function saveReceiptEdit(id){
   r.date=document.getElementById('re-date-'+id)?.value||r.date;
   const finSel=document.getElementById('re-fin-'+id);
   if(finSel)r.financeId=finSel.value||undefined;
+  const invSel=document.getElementById('re-inv-'+id);
+  if(invSel){r.investmentId=invSel.value||undefined;r.investmentUnits=undefined;}
+  const invUnits=document.getElementById('re-inv-units-'+id);
+  if(invUnits&&r.investmentId){const u=invUnits.value.trim();r.investmentUnits=u||undefined;}
   // Update recurring bill template if present
   if(r.recurId){
     const bill=recurringBills.find(b=>b.id===r.recurId);
@@ -3115,6 +3136,7 @@ function saveReceiptEdit(id){
   editingReceiptId=null;
   renderLogMetrics();
   renderReceiptList();
+  if(settings.denPreview){renderDenPortfolio();renderDenNetWorth();}
   buildNotifications();
   triggerAutosave('log');
 }
@@ -3423,14 +3445,24 @@ function applyDenPreview(){
 function updateDenLogFieldVisibility(){
   const fields=document.getElementById('den-log-fields');if(!fields)return;
   fields.style.display=settings.denPreview?'block':'none';
+  if(!settings.denPreview)return;
+  const invSel=document.getElementById('log-investment-id');
+  const unitsInp=document.getElementById('log-investment-units');
+  if(invSel&&unitsInp){
+    const pos=investments.find(v=>v.id===invSel.value);
+    unitsInp.style.display=(pos&&pos.type!=='cd')?'inline-block':'none';
+    if(!pos||pos.type==='cd')unitsInp.value='';
+  }
 }
 
 function renderDenAccordion(){populateDenLogFields();}
 
 
 function populateDenLogFields(){
-  const fSel=document.getElementById('log-finance-id');if(!fSel)return;
-  fSel.innerHTML='<option value="">None</option>'+financing.map(f=>`<option value="${f.id}">${esc(f.name)}${f.type&&f.type!=='other'?' ('+f.type+')':''}</option>`).join('');
+  const fSel=document.getElementById('log-finance-id');
+  if(fSel)fSel.innerHTML='<option value="">None</option>'+financing.map(f=>`<option value="${f.id}">${esc(f.name)}${f.type&&f.type!=='other'?' ('+f.type+')':''}</option>`).join('');
+  const iSel=document.getElementById('log-investment-id');
+  if(iSel)iSel.innerHTML='<option value="">None</option>'+investments.map(v=>`<option value="${v.id}">${esc(v.name||(v.symbol||'Position'))}${v.symbol&&v.name?' ('+esc(v.symbol)+')':''}</option>`).join('');
 }
 
 function addFinancingAcct(){
@@ -3455,6 +3487,15 @@ function updateCatType(name,type){
   cat.type=type;triggerAutosave('den');
 }
 function getFinancingName(id){const f=financing.find(f=>f.id===id);return f?f.name:'';}
+function getInvestmentName(id){const v=investments.find(v=>v.id===id);return v?v.name||(v.symbol||''):''}
+function buildLinkedByPos(){
+  const all=[...receipts];const ids=new Set(all.map(r=>r.id));
+  Object.values(archives||{}).forEach(arr=>(arr||[]).forEach(r=>{if(!ids.has(r.id)){all.push(r);ids.add(r.id);}}));
+  const map={};
+  all.forEach(r=>{if(r.investmentId)(map[r.investmentId]=map[r.investmentId]||[]).push(r);});
+  Object.keys(map).forEach(k=>map[k].sort((a,b)=>a.date.localeCompare(b.date)));
+  return map;
+}
 
 // ── DEN TAB ──────────────────────────────────
 
@@ -3500,7 +3541,9 @@ function renderDenNetWorth(){
   const totalAssetValues=equityAccts.reduce((s,f)=>s+(parseFloat(f.assetValue)||0),0);
   const equityInPie=equityAccts.reduce((s,f)=>s+Math.max(0,(parseFloat(f.assetValue)||0)-(parseFloat(f.currentBalance)||0)),0);
   // Investments & savings
-  const byType=t=>investments.filter(v=>v.type===t).reduce((s,v)=>s+(parseFloat(v.units)||0)*(parseFloat(v.currentPrice)||0),0);
+  const lbp=buildLinkedByPos();
+  const effUnits=v=>{if(v.type==='cd')return parseFloat(v.units)||1;const linked=lbp[v.id]||[];return linked.reduce((s,r)=>s+(parseFloat(r.investmentUnits)||0),0)+(parseFloat(v.units)||0);};
+  const byType=t=>investments.filter(v=>v.type===t).reduce((s,v)=>s+effUnits(v)*(parseFloat(v.currentPrice)||0),0);
   const stockVal=byType('stock'),etfVal=byType('etf'),cryptoVal=byType('crypto'),otherVal=byType('other'),cdVal=byType('cd');
   const savingsAmt=savingsGoals.reduce((s,g)=>s+(parseFloat(g.currentAmt)||0),0);
   // Balance sheet: assets = all asset values + portfolio + savings; liabilities = all loan balances
@@ -3508,7 +3551,7 @@ function renderDenNetWorth(){
   const totalLiabilities=financing.reduce((s,f)=>s+(parseFloat(f.currentBalance)||0),0);
   const netWorth=totalAssets-totalLiabilities;
   const portVal=stockVal+etfVal+cryptoVal+otherVal+cdVal;
-  const costBasis=investments.filter(v=>v.type!=='cd').reduce((s,v)=>s+(parseFloat(v.costBasis)||0),0);
+  const costBasis=investments.filter(v=>v.type!=='cd').reduce((s,v)=>{const linked=lbp[v.id]||[];const autoBasis=linked.reduce((b,r)=>b+(parseFloat(r.amt)||0),0);return s+autoBasis+(parseFloat(v.costBasis)||0);},0);
   const gl=portVal-cdVal-costBasis;
   if(!totalAssets&&!totalLiabilities){el.innerHTML='';return;}
   // Pie shows equity (net of debt) + investments + savings — i.e. what you own free and clear
@@ -3628,7 +3671,9 @@ function renderDenLiabilities(){
 
 function renderDenPortfolioChart(){
   const el=document.getElementById('den-portfolio-chart');if(!el)return;
-  const byType=t=>investments.filter(v=>v.type===t).reduce((s,v)=>s+(parseFloat(v.units)||0)*(parseFloat(v.currentPrice)||0),0);
+  const lbpChart=buildLinkedByPos();
+  const effUnitsChart=v=>{if(v.type==='cd')return parseFloat(v.units)||1;const linked=lbpChart[v.id]||[];return linked.reduce((s,r)=>s+(parseFloat(r.investmentUnits)||0),0)+(parseFloat(v.units)||0);};
+  const byType=t=>investments.filter(v=>v.type===t).reduce((s,v)=>s+effUnitsChart(v)*(parseFloat(v.currentPrice)||0),0);
   const stockVal=byType('stock'),etfVal=byType('etf'),cryptoVal=byType('crypto'),otherVal=byType('other'),cdVal=byType('cd');
   const savingsAmt=savingsGoals.reduce((s,g)=>s+(parseFloat(g.currentAmt)||0),0);
   const total=stockVal+etfVal+cryptoVal+otherVal+cdVal+savingsAmt;
@@ -3667,21 +3712,37 @@ function renderDenPortfolio(){
   const priceIdMeta={coingecko:{label:'CoinGecko ID',ph:'e.g. bitcoin'},finnhub:{label:'Finnhub symbol',ph:'e.g. AAPL or BINANCE:BTCUSDT'},twelvedata:{label:'Symbol',ph:'e.g. AAPL or BTC/USD'},alphavantage:{label:'Symbol',ph:'e.g. AAPL or BTC'}}[prov]||{label:'Price ID',ph:'Ticker / slug'};
   renderDenPortfolioActions();
   if(!investments.length){el.innerHTML='<div style="font-size:12px;color:var(--text-faint);text-align:center;padding:12px 0">No positions yet. Add a stock, ETF, or crypto holding.</div>';return;}
+  const lbp=buildLinkedByPos();
   const groups=[{key:'stock',label:'Stocks'},{key:'etf',label:'ETFs'},{key:'crypto',label:'Crypto'},{key:'cd',label:'CD / Savings'},{key:'other',label:'Other'}];
   let html='';
   groups.forEach(({key,label})=>{
     const group=investments.filter(v=>v.type===key);if(!group.length)return;
-    const gVal=group.reduce((s,v)=>s+(parseFloat(v.units)||0)*(parseFloat(v.currentPrice)||0),0);
-    const gBasis=group.reduce((s,v)=>s+(parseFloat(v.costBasis)||0),0);
+    const gVal=group.reduce((s,v)=>{
+      const linked=lbp[v.id]||[];
+      const autoU=linked.reduce((a,r)=>a+(parseFloat(r.investmentUnits)||0),0);
+      const effU=v.type==='cd'?(parseFloat(v.units)||1):(autoU+(parseFloat(v.units)||0));
+      return s+effU*(parseFloat(v.currentPrice)||0);
+    },0);
+    const gBasis=group.reduce((s,v)=>{
+      if(v.type==='cd')return s+(parseFloat(v.costBasis)||0);
+      const linked=lbp[v.id]||[];
+      const autoB=linked.reduce((a,r)=>a+(parseFloat(r.amt)||0),0);
+      return s+autoB+(parseFloat(v.costBasis)||0);
+    },0);
     const gGL=gVal-gBasis;
     html+=`<div style="font-size:11px;font-weight:600;color:var(--text-faint);letter-spacing:0.4px;margin:8px 0 4px;display:flex;gap:8px;align-items:center">${label}<span style="font-weight:400;color:var(--text-soft)">${fmt(gVal)}</span>${gBasis?`<span class="${gGL>=0?'den-gain':'den-loss'}">${gGL>=0?'+':''}${fmt(gGL)}</span>`:''}</div>`;
     group.forEach(v=>{
-      const val=(parseFloat(v.units)||0)*(parseFloat(v.currentPrice)||0);
-      const basis=parseFloat(v.costBasis)||0;
-      const gl=val-basis;
-      const glPct=basis>0?gl/basis*100:null;
-      const stale=v.lastPriceUpdate&&v.lastPriceUpdate!==todayStr();
       const isCD=v.type==='cd';
+      const linked=isCD?[]:(lbp[v.id]||[]);
+      const autoUnits=linked.reduce((s,r)=>s+(parseFloat(r.investmentUnits)||0),0);
+      const autoBasis=linked.reduce((s,r)=>s+(parseFloat(r.amt)||0),0);
+      const effectiveUnits=isCD?(parseFloat(v.units)||1):(autoUnits+(parseFloat(v.units)||0));
+      const effectiveBasis=isCD?(parseFloat(v.costBasis)||0):(autoBasis+(parseFloat(v.costBasis)||0));
+      const val=effectiveUnits*(parseFloat(v.currentPrice)||0);
+      const basis=effectiveBasis;
+      const gl=isCD?val-(parseFloat(v.costBasis)||0):val-effectiveBasis;
+      const glPct=effectiveBasis>0&&!isCD?gl/effectiveBasis*100:null;
+      const stale=v.lastPriceUpdate&&v.lastPriceUpdate!==todayStr();
       html+=`<div class="den-item" style="margin-bottom:6px">
         <div style="display:flex;gap:8px;align-items:center">
           ${isCD?`<span style="font-size:13px">🏦</span>`:`<input class="den-inp" type="text" value="${esc(v.symbol||'')}" placeholder="SYM" style="width:64px;font-weight:600;text-transform:uppercase;text-align:center" onblur="updateInvestment('${v.id}','symbol',this.value.toUpperCase());invalidateDenChartCache();renderDenChartCard()">`}
@@ -3705,13 +3766,15 @@ function renderDenPortfolio(){
           ${basis&&val?`<div style="text-align:right"><div style="font-size:10px;color:var(--text-soft);margin-bottom:2px">Interest earned</div><div class="${gl>=0?'den-gain':'den-loss'}" style="font-size:13px;font-weight:600">${gl>=0?'+':''}${fmt(gl)}</div></div>`:''}
         </div>`:`
         <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-top:8px">
-          <div><div style="font-size:10px;color:var(--text-soft);margin-bottom:2px">Units / shares</div><input class="den-inp" type="number" min="0" step="any" value="${v.units||''}" placeholder="0" style="width:100px;text-align:right" onblur="updateInvestment('${v.id}','units',this.value);renderDenPortfolio();renderDenNetWorth()"></div>
-          <div><div style="font-size:10px;color:var(--text-soft);margin-bottom:2px">Cost basis ($)</div><input class="den-inp" type="number" min="0" step="0.01" value="${v.costBasis||''}" placeholder="0.00" style="width:110px;text-align:right" onblur="updateInvestment('${v.id}','costBasis',this.value);renderDenPortfolio();renderDenNetWorth()"></div>
+          <div><div style="font-size:10px;color:var(--text-soft);margin-bottom:2px">${autoUnits?'Additional units':'Units / shares'}</div><input class="den-inp" type="number" min="0" step="any" value="${v.units||''}" placeholder="0" style="width:100px;text-align:right" onblur="updateInvestment('${v.id}','units',this.value);renderDenPortfolio();renderDenNetWorth()"></div>
+          <div><div style="font-size:10px;color:var(--text-soft);margin-bottom:2px">${autoBasis?'Additional basis ($)':'Cost basis ($)'}</div><input class="den-inp" type="number" min="0" step="0.01" value="${v.costBasis||''}" placeholder="0.00" style="width:110px;text-align:right" onblur="updateInvestment('${v.id}','costBasis',this.value);renderDenPortfolio();renderDenNetWorth()"></div>
           <div><div style="font-size:10px;color:var(--text-soft);margin-bottom:2px">Purchase date</div><input class="den-inp" type="date" value="${v.purchaseDate||''}" style="width:140px" onblur="updateInvestment('${v.id}','purchaseDate',this.value);invalidateDenChartCache();renderDenChartCard()"></div>
           <div><div style="font-size:10px;color:var(--text-soft);margin-bottom:2px">Current price${stale?' <span title="Not updated today" style="color:var(--amber)">&#9651;</span>':''}</div><input class="den-inp" type="number" min="0" step="0.01" value="${v.currentPrice||''}" placeholder="0.00" style="width:110px;text-align:right" onblur="updateInvestment('${v.id}','currentPrice',this.value);updateInvestment('${v.id}','lastPriceUpdate',todayStr());renderDenPortfolio();renderDenNetWorth()"></div>
           <div style="margin-left:auto;text-align:right"><div style="font-size:10px;color:var(--text-soft);margin-bottom:2px">Value</div><div style="font-size:15px;font-weight:600">${fmt(val)}</div></div>
           ${basis?`<div style="text-align:right"><div style="font-size:10px;color:var(--text-soft);margin-bottom:2px">Gain / Loss</div><div class="${gl>=0?'den-gain':'den-loss'}" style="font-size:13px;font-weight:600">${gl>=0?'+':''}${fmt(gl)}${glPct!==null?' ('+glPct.toFixed(1)+'%)':''}</div></div>`:''}
-        </div>`}
+        </div>
+        ${linked.length?`<div style="margin-top:8px;padding-top:6px;border-top:1px solid var(--border-faint)"><div style="font-size:10px;font-weight:600;color:var(--text-faint);margin-bottom:4px">Purchases from receipts</div>${linked.map(r=>`<div style="display:flex;gap:8px;font-size:11px;color:var(--text-mid);padding:2px 0"><span style="color:var(--text-soft);min-width:80px">${r.date}</span><span style="flex:1">${esc(r.vendor||r.note||'—')}</span><span>${fmt(parseFloat(r.amt)||0)}</span>${r.investmentUnits?`<span style="color:var(--text-soft)">${r.investmentUnits} units</span>`:''}</div>`).join('')}<div style="display:flex;gap:8px;font-size:11px;font-weight:600;margin-top:4px;padding-top:4px;border-top:1px solid var(--border-faint)"><span style="flex:1;color:var(--text-soft)">Subtotal</span><span>${fmt(autoBasis)}</span>${autoUnits?`<span style="color:var(--text-soft)">${autoUnits} units</span>`:''}</div></div>`:''}
+        `}
       </div>`;
     });
   });
@@ -4172,12 +4235,14 @@ function addInvestment(type){
   const isCD=type==='cd';
   investments.push({id:uid(),name:isCD?'New CD / Savings':'New position',symbol:'',type:type||'stock',units:isCD?1:0,costBasis:0,currentPrice:0,lastPriceUpdate:'',priceId:'',apy:0,depositDate:'',purchaseDate:''});
   invalidateDenChartCache();
+  populateDenLogFields();
   triggerAutosave('den');renderDenPortfolio();renderDenNetWorth();renderDenChartCard();
 }
 function deleteInvestment(id){
   if(!confirm('Delete this investment position?'))return;
   investments=investments.filter(v=>v.id!==id);
   invalidateDenChartCache();
+  populateDenLogFields();
   triggerAutosave('den');renderDenPortfolio();renderDenNetWorth();renderDenChartCard();
 }
 function updateInvestment(id,field,value){
