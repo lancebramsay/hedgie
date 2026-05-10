@@ -3417,7 +3417,7 @@ function populateDenLogFields(){
 }
 
 function addFinancingAcct(){
-  financing.push({id:uid(),name:'New account',type:'loan',originalBalance:0,currentBalance:0,interestRate:0,termMonths:0,startDate:'',linkedExpenseKey:''});
+  financing.push({id:uid(),name:'New account',type:'loan',originalBalance:0,currentBalance:0,interestRate:0,termMonths:0,startDate:'',linkedExpenseKey:'',assetValue:0});
   triggerAutosave('den');renderDen();
 }
 function deleteFinancingAcct(id){
@@ -3476,28 +3476,35 @@ function toggleDenItem(bodyId){
 
 function renderDenNetWorth(){
   const el=document.getElementById('den-net-worth');if(!el)return;
-  const loanEquity=financing.reduce((s,f)=>s+Math.max(0,(parseFloat(f.originalBalance)||0)-(parseFloat(f.currentBalance)||0)),0);
+  // Equity accounts: have a real underlying asset (home, vehicle, etc.)
+  const equityAccts=financing.filter(f=>(parseFloat(f.assetValue)||0)>0);
+  const totalAssetValues=equityAccts.reduce((s,f)=>s+(parseFloat(f.assetValue)||0),0);
+  const equityInPie=equityAccts.reduce((s,f)=>s+Math.max(0,(parseFloat(f.assetValue)||0)-(parseFloat(f.currentBalance)||0)),0);
+  // Investments & savings
   const byType=t=>investments.filter(v=>v.type===t).reduce((s,v)=>s+(parseFloat(v.units)||0)*(parseFloat(v.currentPrice)||0),0);
   const stockVal=byType('stock'),etfVal=byType('etf'),cryptoVal=byType('crypto'),otherVal=byType('other');
   const savingsAmt=savingsGoals.reduce((s,g)=>s+(parseFloat(g.currentAmt)||0),0);
-  const totalWorth=loanEquity+stockVal+etfVal+cryptoVal+otherVal+savingsAmt;
-  const totalDebt=financing.reduce((s,f)=>s+(parseFloat(f.currentBalance)||0),0);
-  const netWorth=totalWorth-totalDebt;
+  // Balance sheet: assets = all asset values + portfolio + savings; liabilities = all loan balances
+  const totalAssets=totalAssetValues+stockVal+etfVal+cryptoVal+otherVal+savingsAmt;
+  const totalLiabilities=financing.reduce((s,f)=>s+(parseFloat(f.currentBalance)||0),0);
+  const netWorth=totalAssets-totalLiabilities;
   const costBasis=investments.reduce((s,v)=>s+(parseFloat(v.costBasis)||0),0);
   const portVal=stockVal+etfVal+cryptoVal+otherVal;
   const gl=portVal-costBasis;
-  if(!totalWorth&&!totalDebt){el.innerHTML='';return;}
+  if(!totalAssets&&!totalLiabilities){el.innerHTML='';return;}
+  // Pie shows equity (net of debt) + investments + savings — i.e. what you own free and clear
+  const totalVisualized=equityInPie+stockVal+etfVal+cryptoVal+otherVal+savingsAmt;
   const segs=[
-    {label:'Loan equity',value:loanEquity,color:'#3a6ea8'},
+    {label:'Equity',value:equityInPie,color:'#3a6ea8'},
     {label:'Stocks',value:stockVal,color:'#3a6b4a'},
     {label:'ETFs',value:etfVal,color:'#2a8b8b'},
     {label:'Crypto',value:cryptoVal,color:'#7c5a8b'},
     {label:'Other',value:otherVal,color:'#8b6340'},
     {label:'Savings',value:savingsAmt,color:'#b87820'},
   ].filter(s=>s.value>0);
-  const pie=totalWorth>0?buildDenPie(segs,totalWorth):'';
+  const pie=totalVisualized>0?buildDenPie(segs,totalVisualized):'';
   const legend=segs.map(s=>{
-    const pct=(s.value/totalWorth*100).toFixed(1);
+    const pct=(s.value/totalVisualized*100).toFixed(1);
     return`<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
       <span style="width:10px;height:10px;border-radius:50%;background:${s.color};flex-shrink:0;display:inline-block"></span>
       <span style="font-size:12px;color:var(--text-mid);flex:1">${s.label}</span>
@@ -3506,15 +3513,15 @@ function renderDenNetWorth(){
     </div>`;
   }).join('');
   el.innerHTML=`<div class="card" style="margin-bottom:1rem">
-    <div class="card-hdr" style="margin-bottom:12px"><span class="card-title">Net worth</span><span class="card-sub">${fmt(totalWorth)} total worth</span></div>
+    <div class="card-hdr" style="margin-bottom:12px"><span class="card-title">Net worth</span></div>
     <div style="display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap;margin-bottom:1rem">
-      ${pie}
-      <div style="flex:1;min-width:150px">${legend||'<div style="font-size:12px;color:var(--text-faint)">Add accounts below to see your breakdown</div>'}</div>
+      ${pie||''}
+      <div style="flex:1;min-width:150px">${legend||'<div style="font-size:12px;color:var(--text-faint)">Add asset values to liabilities or portfolio positions to see your breakdown</div>'}</div>
     </div>
     <div class="metrics-row" style="margin-bottom:0">
       <div class="metric"><div class="metric-label">Net worth</div><div class="metric-val ${netWorth>=0?'pos':'neg'}">${fmt(netWorth)}</div></div>
-      <div class="metric"><div class="metric-label">Total worth</div><div class="metric-val">${fmt(totalWorth)}</div></div>
-      <div class="metric"><div class="metric-label">Total debt</div><div class="metric-val${totalDebt?' neg':''}">${fmt(totalDebt)}</div></div>
+      <div class="metric"><div class="metric-label">Total assets</div><div class="metric-val">${fmt(totalAssets)}</div></div>
+      <div class="metric"><div class="metric-label">Total debt</div><div class="metric-val${totalLiabilities?' neg':''}">${fmt(totalLiabilities)}</div></div>
       ${portVal&&costBasis?`<div class="metric"><div class="metric-label">Portfolio G/L</div><div class="metric-val ${gl>=0?'pos':'neg'}">${gl>=0?'+':''}${fmt(gl)}</div></div>`:''}
     </div>
   </div>`;
@@ -3548,8 +3555,11 @@ function renderDenLiabilities(){
   el.innerHTML=financing.map(f=>{
     const orig=parseFloat(f.originalBalance)||0;
     const curr=parseFloat(f.currentBalance)||0;
+    const assetVal=parseFloat(f.assetValue)||0;
+    const hasAsset=assetVal>0;
+    const equity=hasAsset?Math.max(0,assetVal-curr):0;
     const paid=Math.max(0,orig-curr);
-    const pct=orig>0?Math.min(100,paid/orig*100):0;
+    const pct=hasAsset?(assetVal>0?Math.min(100,equity/assetVal*100):0):(orig>0?Math.min(100,paid/orig*100):0);
     const rate=parseFloat(f.interestRate)||0;
     const linkedExp=findExpByKey(f.linkedExpenseKey);
     const pmt=linkedExp?moAmt(linkedExp):0;
@@ -3565,6 +3575,9 @@ function renderDenLiabilities(){
     const pc=pct>=75?'':pct>=40?'warn':'over';
     const bid='den-fi-body-'+f.id;
     const typeCap=(f.type||'other').charAt(0).toUpperCase()+(f.type||'other').slice(1);
+    const progressLabel=hasAsset
+      ?`<span style="color:var(--green)">${fmt(equity)} equity</span><span>${fmt(assetVal)} value</span>`
+      :`<span>${paid>0?fmt(paid)+' paid':'No payments recorded'}</span><span>${orig?fmt(orig)+' original':''}</span>`;
     return`<div class="den-item">
       <div class="den-item-hdr" onclick="toggleDenItem('${bid}')">
         <input class="den-inp den-inp-nm" type="text" value="${esc(f.name)}" onblur="updateFinancingAcct('${f.id}','name',this.value);renderDen()" onclick="event.stopPropagation()">
@@ -3574,11 +3587,10 @@ function renderDenLiabilities(){
         <button class="receipt-del" onclick="event.stopPropagation();deleteFinancingAcct('${f.id}')" title="Delete">&#215;</button>
       </div>
       <div class="progress-wrap" style="margin-top:8px"><div class="progress-fill ${pc}" style="width:${pct.toFixed(1)}%"></div></div>
-      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-soft);margin-top:3px">
-        <span>${paid>0?fmt(paid)+' paid':'No payments recorded'}</span>
-        <span>${orig?fmt(orig)+' original':''}</span>
-      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-soft);margin-top:3px">${progressLabel}</div>
       <div class="den-item-body" id="${bid}">
+        <div class="den-field-row"><span class="den-field-lbl">Asset value</span><input class="den-inp den-inp-amt" type="number" min="0" step="0.01" value="${assetVal||''}" placeholder="Home, vehicle, etc." onblur="updateFinancingAcct('${f.id}','assetValue',this.value);renderDen()"></div>
+        <div style="font-size:11px;color:var(--text-faint);margin:-4px 0 8px;line-height:1.4">Enter current market value for equity-building debts (mortgage, auto). Leave blank for pure liabilities (student loan, personal loan).</div>
         <div class="den-field-row"><span class="den-field-lbl">Original balance</span><input class="den-inp den-inp-amt" type="number" min="0" step="0.01" value="${orig||''}" placeholder="0.00" onblur="updateFinancingAcct('${f.id}','originalBalance',this.value);renderDen()"></div>
         <div class="den-field-row"><span class="den-field-lbl">Current balance</span><input class="den-inp den-inp-amt" type="number" min="0" step="0.01" value="${curr||''}" placeholder="0.00" onblur="updateFinancingAcct('${f.id}','currentBalance',this.value);renderDen()"></div>
         <div class="den-field-row"><span class="den-field-lbl">Interest rate</span><input class="den-inp" type="number" min="0" step="0.01" value="${rate||''}" placeholder="e.g. 6.5" style="width:80px;text-align:right" onblur="updateFinancingAcct('${f.id}','interestRate',this.value);renderDen()"><span style="font-size:12px;color:var(--text-soft);margin-left:2px">% APR</span></div>
