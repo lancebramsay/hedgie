@@ -3530,19 +3530,21 @@ function renderDenNetWorth(){
       <span style="font-size:11px;color:var(--text-soft);min-width:36px;text-align:right">${pct}%</span>
     </div>`;
   }).join('');
-  el.innerHTML=`<div class="card" style="margin-bottom:1rem">
-    <div class="card-hdr" style="margin-bottom:12px"><span class="card-title">Net worth</span></div>
-    <div style="display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap;justify-content:center;margin-bottom:1rem">
-      ${pie||''}
-      <div style="min-width:150px;max-width:280px">${legend||'<div style="font-size:12px;color:var(--text-faint)">Add asset values to liabilities or portfolio positions to see your breakdown</div>'}</div>
-    </div>
-    <div class="metrics-row" style="margin-bottom:0">
+  el.innerHTML=`
+    <div class="metrics-row">
       <div class="metric"><div class="metric-label">Net worth</div><div class="metric-val ${netWorth>=0?'pos':'neg'}">${fmt(netWorth)}</div></div>
       <div class="metric"><div class="metric-label">Total assets</div><div class="metric-val">${fmt(totalAssets)}</div></div>
       <div class="metric"><div class="metric-label">Total debt</div><div class="metric-val${totalLiabilities?' neg':''}">${fmt(totalLiabilities)}</div></div>
       ${portVal&&costBasis?`<div class="metric"><div class="metric-label">Portfolio G/L</div><div class="metric-val ${gl>=0?'pos':'neg'}">${gl>=0?'+':''}${fmt(gl)}</div></div>`:''}
     </div>
-  </div>`;
+    ${totalVisualized>0?`<div class="card" style="margin-bottom:1rem">
+      <div class="card-hdr" style="margin-bottom:12px"><span class="card-title">Breakdown</span></div>
+      <div style="display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap;justify-content:center">
+        ${pie}
+        <div style="min-width:150px;max-width:280px">${legend}</div>
+      </div>
+    </div>`:''}
+  `;
 }
 
 function buildDenPie(segs,total){

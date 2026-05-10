@@ -17,6 +17,10 @@ All notable changes to Open Hedgie are documented here.
 - Portfolio card moved directly below Net Worth so both pie charts appear together
 - New order: Net Worth → Portfolio → Performance → Liabilities → Savings goals
 
+**Net worth metrics**
+- Net worth, Total assets, and Total debt now appear as prominent metric boxes at the top of the Den tab, matching the layout of the monthly report
+- Breakdown pie chart moved into its own card below the metrics row
+
 ---
 
 ## [2.1.1] — 2026-05-10
