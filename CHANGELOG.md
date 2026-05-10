@@ -4,6 +4,17 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
+## [2.1.2] — 2026-05-10
+
+### Fixes
+
+**Pie chart layout**
+- Pie charts in Net Worth and Portfolio Breakdown are now centered within their cards rather than pinned to the left edge
+- Legend no longer stretches to fill remaining card width; pie and legend stay visually grouped together
+- SVG reduced from 144px to 120px for a more balanced proportion
+
+---
+
 ## [2.1.1] — 2026-05-10
 
 ### Fixes
