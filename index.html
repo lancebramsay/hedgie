@@ -324,7 +324,7 @@ select{cursor:pointer}
       <ellipse cx="20" cy="48" rx="5" ry="3" fill="#c9a882"/>
       <ellipse cx="32" cy="49" rx="5" ry="3" fill="#c9a882"/>
     </svg>
-    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v2.1.4</div></div>
+    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v2.1.5</div></div>
   </div>
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('log')" id="tab-log">
@@ -588,7 +588,7 @@ select{cursor:pointer}
     </div>
   </div>
   <div class="hint">Use the gear icon &#x2699; to configure cloud sync, shared keys, and user settings</div>
-  <div class="hint" style="margin-top:4px">Open Hedgie · v2.1.4 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
+  <div class="hint" style="margin-top:4px">Open Hedgie · v2.1.5 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
   <div class="hint" style="margin-top:8px" id="donate-btn-planner"></div>
 </div><!-- /panel-planner -->
 
@@ -607,11 +607,12 @@ select{cursor:pointer}
       <span class="card-title">Performance</span>
     </div>
     <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
+      <button class="btn" id="dcr-1d" onclick="setDenChartRange('1D')" style="font-size:11px;padding:3px 10px">1D</button>
+      <button class="btn" id="dcr-1w" onclick="setDenChartRange('1W')" style="font-size:11px;padding:3px 10px">1W</button>
       <button class="btn" id="dcr-1m" onclick="setDenChartRange('1M')" style="font-size:11px;padding:3px 10px">1M</button>
       <button class="btn" id="dcr-3m" onclick="setDenChartRange('3M')" style="font-size:11px;padding:3px 10px">3M</button>
       <button class="btn" id="dcr-6m" onclick="setDenChartRange('6M')" style="font-size:11px;padding:3px 10px">6M</button>
       <button class="btn" id="dcr-1y" onclick="setDenChartRange('1Y')" style="font-size:11px;padding:3px 10px;font-weight:700">1Y</button>
-      <button class="btn" id="dcr-since" onclick="setDenChartRange('SINCE')" style="font-size:11px;padding:3px 10px">Since purchase</button>
     </div>
     <div id="den-chart-area"></div>
     <div id="den-chart-status" style="font-size:11px;color:var(--text-soft);margin-top:6px;text-align:right"></div>
@@ -3880,9 +3881,10 @@ async function priceViaAlphaVantage(){
 let denChartRange='1Y';
 let denChartAbort=null;
 let denChartCache=null;
+let denChartCacheIntraday=null;
 
 function invalidateDenChartCache(){
-  denChartCache=null;
+  denChartCache=null;denChartCacheIntraday=null;
   const area=document.getElementById('den-chart-area');
   if(area)area.innerHTML='';
 }
@@ -3897,7 +3899,7 @@ function renderDenChartCard(){
 }
 
 function updateDenChartRangeBtns(){
-  ['1M','3M','6M','1Y','SINCE'].forEach(r=>{
+  ['1D','1W','1M','3M','6M','1Y'].forEach(r=>{
     const b=document.getElementById('dcr-'+r.toLowerCase());
     if(b)b.style.fontWeight=r===denChartRange?'700':'400';
   });
@@ -3918,82 +3920,108 @@ async function loadDenChart(){
   if(!eligible.length){area.innerHTML='<div style="font-size:12px;color:var(--text-faint);text-align:center;padding:24px 0">Add a stock, ETF, or crypto position to see performance.</div>';return;}
   if(prov==='none'){area.innerHTML='<div style="font-size:12px;color:var(--text-faint);text-align:center;padding:24px 0">Configure a price feed in Settings → Den Preview to load historical data.</div>';if(status)status.textContent='';return;}
   const posKey=eligible.map(v=>v.id+':'+(v.priceId||v.symbol)).join('|');
-  const purchaseTimes=eligible.map(v=>v.purchaseDate?new Date(v.purchaseDate).getTime():null).filter(Boolean);
-  const sinceMaxDays=purchaseTimes.length?Math.ceil((Date.now()-Math.min(...purchaseTimes))/86400000)+14:0;
-  const maxDays=Math.max(365,sinceMaxDays);
-  const cacheValid=denChartCache&&denChartCache.provider===prov&&denChartCache.posKey===posKey&&denChartCache.maxDays>=maxDays;
-  if(cacheValid){renderDenChartFromCache(eligible,ctl,status);return;}
-  area.innerHTML='<div style="font-size:12px;color:var(--text-soft);text-align:center;padding:24px 0">Loading…</div>';
-  if(status)status.textContent='';
-  const fetches=eligible.map(v=>{
-    const sym=v.priceId||v.symbol;
-    if(prov==='coingecko')return chartViaCoinGecko(sym,maxDays,ctl.signal);
-    if(prov==='finnhub')return chartViaFinnhub(sym,maxDays,ctl.signal);
-    if(prov==='twelvedata')return chartViaTwelveData(sym,maxDays,ctl.signal);
-    if(prov==='alphavantage')return chartViaAlphaVantage(sym,maxDays,ctl.signal);
-    return Promise.reject(new Error('No provider'));
-  });
-  const results=await Promise.allSettled(fetches);
-  if(ctl.signal.aborted)return;
-  const series={};
-  const fetchErrors=[];
-  results.forEach((r,i)=>{
-    if(r.status==='fulfilled'&&r.value&&r.value.length>=2){
-      series[eligible[i].id]={sym:eligible[i].priceId||eligible[i].symbol,pts:r.value};
-    }else if(r.status==='rejected'&&r.reason?.name!=='AbortError'){
-      fetchErrors.push(r.reason?.message||String(r.reason));
+  if(denChartRange==='1D'){
+    const cv=denChartCacheIntraday&&denChartCacheIntraday.provider===prov&&denChartCacheIntraday.posKey===posKey;
+    if(cv){renderDenChartFromCache(eligible,denChartCacheIntraday,ctl,status,true);return;}
+    area.innerHTML='<div style="font-size:12px;color:var(--text-soft);text-align:center;padding:24px 0">Loading…</div>';
+    if(status)status.textContent='';
+    const fetches=eligible.map(v=>{
+      const sym=v.priceId||v.symbol;
+      if(prov==='coingecko')return chartViaCoinGecko(sym,1,ctl.signal);
+      if(prov==='finnhub')return chartViaFinnhubIntraday(sym,ctl.signal);
+      if(prov==='twelvedata')return chartViaTwelveDataIntraday(sym,ctl.signal);
+      if(prov==='alphavantage')return chartViaAlphaVantageIntraday(sym,ctl.signal);
+      return Promise.reject(new Error('No provider'));
+    });
+    const results=await Promise.allSettled(fetches);
+    if(ctl.signal.aborted)return;
+    const series={};const fetchErrors=[];
+    results.forEach((r,i)=>{
+      if(r.status==='fulfilled'&&r.value&&r.value.length>=2){
+        series[eligible[i].id]={sym:eligible[i].priceId||eligible[i].symbol,pts:r.value};
+      }else if(r.status==='rejected'&&r.reason?.name!=='AbortError'){
+        fetchErrors.push(r.reason?.message||String(r.reason));
+      }
+    });
+    if(!Object.keys(series).length){
+      area.innerHTML=`<div style="font-size:12px;color:var(--red);text-align:center;padding:24px 0">Could not load chart data${fetchErrors.length?' — '+fetchErrors[0]:''}.<br><span style="font-size:11px;color:var(--text-soft)">Check symbol and API key, or wait a moment and try again.</span></div>`;
+      return;
     }
-  });
-  if(!Object.keys(series).length){
-    area.innerHTML=`<div style="font-size:12px;color:var(--red);text-align:center;padding:24px 0">Could not load chart data${fetchErrors.length?' — '+fetchErrors[0]:''}.<br><span style="font-size:11px;color:var(--text-soft)">Check symbol and API key, or wait a moment and try again.</span></div>`;
-    return;
+    denChartCacheIntraday={provider:prov,posKey,series};
+    renderDenChartFromCache(eligible,denChartCacheIntraday,ctl,status,true);
+  }else{
+    const purchaseTimes=eligible.map(v=>v.purchaseDate?new Date(v.purchaseDate).getTime():null).filter(Boolean);
+    const sinceMaxDays=purchaseTimes.length?Math.ceil((Date.now()-Math.min(...purchaseTimes))/86400000)+14:0;
+    const maxDays=Math.max(365,sinceMaxDays);
+    const cv=denChartCache&&denChartCache.provider===prov&&denChartCache.posKey===posKey&&denChartCache.maxDays>=maxDays;
+    if(cv){renderDenChartFromCache(eligible,denChartCache,ctl,status,false);return;}
+    area.innerHTML='<div style="font-size:12px;color:var(--text-soft);text-align:center;padding:24px 0">Loading…</div>';
+    if(status)status.textContent='';
+    const fetches=eligible.map(v=>{
+      const sym=v.priceId||v.symbol;
+      if(prov==='coingecko')return chartViaCoinGecko(sym,maxDays,ctl.signal);
+      if(prov==='finnhub')return chartViaFinnhub(sym,maxDays,ctl.signal);
+      if(prov==='twelvedata')return chartViaTwelveData(sym,maxDays,ctl.signal);
+      if(prov==='alphavantage')return chartViaAlphaVantage(sym,maxDays,ctl.signal);
+      return Promise.reject(new Error('No provider'));
+    });
+    const results=await Promise.allSettled(fetches);
+    if(ctl.signal.aborted)return;
+    const series={};const fetchErrors=[];
+    results.forEach((r,i)=>{
+      if(r.status==='fulfilled'&&r.value&&r.value.length>=2){
+        series[eligible[i].id]={sym:eligible[i].priceId||eligible[i].symbol,pts:r.value};
+      }else if(r.status==='rejected'&&r.reason?.name!=='AbortError'){
+        fetchErrors.push(r.reason?.message||String(r.reason));
+      }
+    });
+    if(!Object.keys(series).length){
+      area.innerHTML=`<div style="font-size:12px;color:var(--red);text-align:center;padding:24px 0">Could not load chart data${fetchErrors.length?' — '+fetchErrors[0]:''}.<br><span style="font-size:11px;color:var(--text-soft)">Check symbol and API key, or wait a moment and try again.</span></div>`;
+      return;
+    }
+    denChartCache={provider:prov,posKey,maxDays,series};
+    renderDenChartFromCache(eligible,denChartCache,ctl,status,false);
   }
-  denChartCache={provider:prov,posKey,maxDays,series};
-  renderDenChartFromCache(eligible,ctl,status);
 }
 
-function renderDenChartFromCache(eligible,ctl,status){
+function renderDenChartFromCache(eligible,cache,ctl,status,isIntraday){
   const area=document.getElementById('den-chart-area');
-  if(!area||!denChartCache)return;
+  if(!area||!cache)return;
   if(ctl&&ctl.signal.aborted)return;
   const now=Date.now();
-  let rangeDays,sinceNote='';
-  if(denChartRange==='SINCE'){
-    const purchaseTimes=eligible.map(v=>v.purchaseDate?new Date(v.purchaseDate).getTime():null).filter(Boolean);
-    if(!purchaseTimes.length)sinceNote='Add a purchase date to each position to use Since purchase.';
-    rangeDays=purchaseTimes.length?Math.ceil((now-Math.min(...purchaseTimes))/86400000)+14:365;
-  }else{
-    rangeDays={'1M':30,'3M':90,'6M':180,'1Y':365}[denChartRange]||365;
-  }
+  const rangeDays={'1D':1,'1W':7,'1M':30,'3M':90,'6M':180,'1Y':365}[denChartRange]||365;
   const cutoff=now-rangeDays*86400000;
   const posMaps=[];
   eligible.forEach(v=>{
-    const cached=denChartCache.series[v.id];if(!cached)return;
+    const cached=cache.series[v.id];if(!cached)return;
     const units=parseFloat(v.units)||0;
-    const purchaseTs=denChartRange==='SINCE'&&v.purchaseDate?new Date(v.purchaseDate).getTime():0;
-    const effectiveCutoff=Math.max(cutoff,purchaseTs);
+    const purchaseTs=v.purchaseDate?new Date(v.purchaseDate).getTime():0;
+    const effectiveCutoff=purchaseTs?Math.max(cutoff,purchaseTs):cutoff;
     const dateMap={};
     cached.pts.forEach(pt=>{
-      if(pt.t>=effectiveCutoff){const d=new Date(pt.t).toISOString().slice(0,10);dateMap[d]=pt.p;}
+      if(pt.t>=effectiveCutoff){
+        const d=isIntraday?String(pt.t):new Date(pt.t).toISOString().slice(0,10);
+        dateMap[d]=pt.p;
+      }
     });
     if(Object.keys(dateMap).length>0)posMaps.push({units,dateMap});
   });
   if(!posMaps.length){
     area.innerHTML='<div style="font-size:12px;color:var(--text-faint);text-align:center;padding:24px 0">Not enough data for this range.</div>';
-    if(status)status.textContent=sinceNote;
+    if(status)status.textContent='';
     return;
   }
-  const allDates=[...new Set(posMaps.flatMap(m=>Object.keys(m.dateMap)))].sort();
+  const allKeys=[...new Set(posMaps.flatMap(m=>Object.keys(m.dateMap)))].sort((a,b)=>+a-+b||a.localeCompare(b));
   const lastPrices=posMaps.map(()=>0);
   const pts=[];
-  allDates.forEach(d=>{
+  allKeys.forEach(d=>{
     let total=0;
     posMaps.forEach((m,i)=>{if(m.dateMap[d]!==undefined)lastPrices[i]=m.dateMap[d];total+=lastPrices[i]*m.units;});
-    if(total>0)pts.push({t:new Date(d).getTime(),p:total});
+    if(total>0)pts.push({t:isIntraday?parseInt(d):new Date(d).getTime(),p:total});
   });
   if(pts.length<2){area.innerHTML='<div style="font-size:12px;color:var(--text-faint);text-align:center;padding:24px 0">Not enough data points for this range.</div>';return;}
   renderLineChart(pts,area);
-  if(status)status.textContent=`${posMaps.length} position${posMaps.length===1?'':'s'} · ${pts.length} data points · ${denChartRange}${sinceNote?' · '+sinceNote:''}`;
+  if(status)status.textContent=`${posMaps.length} position${posMaps.length===1?'':'s'} · ${pts.length} data points · ${denChartRange}`;
 }
 
 function recalcCDValue(id){
@@ -4101,6 +4129,38 @@ async function chartViaAlphaVantage(sym,days,sig){
   if(!series)throw new Error('No data returned');
   const cutoff=Date.now()-days*86400000;
   return Object.entries(series).filter(([d])=>new Date(d).getTime()>=cutoff).reverse().map(([d,v])=>({t:new Date(d).getTime(),p:parseFloat(v['4. close']||v['4a. close (USD)'])}));
+}
+
+async function chartViaFinnhubIntraday(sym,sig){
+  const key=settings.priceApiKey;if(!key)throw new Error('API key required');
+  const to=Math.floor(Date.now()/1000),from=to-86400;
+  const res=await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=${encodeURIComponent(sym)}&resolution=60&from=${from}&to=${to}&token=${encodeURIComponent(key)}`,{signal:sig||AbortSignal.timeout(12000)});
+  if(!res.ok)throw new Error('Finnhub HTTP '+res.status);
+  const data=await res.json();
+  if(data.s==='no_data')throw new Error('No data for this symbol');
+  return(data.t||[]).map((t,i)=>({t:t*1000,p:data.c[i]}));
+}
+
+async function chartViaTwelveDataIntraday(sym,sig){
+  const key=settings.priceApiKey;if(!key)throw new Error('API key required');
+  const res=await fetch(`https://api.twelvedata.com/time_series?symbol=${encodeURIComponent(sym)}&interval=1h&outputsize=24&apikey=${encodeURIComponent(key)}`,{signal:sig||AbortSignal.timeout(12000)});
+  if(!res.ok)throw new Error('Twelve Data HTTP '+res.status);
+  const data=await res.json();
+  if(data.status==='error')throw new Error(data.message||'Error');
+  return(data.values||[]).reverse().map(v=>({t:new Date(v.datetime).getTime(),p:parseFloat(v.close)}));
+}
+
+async function chartViaAlphaVantageIntraday(sym,sig){
+  const key=settings.priceApiKey;if(!key)throw new Error('API key required');
+  const isCrypto=investments.find(v=>(v.priceId||v.symbol)===sym)?.type==='crypto';
+  if(isCrypto)return chartViaAlphaVantage(sym,2,sig);
+  const res=await fetch(`https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${encodeURIComponent(sym)}&interval=60min&outputsize=compact&apikey=${encodeURIComponent(key)}`,{signal:sig||AbortSignal.timeout(15000)});
+  if(!res.ok)throw new Error('Alpha Vantage HTTP '+res.status);
+  const data=await res.json();
+  const series=data['Time Series (60min)'];
+  if(!series)throw new Error(data['Note']?'Rate limit reached — wait a moment and try again':'No data returned');
+  const cutoff=Date.now()-86400000;
+  return Object.entries(series).filter(([d])=>new Date(d).getTime()>=cutoff).reverse().map(([d,v])=>({t:new Date(d).getTime(),p:parseFloat(v['4. close'])}));
 }
 
 function addInvestment(type){

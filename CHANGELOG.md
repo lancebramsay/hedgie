@@ -4,6 +4,23 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
+## [2.1.5] — 2026-05-10
+
+### New: 1D and 1W chart ranges; purchase-date-aware performance for all ranges
+
+**1D and 1W range buttons**
+- Two new range buttons appear in the Performance chart: **1D** (today, hourly data) and **1W** (past 7 days)
+- Range order: 1D · 1W · 1M · 3M · 6M · 1Y
+- 1D uses intraday API endpoints — CoinGecko returns 5-minute intervals; Finnhub returns hourly candles (`resolution=60`); Twelve Data returns 24 hourly bars; Alpha Vantage uses `TIME_SERIES_INTRADAY` for equities (crypto falls back to last 2 daily closes since AV has no free intraday crypto endpoint)
+- 1D data is cached separately from the daily cache (1W–1Y) — switching between 1D and longer ranges reuses both caches independently
+
+**Purchase-date-aware performance for all ranges**
+- Every range now respects each position's purchase date — if a position was bought within the selected window, it contributes $0 before its purchase date
+- A position purchased 3 months ago will show no contribution in the earlier part of a 1Y chart; the aggregate line rises only when assets actually entered the portfolio
+- "Since purchase" has been removed as a separate button — this behaviour is now built into every range
+
+---
+
 ## [2.1.4] — 2026-05-09
 
 ### New: Performance chart caching
