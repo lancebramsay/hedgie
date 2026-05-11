@@ -890,6 +890,27 @@ body.dark.high-contrast{
           </label>
           <div style="font-size:11px;color:var(--text-faint);margin-top:4px;line-height:1.4">Logs a separate ETH Gas receipt for each transaction's network fee.</div>
         </div>
+        <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border-light)">
+          <div style="font-size:11px;font-weight:600;color:var(--text-soft);text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px">Networks</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+              <span style="flex:1;font-size:13px;color:var(--text)">Ethereum</span>
+              <input type="checkbox" id="cfg-chain-ethereum" onchange="toggleWalletChain('ethereum',this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:var(--brown)">
+            </label>
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+              <span style="flex:1;font-size:13px;color:var(--text)">Arbitrum</span>
+              <input type="checkbox" id="cfg-chain-arbitrum" onchange="toggleWalletChain('arbitrum',this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:var(--brown)">
+            </label>
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+              <span style="flex:1;font-size:13px;color:var(--text)">Base</span>
+              <input type="checkbox" id="cfg-chain-base" onchange="toggleWalletChain('base',this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:var(--brown)">
+            </label>
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+              <span style="flex:1;font-size:13px;color:var(--text)">Polygon</span>
+              <input type="checkbox" id="cfg-chain-polygon" onchange="toggleWalletChain('polygon',this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:var(--brown)">
+            </label>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1480,6 +1501,7 @@ function openDrawer(){
   const walDir=document.getElementById('cfg-wallet-dir');if(walDir)walDir.value=settings.walletTxDir||'out';
   const walAuto=document.getElementById('cfg-wallet-autoimport');if(walAuto)walAuto.checked=!!settings.walletAutoImport;
   const walGas=document.getElementById('cfg-wallet-gas');if(walGas)walGas.checked=!!settings.walletGasFees;
+  ['ethereum','arbitrum','base','polygon'].forEach(c=>{const cb=document.getElementById('cfg-chain-'+c);if(cb)cb.checked=walletChains.includes(c);});
   // Appearance section
   applyDarkMode();
   applyDarkModeBtn();
@@ -4341,9 +4363,6 @@ function renderDenWallet(){
   let html=`<div style="display:flex;gap:6px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
     <input class="den-inp" type="text" value="${esc(walletAddress)}" placeholder="0x wallet address" style="flex:1;min-width:180px;font-family:monospace;font-size:12px" onblur="saveWalletAddress(this.value);renderDenWallet()">
     ${canConnect?`<button class="btn" style="font-size:12px" onclick="connectWallet()">Connect</button>`:''}
-  </div>
-  <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px">
-    ${Object.entries(WALLET_CHAINS).map(([key,chain])=>`<label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-mid);cursor:pointer"><input type="checkbox" ${walletChains.includes(key)?'checked':''} onchange="toggleWalletChain('${key}',this.checked)" style="margin:0">${chain.name}</label>`).join('')}
   </div>
   ${!ethKey?'<div style="font-size:11px;color:var(--text-faint);margin-bottom:10px">Transaction import: add an Etherscan API key in <strong>Settings → Wallet</strong>, then tap ↺ Refresh.</div>':''}
 `;
