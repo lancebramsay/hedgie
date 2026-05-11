@@ -1,14 +1,4 @@
-﻿# 🦔 Open Hedgie
-
-A lightweight household budget planner that runs entirely from a single HTML file.
-
-**Stable:** [hedgie.pages.dev](https://hedgie.pages.dev) — Cloudflare Pages, fully tested releases<br>
-**Pilot:** [lancebramsay.github.io/hedgie](https://lancebramsay.github.io/hedgie) — GitHub Pages, latest updates<br>
-**Current stable:** v1.8.4 | **Pilot:** v2.5.0
-
----
-
-## What it is
+# Open Hedgie
 
 **Hedgie is a household budget planner that belongs entirely to you.**
 
@@ -16,62 +6,66 @@ No account. No subscription. No company holding your data. Just a single file yo
 
 When you're ready for more, Hedgie connects to free services you already trust: GitHub, Dropbox, and others for cloud sync; CoinGecko, Finnhub, and more for live prices. Nothing proprietary, nothing locked in. Every feature is built on open tools that stay free.
 
+**Stable:** [hedgie.pages.dev](https://hedgie.pages.dev) — Cloudflare Pages, fully tested releases<br>
+**Pilot:** [lancebramsay.github.io/hedgie](https://lancebramsay.github.io/hedgie) — GitHub Pages, latest updates<br>
+**Current stable:** v1.8.4 | **Pilot:** v2.5.6
+
 ---
 
 ## Features
 
 ### Budgeting
-- Receipt logging with vendor memory and recurring bill auto-logging — monthly, yearly (specific month + day), or custom interval (every N months)
-- Monthly budget vs actual tracking per category
+- Receipt logging with vendor memory and recurring bill auto-logging — monthly, yearly, or every N months
+- Monthly budget vs. actual tracking per category
 - Yearly spending overview (Hibernation View)
-- Budget planner with monthly, yearly, and custom-interval (every N months) expense frequency; all frequencies reduce to a monthly equivalent automatically
-- Per-category recurring bill coverage indicator — shows total committed monthly spend vs. budget, flagging underfunded categories
-- Bill set-aside metric — shows total monthly provision needed across all non-monthly planner expenses; each yearly or interval expense can be toggled individually to include or exclude it from the set-aside total; color-coded against income remaining (green ≥ 120%, amber 100–120%, red < 100%)
+- Budget planner with monthly, yearly, and custom-interval expense frequencies — all reduce to a monthly equivalent automatically
+- Per-category recurring bill coverage indicator — flags underfunded categories
+- Bill set-aside metric — total monthly provision needed across non-monthly expenses; color-coded against income remaining (green ≥ 120%, amber 100–120%, red < 100%)
 - Custom categories — add, rename, reorder, color, remove; assign type (Expense, Savings, Investment)
-- Income remaining excludes savings contributions — savings receipts stay liquid so they don't reduce the figure; investment receipts (CDs, retirement, etc.) still count against it
+- Income remaining excludes savings contributions — savings receipts stay liquid; investment receipts still count against it
 - Rainy day buffer distribution weighted by category priority
 
-### Insights & notifications
-- Built-in notifications: upcoming bills of all frequencies (monthly, yearly, custom interval) with monthly set-aside shown, budget warnings (expense categories only), sync staleness, monthly logging nudge, first-session sync prompt, monthly local backup reminder
+### Insights and notifications
+- Built-in notifications: upcoming bills, budget warnings, sync staleness, monthly logging nudge, first-session sync prompt, monthly backup reminder
 - Four urgency tiers: high (red), med (amber), low (green), info (blue)
-- Bell badge color reflects highest-priority active notification
+- Bell badge color reflects the highest-priority active notification
 - Custom notification rule builder: 12 queryable fields, AND/OR logic, up to 3 conditions per rule
 
-### Sync & data
-- Cloud providers: JSONBin.io, GitHub Gist, self-hosted endpoint, Dropbox
-- HMAC-SHA256 signed payloads with shared secret key
+### Sync and data
+- Cloud providers: GitHub Gist, Dropbox, JSONBin.io, self-hosted endpoint
+- HMAC-SHA256 signed payloads with a shared secret key
 - Optional AES-256-GCM payload encryption (derived from shared key via PBKDF2)
 - Conflict resolution modal and automatic receipt merging
-- Auto-archive moves receipts older than the prior calendar year to a read-only archive; configurable auto-prune permanently removes archived data beyond a set retention window (1–10 years, or keep forever)
-- Local backup (save/restore JSON), CSV export, Copy for Sheets
+- Auto-archive moves receipts older than the prior calendar year to a read-only archive; configurable retention window (1–10 years, or keep forever)
+- Local backup (save/restore JSON), decrypted export, CSV export, Copy for Sheets, archived receipt export
 
 ### Den (Preview)
 
-Enable via **Settings → Den Preview** to unlock a fourth tab for tracking long-term assets and liabilities alongside your monthly budget. All Den data is stored in the shared sync payload immediately, so it survives cloud sync and is ready for native Den features in a future phase.
+Enable via **Settings → Den** to unlock a fourth tab for tracking long-term assets and liabilities alongside your monthly budget. All Den data is stored in the shared sync payload immediately — ready for native Den features in future phases.
 
-- **Net worth metrics** — prominent boxes at the top of the tab: Net worth, Total assets, Total debt, Portfolio G/L
-- **Net Worth** — donut pie chart showing equity, stocks, ETFs, crypto, CD/savings, and savings goals as a share of total worth
-- **Portfolio Mix** — second donut pie chart showing composition of the investment portfolio only
-- **Liabilities** — loan, credit, lease, and other financing accounts with balance, interest rate, term, and payoff estimate; optional asset value field for equity-building debts (mortgage, auto) — equity = max(0, asset value − current balance); receipt tagging available from the log form
-- **Portfolio** — stock, ETF, crypto, CD/Savings, and other investment positions; CD/Savings entries use principal + APY + deposit date to calculate compound interest value automatically; optional purchase date per position; log receipts can be linked to portfolio positions to auto-track cost basis and units from purchase history
-- **Performance chart** — trading-style aggregate portfolio value chart; range buttons 1D / 1W / 1M / 3M / 6M / 1Y; all ranges are purchase-date-aware — positions contribute $0 before the date they were bought; 1D uses intraday (hourly) data; historical data from the configured price feed
-- **Savings goals** — named targets with current saved amount, target, progress bar, and budget line link
-- **Live price feed** — four providers: CoinGecko (free, crypto only, no key), Finnhub, Twelve Data, Alpha Vantage; API keys stay on-device in localStorage and are never synced
-- **Wallet balances** — paste a public 0x address or click Connect (MetaMask / Brave / Coinbase Wallet); pulls ETH, POL, USDC, USDT, and DAI balances per chain across Ethereum, Arbitrum, Base, and Polygon; per-(chain, token) tracking so ETH on Arbitrum and ETH on Ethereum are shown separately; wallet crypto and stablecoins feed into the Net Worth pie chart automatically
-- **Transaction import** — add a free Etherscan API key in the Wallet card to fetch transaction history across all enabled chains; new transactions arrive in a review queue with editable date, amount, vendor, category, and note fields before being logged as receipts; optional auto-import mode skips the queue; historical USD prices from CoinGecko at the transaction date; gas fees can be logged as separate receipts
+- **Net worth metrics** — net worth, total assets, total debt, portfolio G/L at the top of the tab
+- **Net Worth chart** — donut pie chart showing equity, stocks, ETFs, crypto, CD/savings, and savings goals
+- **Portfolio Mix chart** — composition of the investment portfolio
+- **Liabilities** — loans, credit, leases, and other financing accounts with balance, interest rate, term, and payoff estimate; optional asset value field for equity-building debts
+- **Portfolio** — stocks, ETFs, crypto, CD/Savings, and other positions; CD/Savings entries calculate compound interest from principal, APY, and deposit date; purchase receipts can be linked to auto-track cost basis and units
+- **Performance chart** — aggregate portfolio value over 1D / 1W / 1M / 3M / 6M / 1Y; all ranges are purchase-date-aware
+- **Savings goals** — named targets with progress bar and budget line link
+- **Live price feed** — CoinGecko (free, no key), Finnhub, Twelve Data, Alpha Vantage
+- **Wallet balances** — connect a public 0x address or MetaMask/Brave/Coinbase Wallet; pulls ETH, POL, USDC, USDT, and DAI across Ethereum, Arbitrum, Base, and Polygon
+- **Transaction import** — Etherscan API key optional; fetches transaction history across all enabled chains into a review queue before logging as receipts; auto-import mode available
 
-### App & device
-- Dark mode — toggle in tab bar, synced across devices via cloud payload
-- Installable PWA: 📲 button on Android/desktop; Share → Add to Home Screen banner on iOS/iPadOS
-- Swipe left/right between tabs on any touch screen (iOS, Android, tablet)
-- Tap a truncated receipt note to expand it inline
-- Multi-user receipt attribution — each entry stamped with the logger's display name; signature color customizable per user in Identity settings and on the welcome screen
+### App and device
+- Dark mode — toggle in Settings or the tab bar; synced across devices
+- Installable PWA: 📲 button on Android/desktop; Share → Add to Home Screen on iOS/iPadOS
+- Swipe left/right between tabs on any touch screen
+- Left-hand mode — mirrors the tab bar layout for left-handed use (Settings → Appearance)
+- Multi-user receipt attribution — each entry stamped with the logger's display name; signature color customizable per user
 
 ---
 
 ## Getting started
 
-1. Download `index.html` from the [releases page](https://github.com/lancebramsay/hedgie/releases) or the repo root
+1. Download `index.html` from the [releases page](https://github.com/lancebramsay/hedgie/releases) or open the [hosted version](https://hedgie.pages.dev)
 2. Open in Chrome, Safari, Firefox, or Brave
 3. Enter your display name when prompted
 4. Set up your budget in **Budget planner**
@@ -85,33 +79,33 @@ Works fully offline. No internet required for core features.
 
 ### GitHub Gist (recommended)
 
-1. Create a private Gist at [gist.github.com](https://gist.github.com), name the file `hedgie.json`, and set the initial content to `{"_hedgie":true,"version":0}`
+1. Create a private Gist at [gist.github.com](https://gist.github.com), name the file `hedgie.json`, set the initial content to `{"_hedgie":true,"version":0}`
 2. Generate a **classic** Personal Access Token at github.com/settings/tokens with the `gist` scope — fine-grained tokens do not support Gist access
-3. Gear → Cloud sync → GitHub Gist → paste Gist ID and token → **Push**
+3. Settings → Sync → GitHub Gist → paste Gist ID and token → **Push**
 
 100 MB per-file limit — effectively unlimited for household budget data.
 
 ### Dropbox
 
 1. Create an app at [dropbox.com/developers/apps/create](https://www.dropbox.com/developers/apps/create) — choose **Scoped access** and **Full Dropbox**
-2. Go to the **Permissions** tab and enable `files.content.read` and `files.content.write`
+2. Go to **Permissions** and enable `files.content.read` and `files.content.write`
 3. Go to **Settings → OAuth 2** and click **Generate** to create a long-lived access token
-4. Gear → Cloud sync → Dropbox → paste the token → **Push**
+4. Settings → Sync → Dropbox → paste the token → **Push**
 
-Data saves as `/hedgie/data.json` in your Dropbox root. 2 GB file limit.
+Data saves as `/hedgie/data.json` in your Dropbox root.
 
 ### JSONBin.io
 
 1. Create a free account at [jsonbin.io](https://jsonbin.io)
 2. Create a bin — initialize with `{"_hedgie":true,"version":0}`
 3. Copy the Bin ID and Master Key
-4. Gear → Cloud sync → JSONBin → paste both → **Push**
+4. Settings → Sync → JSONBin → paste both → **Push**
 
-100 KB payload limit — suitable for the first ~6 months of typical use.
+100 KB payload limit — suitable for the first several months of typical use.
 
 ### Self-hosted
 
-Expects GET (returns JSON) and PUT (stores JSON) on one URL. Optional Bearer token auth. Set your own payload limit in Settings → Cloud sync.
+Expects GET (returns JSON) and PUT (stores JSON) on one URL. Optional Bearer token auth.
 
 ```bash
 npm install express
@@ -120,20 +114,38 @@ HEDGIE_TOKEN=secret node server.js
 
 ---
 
+## Settings
+
+Settings are accessed via the **gear icon** in the bottom corner. They are organized into sections:
+
+| Section | Contents |
+|---|---|
+| **Identity** | Display name, signature color, shared key, encryption |
+| **Data** | Backup, restore, export, archived receipt export, data retention |
+| **Sync** | Cloud provider, credentials, pull/push/force refresh, payload health |
+| **Den** | Den Preview toggle, price feed, API keys |
+| **Wallet** | Etherscan key, transaction import direction, auto-import, gas fees |
+| **Notifications** | Built-in notification toggles, custom rule builder |
+| **Appearance** | Dark mode, dark mode button visibility, left-hand mode |
+| **Danger zone** | Targeted clears (receipts, vendor memory, Den data) and full resets |
+
+---
+
 ## Security
 
-- Shared secret key (Settings → Identity) — generates a random 128-bit key, copy and share via AirDrop or iMessage
+- Shared secret key (Settings → Identity) — generates a random 128-bit key; copy and share via AirDrop or iMessage
 - HMAC-SHA256 payload signing — sync rejected on key mismatch
-- Optional AES-256-GCM encryption — toggle in Settings → Identity, requires HTTPS
+- Optional AES-256-GCM encryption — toggle in Settings → Identity; requires HTTPS
 - Key derivation: `PBKDF2(sharedSecret, salt='hedgie-aes-v1', 100,000 iterations) → AES-256 key`
+- API keys (price feeds, Etherscan) are stored only in `localStorage` on-device and are never included in sync payloads
 
 ---
 
 ## Sync safety
 
-- **Empty session → always pulls.** A blank session (no income, expenses, or receipts) can never push to the cloud, even if preferences like dark mode are changed.
-- **First sync with local data → user confirms.** Hedgie fetches the cloud version first and shows a pull-or-push dialog before touching anything.
-- **Conflict resolution.** If both users have changed the budget plan since last sync, a modal lets you choose which plan to keep. Receipts are always merged automatically.
+- **Empty session → always pulls.** A blank session cannot push to the cloud, even if preferences like dark mode were changed.
+- **First sync with local data → user confirms.** Hedgie fetches the cloud version and shows a pull-or-push dialog before touching anything.
+- **Conflict resolution.** If both users changed the budget plan since last sync, a modal lets you choose which plan to keep. Receipts are always merged automatically.
 
 ---
 
@@ -144,9 +156,8 @@ The 📲 button appears in the tab bar when the browser offers installation. Tap
 
 ### iOS / iPadOS
 A banner appears with instructions: tap **Share ⬆** in the browser toolbar → **Add to Home Screen**.
-This is the only install path on iOS — Apple does not expose a programmatic install API.
 
-Once installed and opened as a PWA, both the button and banner are hidden automatically.
+Once installed as a PWA, the button and banner hide automatically.
 
 ---
 
@@ -178,42 +189,28 @@ Once installed and opened as a PWA, both the button and banner are hidden automa
 
 ## Deployment
 
-Open Hedgie uses a two-channel release model:
-
 | Channel | URL | Source | Purpose |
 |---|---|---|---|
 | **Stable** | [hedgie.pages.dev](https://hedgie.pages.dev) | Cloudflare Pages — `stable` branch | Fully tested, recommended for everyday use |
 | **Pilot** | [lancebramsay.github.io/hedgie](https://lancebramsay.github.io/hedgie) | GitHub Pages — `main` branch | Latest updates, may include changes still being validated |
 
-### GitHub Pages (Pilot)
-Deploys automatically from the `main` branch on every push. Always reflects the latest changes.
-
-### Cloudflare Pages (Stable)
-Deploys from the `stable` branch. Updated manually once a release is confirmed stable after pilot testing.
-
 ---
 
 ## Roadmap
 
-### Phase 1 — Now: Den Preview
+### Phase 1 — Now: Open Hedgie
 
-The **Den Preview** toggle in Settings unlocks the full Den tab: liability tracking, investment portfolio, savings goals, a net worth pie chart, and an optional live price feed (CoinGecko, Finnhub, Twelve Data, Alpha Vantage). All Den data is stored in the shared sync schema, ready for future phases to read natively.
+The free, open-source web edition. A complete household budgeting tool with Den Preview available today — liabilities, portfolio, savings goals, net worth chart, live prices, and wallet balances.
 
 ### Phase 2 — Next: NFT ecosystem
 
-The **Hedgehog Den** NFT collection unlocks Den features on Open Hedgie without an account or subscription. Each NFT is a unique generative hedgehog and a self-sovereign Den license — owned by the user, verified on-chain, valid across Ethereum, Arbitrum, Base, and Polygon.
+The **Hedgehog Den** NFT collection unlocks full Den features on Open Hedgie — no account, no subscription. Each NFT is a unique generative hedgehog and a self-sovereign Den license, valid across Ethereum, Arbitrum, Base, and Polygon.
 
-Alongside the collection, a separate **Community App** serves as the ecosystem hub: NFT marketplace (swap or sell), staking hub (stake NFTs to earn `$HEDGE` participation tokens), and a non-binding community signal board for charitable giving, development fund direction, open polls, and a budgeter's idea exchange.
+A separate **Community App** serves as the ecosystem hub: NFT marketplace, staking hub (earn `$HEDGE` tokens), and a non-binding community signal board.
 
 ### Phase 3 — Later: Native Hedgie (iOS / macOS)
 
-A native app built with SwiftUI and CloudKit sync, shipping the full Den feature set alongside deeper Apple ecosystem integration: Sign in with Apple, iCloud Keychain wallet backup, and seed phrase management. Den features are included in the paid App Store download — no separate unlock needed.
-
-Den features include:
-
-- **Debt tracking & financing management** — track balances, interest, and payoff timelines alongside monthly budgets
-- **Special event planning** — budget for vacations and one-off events separately, so planned splurges don't distort regular spending reports
-- **Surplus allocation** — automatically suggest end-of-month leftover funds toward savings goals and portfolio contributions
+A native SwiftUI app with CloudKit sync, Sign in with Apple, and iCloud Keychain wallet backup. Den features included in the paid App Store download.
 
 ---
 
