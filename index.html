@@ -515,7 +515,6 @@ body.dark.high-contrast{
       <span class="card-title">This month's receipts</span>
       <div class="btn-row">
         <select id="log-month-sel" style="width:auto;font-size:12px" onchange="renderLogMetrics();renderReceiptList()"></select>
-        <button class="btn" style="font-size:12px;padding:5px 10px" onclick="exportReceiptsCSV()">Export CSV</button>
       </div>
     </div>
     <div class="pills" id="rcpt-filters">
@@ -766,7 +765,8 @@ body.dark.high-contrast{
         </div>
         <div style="font-size:11px;font-weight:600;color:var(--text-faint);letter-spacing:0.3px;margin-top:16px;margin-bottom:8px;padding-top:12px;border-top:1px solid var(--border-light)">EXPORT</div>
         <div style="display:flex;flex-wrap:wrap;gap:8px">
-          <button class="btn" onclick="exportCSV()">Export CSV</button>
+          <button class="btn" onclick="exportReceiptsCSV()">Export receipts CSV</button>
+          <button class="btn" onclick="exportCSV()">Export budget CSV</button>
           <button class="btn" id="copy-btn" onclick="copySheets()">Copy for Sheets</button>
           <button class="btn" onclick="exportArchiveCSV()">Export archived receipts</button>
         </div>
