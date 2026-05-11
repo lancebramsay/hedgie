@@ -329,12 +329,16 @@ body.left-hand #gsb-sync-btn{border-radius:6px}
       <ellipse cx="20" cy="48" rx="5" ry="3" fill="#c9a882"/>
       <ellipse cx="32" cy="49" rx="5" ry="3" fill="#c9a882"/>
     </svg>
-    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v2.5.3</div></div>
+    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v2.5.4</div></div>
   </div>
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('log')" id="tab-log">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
       <span class="tab-lbl">Log receipt</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('den')" id="tab-den" style="display:none">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span class="tab-lbl">Den</span>
     </button>
     <button class="tab-btn" onclick="switchTab('report')" id="tab-report">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
@@ -343,10 +347,6 @@ body.left-hand #gsb-sync-btn{border-radius:6px}
     <button class="tab-btn" onclick="switchTab('planner')" id="tab-planner">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
       <span class="tab-lbl">Budget planner</span>
-    </button>
-    <button class="tab-btn" onclick="switchTab('den')" id="tab-den" style="display:none">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      <span class="tab-lbl">Den</span>
     </button>
   </div>
   <div class="notif-wrap" style="display:flex;align-items:center;align-self:center;margin-right:4px;gap:4px">
@@ -504,7 +504,69 @@ body.left-hand #gsb-sync-btn{border-radius:6px}
   <div class="hint" style="margin-top:8px" id="donate-btn-log"></div>
 </div>
 
-<!-- ═══ TAB 2 — REPORT ═══ -->
+<!-- ═══ TAB 2 — DEN ═══ -->
+<div class="panel" id="panel-den">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
+    <div>
+      <div style="font-size:18px;font-weight:700;color:var(--brown-dark)">Den</div>
+      <div style="font-size:13px;color:var(--text-soft)">Long-term assets &amp; liabilities</div>
+    </div>
+  </div>
+  <div id="den-net-worth"></div>
+  <div id="den-portfolio-chart"></div>
+  <div class="card" id="den-chart-card" style="display:none">
+    <div class="card-hdr" style="margin-bottom:10px">
+      <span class="card-title">Performance</span>
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
+      <button class="btn" id="dcr-1d" onclick="setDenChartRange('1D')" style="font-size:11px;padding:3px 10px">1D</button>
+      <button class="btn" id="dcr-1w" onclick="setDenChartRange('1W')" style="font-size:11px;padding:3px 10px">1W</button>
+      <button class="btn" id="dcr-1m" onclick="setDenChartRange('1M')" style="font-size:11px;padding:3px 10px">1M</button>
+      <button class="btn" id="dcr-3m" onclick="setDenChartRange('3M')" style="font-size:11px;padding:3px 10px">3M</button>
+      <button class="btn" id="dcr-6m" onclick="setDenChartRange('6M')" style="font-size:11px;padding:3px 10px">6M</button>
+      <button class="btn" id="dcr-1y" onclick="setDenChartRange('1Y')" style="font-size:11px;padding:3px 10px;font-weight:700">1Y</button>
+    </div>
+    <div id="den-chart-area"></div>
+    <div id="den-chart-status" style="font-size:11px;color:var(--text-soft);margin-top:6px;text-align:right"></div>
+  </div>
+  <div class="card">
+    <div class="card-hdr">
+      <span class="card-title">Portfolio</span>
+      <div class="btn-row">
+        <button class="btn" style="font-size:12px" onclick="addInvestment('stock')">+ Stock / ETF</button>
+        <button class="btn" style="font-size:12px" onclick="addInvestment('crypto')">+ Crypto</button>
+        <button class="btn" style="font-size:12px" onclick="addInvestment('cd')">+ CD / Savings</button>
+      </div>
+    </div>
+    <div id="den-portfolio-actions" style="display:none;padding:0 0 8px"></div>
+    <div id="den-price-status" style="display:none;font-size:11px;color:var(--text-soft);padding-bottom:8px"></div>
+    <div id="den-portfolio"></div>
+  </div>
+  <div class="card">
+    <div class="card-hdr" style="margin-bottom:10px">
+      <span class="card-title">Wallet</span>
+      <button class="btn" id="den-wallet-refresh" style="font-size:12px" onclick="refreshWalletBalances()">&#8635; Refresh</button>
+    </div>
+    <div id="den-wallet-status" style="display:none;font-size:11px;color:var(--text-soft);margin-bottom:8px"></div>
+    <div id="den-wallet"></div>
+  </div>
+  <div class="card">
+    <div class="card-hdr">
+      <span class="card-title">Liabilities</span>
+      <button class="btn" style="font-size:12px" onclick="addFinancingAcct()">+ Add</button>
+    </div>
+    <div id="den-liabilities"></div>
+  </div>
+  <div class="card">
+    <div class="card-hdr">
+      <span class="card-title">Savings goals</span>
+      <button class="btn" style="font-size:12px" onclick="addSavingsGoal()">+ Add goal</button>
+    </div>
+    <div id="den-goals"></div>
+  </div>
+</div><!-- /panel-den -->
+
+<!-- ═══ TAB 3 — REPORT ═══ -->
 <div class="panel" id="panel-report">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
     <div>
@@ -596,66 +658,6 @@ body.left-hand #gsb-sync-btn{border-radius:6px}
 </div><!-- /panel-planner -->
 
 <!-- ═══ TAB 4 — DEN ═══ -->
-<div class="panel" id="panel-den">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:8px">
-    <div>
-      <div style="font-size:18px;font-weight:700;color:var(--brown-dark)">Den</div>
-      <div style="font-size:13px;color:var(--text-soft)">Long-term assets &amp; liabilities</div>
-    </div>
-  </div>
-  <div id="den-net-worth"></div>
-  <div id="den-portfolio-chart"></div>
-  <div class="card" id="den-chart-card" style="display:none">
-    <div class="card-hdr" style="margin-bottom:10px">
-      <span class="card-title">Performance</span>
-    </div>
-    <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
-      <button class="btn" id="dcr-1d" onclick="setDenChartRange('1D')" style="font-size:11px;padding:3px 10px">1D</button>
-      <button class="btn" id="dcr-1w" onclick="setDenChartRange('1W')" style="font-size:11px;padding:3px 10px">1W</button>
-      <button class="btn" id="dcr-1m" onclick="setDenChartRange('1M')" style="font-size:11px;padding:3px 10px">1M</button>
-      <button class="btn" id="dcr-3m" onclick="setDenChartRange('3M')" style="font-size:11px;padding:3px 10px">3M</button>
-      <button class="btn" id="dcr-6m" onclick="setDenChartRange('6M')" style="font-size:11px;padding:3px 10px">6M</button>
-      <button class="btn" id="dcr-1y" onclick="setDenChartRange('1Y')" style="font-size:11px;padding:3px 10px;font-weight:700">1Y</button>
-    </div>
-    <div id="den-chart-area"></div>
-    <div id="den-chart-status" style="font-size:11px;color:var(--text-soft);margin-top:6px;text-align:right"></div>
-  </div>
-  <div class="card">
-    <div class="card-hdr">
-      <span class="card-title">Portfolio</span>
-      <div class="btn-row">
-        <button class="btn" style="font-size:12px" onclick="addInvestment('stock')">+ Stock / ETF</button>
-        <button class="btn" style="font-size:12px" onclick="addInvestment('crypto')">+ Crypto</button>
-        <button class="btn" style="font-size:12px" onclick="addInvestment('cd')">+ CD / Savings</button>
-      </div>
-    </div>
-    <div id="den-portfolio-actions" style="display:none;padding:0 0 8px"></div>
-    <div id="den-price-status" style="display:none;font-size:11px;color:var(--text-soft);padding-bottom:8px"></div>
-    <div id="den-portfolio"></div>
-  </div>
-  <div class="card">
-    <div class="card-hdr" style="margin-bottom:10px">
-      <span class="card-title">Wallet</span>
-      <button class="btn" id="den-wallet-refresh" style="font-size:12px" onclick="refreshWalletBalances()">&#8635; Refresh</button>
-    </div>
-    <div id="den-wallet-status" style="display:none;font-size:11px;color:var(--text-soft);margin-bottom:8px"></div>
-    <div id="den-wallet"></div>
-  </div>
-  <div class="card">
-    <div class="card-hdr">
-      <span class="card-title">Liabilities</span>
-      <button class="btn" style="font-size:12px" onclick="addFinancingAcct()">+ Add</button>
-    </div>
-    <div id="den-liabilities"></div>
-  </div>
-  <div class="card">
-    <div class="card-hdr">
-      <span class="card-title">Savings goals</span>
-      <button class="btn" style="font-size:12px" onclick="addSavingsGoal()">+ Add goal</button>
-    </div>
-    <div id="den-goals"></div>
-  </div>
-</div><!-- /panel-den -->
 </div></div><!-- /tab-panels-inner /tab-panels-wrap -->
 
 <!-- GEAR -->
@@ -678,7 +680,7 @@ body.left-hand #gsb-sync-btn{border-radius:6px}
 
     <!-- IDENTITY -->
     <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0 10px;border-bottom:1px solid var(--border-light);margin-bottom:8px">
-      <span style="font-size:12px;color:var(--text-faint)">Open Hedgie · v2.5.3</span>
+      <span style="font-size:12px;color:var(--text-faint)">Open Hedgie · v2.5.4</span>
       <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="font-size:12px;color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie &#8594;</a>
     </div>
     <a href="https://github.com/lancebramsay/hedgie/wiki" target="_blank"
@@ -801,7 +803,7 @@ body.left-hand #gsb-sync-btn{border-radius:6px}
 
     <!-- DEN -->
     <div class="drawer-acc-hdr" onclick="toggleAcc('acc-den')">
-      <span class="drawer-acc-title">&#9672; Den</span>
+      <span class="drawer-acc-title">&#127968; Den</span>
       <span class="drawer-acc-arrow" id="arr-acc-den">&#9656;</span>
     </div>
     <div class="drawer-acc-body" id="acc-den">
@@ -3544,7 +3546,7 @@ function applyDenPreview(){
   const content=document.getElementById('den-preview-content');if(content)content.style.display=on?'block':'none';
   const tabBtn=document.getElementById('tab-den');if(tabBtn)tabBtn.style.display=on?'':'none';
   const hasDen=TAB_ORDER.includes('den');
-  if(on&&!hasDen){TAB_ORDER.push('den');}
+  if(on&&!hasDen){TAB_ORDER.splice(1,0,'den');}
   else if(!on&&hasDen){
     TAB_ORDER.splice(TAB_ORDER.indexOf('den'),1);
     if(currentTabIdx>=TAB_ORDER.length){currentTabIdx=0;switchTab('log');}

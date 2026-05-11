@@ -4,6 +4,16 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
+## [2.5.4] — 2026-05-10
+
+### Den tab repositioned; settings icon updated
+
+- Den tab moved to second position in the tab bar, immediately after Log receipt — tab order is now Log receipt → Den → Monthly report → Budget planner
+- Den panel order in the DOM updated to match, so swipe navigation is consistent
+- Den settings section icon updated from ◈ to 🏠 to match the house icon used in the tab bar
+
+---
+
 ## [2.5.3] — 2026-05-10
 
 ### Data management moved to Settings
