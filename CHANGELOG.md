@@ -6,6 +6,24 @@ All notable changes to Open Hedgie are documented here.
 
 ## [2.5.7] — 2026-05-11
 
+### Accessibility options in Settings → Appearance
+
+**Left-hand mode — extended**
+- Card action buttons and button rows on tab pages now mirror alongside the top bar — `+ Add` buttons and action controls move to the left edge of their cards
+- Left-hand mode description updated to reflect the broader scope
+
+**Reduce motion** (new)
+- Disables all CSS transitions and animations including the tab slide, accordion open/close, and status bar color fades
+- Recommended for users with motion sensitivity or vestibular disorders
+
+**Large text** (new)
+- Increases font size on buttons, form fields, card titles, tab labels, and settings content
+- Helps with low vision or use on small screens
+
+**High contrast** (new)
+- Strengthens text, border, and semantic status colors (green/amber/red/blue) for both light and dark mode
+- Raises contrast ratios toward WCAG AA minimums; helps with low vision
+
 ### Fix: left-hand mode logo separator on wrong side
 
 - In left-hand mode the tab logo moved to the right end of the bar but retained its `border-right`, placing the separator line on the outer edge instead of between the logo and the tabs

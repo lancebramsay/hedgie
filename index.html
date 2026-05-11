@@ -297,6 +297,33 @@ body.left-hand .notif-panel{right:auto;left:0}
 body.left-hand .gear-btn{right:auto;left:20px}
 body.left-hand #gsb-inner{flex-direction:row-reverse;padding:0 1.25rem 0 0}
 body.left-hand #gsb-sync-btn{border-radius:6px}
+body.left-hand .card-hdr{flex-direction:row-reverse}
+body.left-hand .btn-row{flex-direction:row-reverse}
+/* REDUCED MOTION */
+body.reduced-motion *{transition:none!important;animation:none!important}
+/* LARGE TEXT */
+body.large-text .card-title{font-size:16px!important}
+body.large-text .btn{font-size:14px!important}
+body.large-text input,body.large-text select,body.large-text textarea{font-size:15px!important}
+body.large-text .tab-lbl{font-size:13px!important}
+body.large-text .drawer-acc-title{font-size:14px!important}
+body.large-text .drawer-acc-inner{font-size:15px!important}
+body.large-text .hint{font-size:13px!important}
+body.large-text .notif-item-label{font-size:14px!important}
+body.large-text .gsb-label,body.large-text #gsb-label{font-size:13px!important}
+/* HIGH CONTRAST */
+body.high-contrast{
+  --text:#111111;--text-soft:#333333;--text-mid:#222222;--text-faint:#555555;
+  --border:#777777;--border-light:#aaaaaa;--shadow:rgba(0,0,0,0.22);
+  --green:#176a17;--green-bg:#d4edd4;--red:#b30000;--red-light:#f5d0d0;
+  --amber:#8a4a00;--amber-light:#fae6c0;--blue:#1245b5;--blue-light:#ccdaf5;
+}
+body.dark.high-contrast{
+  --text:#ffffff;--text-soft:#e8e8e8;--text-mid:#f5f5f5;--text-faint:#aaaaaa;
+  --border:#8a8a8a;--border-light:#6a6a6a;
+  --green:#5ec45e;--green-bg:#0d2e0d;--red:#ef5350;--red-light:#2e0d0d;
+  --amber:#ffb74d;--amber-light:#2e1f00;--blue:#64a3e8;--blue-light:#0d1e30;
+}
 </style>
 <script>
 // Strip ?v= cache-bust param from URL immediately on load (added by forceRefresh())
@@ -914,7 +941,28 @@ body.left-hand #gsb-sync-btn{border-radius:6px}
             <span style="flex:1;font-size:13px;color:var(--text)">Left-hand mode</span>
             <input type="checkbox" id="cfg-left-hand" onchange="settings.leftHandMode=this.checked;saveSettings();applyLeftHandMode()" style="width:16px;height:16px;cursor:pointer;accent-color:var(--brown)">
           </label>
-          <div style="font-size:11px;color:var(--text-faint);margin-top:4px;line-height:1.4">Mirrors the tab bar so the notification bell and controls sit on the left. The sync button and gear icon move left too.</div>
+          <div style="font-size:11px;color:var(--text-faint);margin-top:4px;line-height:1.4">Mirrors the tab bar and card action buttons so controls sit on the left.</div>
+        </div>
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border-light)">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+            <span style="flex:1;font-size:13px;color:var(--text)">Reduce motion</span>
+            <input type="checkbox" id="cfg-reduced-motion" onchange="settings.reducedMotion=this.checked;saveSettings();applyReducedMotion()" style="width:16px;height:16px;cursor:pointer;accent-color:var(--brown)">
+          </label>
+          <div style="font-size:11px;color:var(--text-faint);margin-top:4px;line-height:1.4">Disables slide animations and transitions. Recommended for motion sensitivity or vestibular disorders.</div>
+        </div>
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border-light)">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+            <span style="flex:1;font-size:13px;color:var(--text)">Large text</span>
+            <input type="checkbox" id="cfg-large-text" onchange="settings.largeText=this.checked;saveSettings();applyLargeText()" style="width:16px;height:16px;cursor:pointer;accent-color:var(--brown)">
+          </label>
+          <div style="font-size:11px;color:var(--text-faint);margin-top:4px;line-height:1.4">Increases font size on buttons, form fields, card titles, and settings. Helps with low vision or small screens.</div>
+        </div>
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border-light)">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+            <span style="flex:1;font-size:13px;color:var(--text)">High contrast</span>
+            <input type="checkbox" id="cfg-high-contrast" onchange="settings.highContrast=this.checked;saveSettings();applyHighContrast()" style="width:16px;height:16px;cursor:pointer;accent-color:var(--brown)">
+          </label>
+          <div style="font-size:11px;color:var(--text-faint);margin-top:4px;line-height:1.4">Strengthens text, border, and status colors for improved readability. Works in both light and dark mode.</div>
         </div>
       </div>
     </div>
@@ -1114,7 +1162,7 @@ let walletImportingTxId=null; // which pending tx has inline import form open
 let walletHistPriceCache={}; // session cache: {cgId:date -> price}
 let denOpenItems=new Set(); // tracks which Den liability body IDs are expanded
 let currentRecurring='none';
-let settings={username:'',provider:'none',jsonbinId:'',jsonbinKey:'',gistId:'',gistToken:'',selfUrl:'',selfToken:'',selfPayloadKB:'',dropboxToken:'',sharedKey:'',encryptSync:false,darkMode:false,pwaInstalled:false,reminderDays:7,pruneYears:0,notifs:{bills:true,budget:true,yearly:true,sync:true,firstSync:true,localSave:true,nudge:true},customNotifs:[],denPreview:false,userColor:'',priceProvider:'none',priceApiKey:'',cgApiKey:'',etherscanApiKey:'',walletAutoImport:false,walletTxDir:'out',walletGasFees:false,showDarkModeBtn:true,leftHandMode:false};
+let settings={username:'',provider:'none',jsonbinId:'',jsonbinKey:'',gistId:'',gistToken:'',selfUrl:'',selfToken:'',selfPayloadKB:'',dropboxToken:'',sharedKey:'',encryptSync:false,darkMode:false,pwaInstalled:false,reminderDays:7,pruneYears:0,notifs:{bills:true,budget:true,yearly:true,sync:true,firstSync:true,localSave:true,nudge:true},customNotifs:[],denPreview:false,userColor:'',priceProvider:'none',priceApiKey:'',cgApiKey:'',etherscanApiKey:'',walletAutoImport:false,walletTxDir:'out',walletGasFees:false,showDarkModeBtn:true,leftHandMode:false,reducedMotion:false,largeText:false,highContrast:false};
 let planFilterCat='all',planFilterPri='all',rcptFilterCat='all',rptFilterCat='all';
 let reportView='monthly';
 let pendingCloudData=null;
@@ -3481,6 +3529,21 @@ function applyLeftHandMode(){
   const cb=document.getElementById('cfg-left-hand');
   if(cb)cb.checked=!!settings.leftHandMode;
 }
+function applyReducedMotion(){
+  document.body.classList.toggle('reduced-motion',!!settings.reducedMotion);
+  const cb=document.getElementById('cfg-reduced-motion');
+  if(cb)cb.checked=!!settings.reducedMotion;
+}
+function applyLargeText(){
+  document.body.classList.toggle('large-text',!!settings.largeText);
+  const cb=document.getElementById('cfg-large-text');
+  if(cb)cb.checked=!!settings.largeText;
+}
+function applyHighContrast(){
+  document.body.classList.toggle('high-contrast',!!settings.highContrast);
+  const cb=document.getElementById('cfg-high-contrast');
+  if(cb)cb.checked=!!settings.highContrast;
+}
 function toggleDarkMode(){
   settings.darkMode=!settings.darkMode;
   saveSettings();
@@ -4930,10 +4993,13 @@ updatePlanner();
 renderLogMetrics();
 renderReceiptList();
 checkWelcome();
-applyDarkMode(); // apply saved dark mode preference after settings loaded
-applyDarkModeBtn(); // apply tab bar dark mode button visibility
-applyLeftHandMode(); // apply left-hand mode layout if enabled
-applyDenPreview(); // apply Den Preview state after settings loaded
+applyDarkMode();
+applyDarkModeBtn();
+applyLeftHandMode();
+applyReducedMotion();
+applyLargeText();
+applyHighContrast();
+applyDenPreview();
 checkIosInstallBanner(); // show iOS install banner if on iOS Safari without standalone mode
 loadSyncMeta();
 processRecurringBills();
