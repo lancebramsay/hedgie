@@ -6,9 +6,10 @@ All notable changes to Open Hedgie are documented here.
 
 ## [2.5.1] — 2026-05-10
 
-### Fix: sync button flush with right edge of status bar
+### Fix: sync button layout and color
 
 - Removed right padding from the GSB inner row; sync button now stretches full height and sits flush against the right edge of the bar with `border-radius:0 0 var(--radius-md) 0` matching the bar's own bottom-right corner
+- Sync button color updated to match the ghost-style top bar buttons: transparent background, `var(--text-soft)` color, subtle left border separator — consistent with the dark mode toggle and notification bell
 
 ---
 
