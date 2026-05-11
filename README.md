@@ -4,7 +4,7 @@ A lightweight household budget planner that runs entirely from a single HTML fil
 
 **Stable:** [hedgie.pages.dev](https://hedgie.pages.dev) — Cloudflare Pages, fully tested releases<br>
 **Pilot:** [lancebramsay.github.io/hedgie](https://lancebramsay.github.io/hedgie) — GitHub Pages, latest updates<br>
-**Current stable:** v1.8.4 | **Pilot:** v2.2.0
+**Current stable:** v1.8.4 | **Pilot:** v2.3.0
 
 ---
 
@@ -55,6 +55,7 @@ Enable via **Settings → Den Preview** to unlock a fourth tab for tracking long
 - **Performance chart** — trading-style aggregate portfolio value chart; range buttons 1D / 1W / 1M / 3M / 6M / 1Y; all ranges are purchase-date-aware — positions contribute $0 before the date they were bought; 1D uses intraday (hourly) data; historical data from the configured price feed
 - **Savings goals** — named targets with current saved amount, target, progress bar, and budget line link
 - **Live price feed** — four providers: CoinGecko (free, crypto only, no key), Finnhub, Twelve Data, Alpha Vantage; API keys stay on-device in localStorage and are never synced
+- **Wallet balances** — paste a public 0x address or click Connect (MetaMask / Brave / Coinbase Wallet); pulls ETH, POL, USDC, USDT, and DAI balances per chain across Ethereum, Arbitrum, Base, and Polygon; per-(chain, token) tracking so ETH on Arbitrum and ETH on Ethereum are shown separately; wallet crypto and stablecoins feed into the Net Worth pie chart automatically
 
 ### App & device
 - Dark mode — toggle in tab bar, synced across devices via cloud payload

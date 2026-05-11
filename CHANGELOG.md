@@ -4,6 +4,45 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
+## [2.3.0] — 2026-05-10
+
+### New: Crypto wallet balance tracking
+
+**Wallet section in Den**
+- A new **Wallet** card appears at the bottom of the Den tab when Den Preview is enabled
+- Paste any public 0x wallet address, or click **Connect** to auto-fill it from MetaMask, Brave Wallet, Coinbase Wallet, or any EIP-1193 compatible browser extension — read-only, no signing required
+- Connect button only appears when a wallet provider is detected; paste input always available as fallback (works on all browsers including iOS Safari)
+
+**Per-(chain, token) balance tracking**
+- Balances are tracked as independent (chain, token) pairs — ETH on Arbitrum and ETH on Ethereum are separate entries, not aggregated
+- Four chains supported: **Ethereum**, **Arbitrum**, **Base**, **Polygon**
+- Each chain can be toggled on or off independently
+- Assets tracked per chain: ETH (Ethereum / Arbitrum / Base), POL (Polygon native), USDC, USDT, DAI
+- USDT is not tracked on Base (no official deployment); all other tokens available on all four chains
+
+**Balance fetching**
+- Uses public JSON-RPC endpoints — no API key required for balance reads
+- Native balances via `eth_getBalance`; ERC-20 balances via `eth_call` with the standard `balanceOf` selector
+- All chains fetched in parallel; individual chain failures do not block others from loading
+- ETH and POL fiat values fetched from CoinGecko (uses configured demo key if set); stablecoins pegged at $1.00
+- Staleness indicator appears when balances are more than 4 hours old
+
+**Display**
+- Balances grouped by token symbol with per-chain rows beneath each
+- Multi-chain totals shown at the token level when the same token exists across multiple enabled chains
+- Zero balances are omitted from the display
+
+**Net Worth integration**
+- Wallet crypto (ETH, POL) contributes a **Wallet crypto** segment to the Net Worth pie
+- Wallet stablecoins (USDC, USDT, DAI) contribute a **Stablecoins** segment
+- Both included in Total assets and Net worth metrics
+
+**Data**
+- Wallet address and enabled chains sync across household devices via the shared payload
+- Latest balances cached in `walletAssets[]` in the payload and sync automatically after each refresh
+
+---
+
 ## [2.2.0] — 2026-05-10
 
 ### New: Receipt → portfolio position link
