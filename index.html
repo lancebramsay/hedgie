@@ -4032,7 +4032,7 @@ function renderDenPortfolio(){
         ${linked.length?`<div style="margin-top:8px;padding-top:6px;border-top:1px solid var(--border-faint)"><div style="font-size:10px;font-weight:600;color:var(--text-faint);margin-bottom:4px">Purchases from receipts</div>${linked.map(r=>`<div style="display:flex;gap:8px;font-size:11px;color:var(--text-mid);padding:2px 0"><span style="color:var(--text-soft);min-width:80px">${r.date}</span><span style="flex:1">${esc(r.vendor||r.note||'—')}</span><span>${fmt(parseFloat(r.amt)||0)}</span>${r.investmentUnits?`<span style="color:var(--text-soft)">${r.investmentUnits} units</span>`:''}</div>`).join('')}<div style="display:flex;gap:8px;font-size:11px;font-weight:600;margin-top:4px;padding-top:4px;border-top:1px solid var(--border-faint)"><span style="flex:1;color:var(--text-soft)">Subtotal</span><span>${fmt(autoBasis)}</span>${autoUnits?`<span style="color:var(--text-soft)">${autoUnits} units</span>`:''}</div></div>`:''}
         <div style="display:flex;align-items:center;gap:6px;margin-top:8px;padding-top:6px;border-top:1px solid var(--border-faint)">
           <input type="checkbox" id="wt-${v.id}" ${v.walletTracked?'checked':''} onchange="updateInvestment('${v.id}','walletTracked',this.checked);renderDenNetWorth();renderDenPortfolioChart()">
-          <label for="wt-${v.id}" style="font-size:11px;color:var(--text-soft);cursor:pointer">Tracked via wallet — exclude from net worth</label>
+          <label for="wt-${v.id}" style="font-size:11px;color:var(--text-soft);cursor:pointer">Price tracked via wallet — exclude from net worth</label>
         </div>
         `}
       </div>`;
