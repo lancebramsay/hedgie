@@ -681,14 +681,11 @@ body.left-hand #gsb-sync-btn{border-radius:6px}
     <!-- IDENTITY -->
     <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0 10px;border-bottom:1px solid var(--border-light);margin-bottom:8px">
       <span style="font-size:12px;color:var(--text-faint)">Open Hedgie · v2.5.6</span>
-      <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="font-size:12px;color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie &#8594;</a>
+      <div style="display:flex;align-items:center;gap:12px">
+        <a href="https://github.com/lancebramsay/hedgie/wiki" target="_blank" style="font-size:12px;color:var(--brown-light);text-decoration:none">&#128214; Wiki &#8594;</a>
+        <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="font-size:12px;color:var(--brown-light);text-decoration:none">GitHub &#8594;</a>
+      </div>
     </div>
-    <a href="https://github.com/lancebramsay/hedgie/wiki" target="_blank"
-       style="display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border-light);text-decoration:none;margin-bottom:8px">
-      <span style="font-size:16px;flex-shrink:0">&#128214;</span>
-      <span style="font-size:13px;color:var(--text-mid);flex:1">Open Hedgie Wiki &amp; User Guide</span>
-      <span style="font-size:13px;color:var(--text-faint)">&#8594;</span>
-    </a>
 
     <div class="drawer-acc-hdr" onclick="toggleAcc('acc-identity')">
       <span class="drawer-acc-title">&#128100; Identity</span>
@@ -922,7 +919,7 @@ body.left-hand #gsb-sync-btn{border-radius:6px}
     </div>
 
     <!-- DANGER ZONE -->
-    <div class="drawer-acc-hdr" onclick="toggleAcc('acc-danger')" style="margin-top:8px">
+    <div class="drawer-acc-hdr" onclick="toggleAcc('acc-danger')">
       <span class="drawer-acc-title" style="color:var(--red)">&#9888; Danger zone</span>
       <span class="drawer-acc-arrow" id="arr-acc-danger">&#9656;</span>
     </div>
