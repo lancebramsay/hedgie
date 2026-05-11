@@ -324,7 +324,7 @@ select{cursor:pointer}
       <ellipse cx="20" cy="48" rx="5" ry="3" fill="#c9a882"/>
       <ellipse cx="32" cy="49" rx="5" ry="3" fill="#c9a882"/>
     </svg>
-    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v2.3.0</div></div>
+    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v2.3.1</div></div>
   </div>
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('log')" id="tab-log">
@@ -593,7 +593,7 @@ select{cursor:pointer}
     </div>
   </div>
   <div class="hint">Use the gear icon &#x2699; to configure cloud sync, shared keys, and user settings</div>
-  <div class="hint" style="margin-top:4px">Open Hedgie · v2.3.0 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
+  <div class="hint" style="margin-top:4px">Open Hedgie · v2.3.1 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
   <div class="hint" style="margin-top:8px" id="donate-btn-planner"></div>
 </div><!-- /panel-planner -->
 
@@ -624,13 +624,6 @@ select{cursor:pointer}
   </div>
   <div class="card">
     <div class="card-hdr">
-      <span class="card-title">Liabilities</span>
-      <button class="btn" style="font-size:12px" onclick="addFinancingAcct()">+ Add</button>
-    </div>
-    <div id="den-liabilities"></div>
-  </div>
-  <div class="card">
-    <div class="card-hdr">
       <span class="card-title">Portfolio</span>
       <div class="btn-row">
         <button class="btn" style="font-size:12px" onclick="addInvestment('stock')">+ Stock / ETF</button>
@@ -643,19 +636,26 @@ select{cursor:pointer}
     <div id="den-portfolio"></div>
   </div>
   <div class="card">
-    <div class="card-hdr">
-      <span class="card-title">Savings goals</span>
-      <button class="btn" style="font-size:12px" onclick="addSavingsGoal()">+ Add goal</button>
-    </div>
-    <div id="den-goals"></div>
-  </div>
-  <div class="card">
     <div class="card-hdr" style="margin-bottom:10px">
       <span class="card-title">Wallet</span>
       <button class="btn" id="den-wallet-refresh" style="font-size:12px" onclick="refreshWalletBalances()">&#8635; Refresh</button>
     </div>
     <div id="den-wallet-status" style="display:none;font-size:11px;color:var(--text-soft);margin-bottom:8px"></div>
     <div id="den-wallet"></div>
+  </div>
+  <div class="card">
+    <div class="card-hdr">
+      <span class="card-title">Liabilities</span>
+      <button class="btn" style="font-size:12px" onclick="addFinancingAcct()">+ Add</button>
+    </div>
+    <div id="den-liabilities"></div>
+  </div>
+  <div class="card">
+    <div class="card-hdr">
+      <span class="card-title">Savings goals</span>
+      <button class="btn" style="font-size:12px" onclick="addSavingsGoal()">+ Add goal</button>
+    </div>
+    <div id="den-goals"></div>
   </div>
 </div><!-- /panel-den -->
 </div></div><!-- /tab-panels-inner /tab-panels-wrap -->
@@ -3522,12 +3522,12 @@ function findExpByKey(key){
 
 function renderDen(){
   renderDenNetWorth();
-  renderDenLiabilities();
   renderDenPortfolioChart();
-  renderDenPortfolio();
-  renderDenGoals();
-  renderDenWallet();
   renderDenChartCard();
+  renderDenPortfolio();
+  renderDenWallet();
+  renderDenLiabilities();
+  renderDenGoals();
   applyDenOpenStates();
 }
 
@@ -3558,7 +3558,7 @@ function renderDenNetWorth(){
   // Investments & savings
   const lbp=buildLinkedByPos();
   const effUnits=v=>{if(v.type==='cd')return parseFloat(v.units)||1;const linked=lbp[v.id]||[];return linked.reduce((s,r)=>s+(parseFloat(r.investmentUnits)||0),0)+(parseFloat(v.units)||0);};
-  const byType=t=>investments.filter(v=>v.type===t).reduce((s,v)=>s+effUnits(v)*(parseFloat(v.currentPrice)||0),0);
+  const byType=t=>investments.filter(v=>v.type===t&&!v.walletTracked).reduce((s,v)=>s+effUnits(v)*(parseFloat(v.currentPrice)||0),0);
   const stockVal=byType('stock'),etfVal=byType('etf'),cryptoVal=byType('crypto'),otherVal=byType('other'),cdVal=byType('cd');
   const savingsAmt=savingsGoals.reduce((s,g)=>s+(parseFloat(g.currentAmt)||0),0);
   // Wallet balances
@@ -3569,7 +3569,7 @@ function renderDenNetWorth(){
   const totalLiabilities=financing.reduce((s,f)=>s+(parseFloat(f.currentBalance)||0),0);
   const netWorth=totalAssets-totalLiabilities;
   const portVal=stockVal+etfVal+cryptoVal+otherVal+cdVal;
-  const costBasis=investments.filter(v=>v.type!=='cd').reduce((s,v)=>{const linked=lbp[v.id]||[];const autoBasis=linked.reduce((b,r)=>b+(parseFloat(r.amt)||0),0);return s+autoBasis+(parseFloat(v.costBasis)||0);},0);
+  const costBasis=investments.filter(v=>v.type!=='cd'&&!v.walletTracked).reduce((s,v)=>{const linked=lbp[v.id]||[];const autoBasis=linked.reduce((b,r)=>b+(parseFloat(r.amt)||0),0);return s+autoBasis+(parseFloat(v.costBasis)||0);},0);
   const gl=portVal-cdVal-costBasis;
   if(!totalAssets&&!totalLiabilities){el.innerHTML='';return;}
   // Pie shows equity (net of debt) + investments + savings + wallet — i.e. what you own free and clear
@@ -3693,7 +3693,7 @@ function renderDenPortfolioChart(){
   const el=document.getElementById('den-portfolio-chart');if(!el)return;
   const lbpChart=buildLinkedByPos();
   const effUnitsChart=v=>{if(v.type==='cd')return parseFloat(v.units)||1;const linked=lbpChart[v.id]||[];return linked.reduce((s,r)=>s+(parseFloat(r.investmentUnits)||0),0)+(parseFloat(v.units)||0);};
-  const byType=t=>investments.filter(v=>v.type===t).reduce((s,v)=>s+effUnitsChart(v)*(parseFloat(v.currentPrice)||0),0);
+  const byType=t=>investments.filter(v=>v.type===t&&!v.walletTracked).reduce((s,v)=>s+effUnitsChart(v)*(parseFloat(v.currentPrice)||0),0);
   const stockVal=byType('stock'),etfVal=byType('etf'),cryptoVal=byType('crypto'),otherVal=byType('other'),cdVal=byType('cd');
   const savingsAmt=savingsGoals.reduce((s,g)=>s+(parseFloat(g.currentAmt)||0),0);
   const total=stockVal+etfVal+cryptoVal+otherVal+cdVal+savingsAmt;
@@ -3794,6 +3794,10 @@ function renderDenPortfolio(){
           ${basis?`<div style="text-align:right"><div style="font-size:10px;color:var(--text-soft);margin-bottom:2px">Gain / Loss</div><div class="${gl>=0?'den-gain':'den-loss'}" style="font-size:13px;font-weight:600">${gl>=0?'+':''}${fmt(gl)}${glPct!==null?' ('+glPct.toFixed(1)+'%)':''}</div></div>`:''}
         </div>
         ${linked.length?`<div style="margin-top:8px;padding-top:6px;border-top:1px solid var(--border-faint)"><div style="font-size:10px;font-weight:600;color:var(--text-faint);margin-bottom:4px">Purchases from receipts</div>${linked.map(r=>`<div style="display:flex;gap:8px;font-size:11px;color:var(--text-mid);padding:2px 0"><span style="color:var(--text-soft);min-width:80px">${r.date}</span><span style="flex:1">${esc(r.vendor||r.note||'—')}</span><span>${fmt(parseFloat(r.amt)||0)}</span>${r.investmentUnits?`<span style="color:var(--text-soft)">${r.investmentUnits} units</span>`:''}</div>`).join('')}<div style="display:flex;gap:8px;font-size:11px;font-weight:600;margin-top:4px;padding-top:4px;border-top:1px solid var(--border-faint)"><span style="flex:1;color:var(--text-soft)">Subtotal</span><span>${fmt(autoBasis)}</span>${autoUnits?`<span style="color:var(--text-soft)">${autoUnits} units</span>`:''}</div></div>`:''}
+        <div style="display:flex;align-items:center;gap:6px;margin-top:8px;padding-top:6px;border-top:1px solid var(--border-faint)">
+          <input type="checkbox" id="wt-${v.id}" ${v.walletTracked?'checked':''} onchange="updateInvestment('${v.id}','walletTracked',this.checked);renderDenNetWorth();renderDenPortfolioChart()">
+          <label for="wt-${v.id}" style="font-size:11px;color:var(--text-soft);cursor:pointer">Tracked via wallet — exclude from net worth</label>
+        </div>
         `}
       </div>`;
     });

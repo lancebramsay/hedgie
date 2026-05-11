@@ -4,6 +4,21 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
+## [2.3.1] — 2026-05-10
+
+### Den tab reorder and wallet double-count fix
+
+**Section order**
+- Den tab sections reordered to: Net Worth → Portfolio Mix → Performance → Portfolio → Wallet → Liabilities → Savings Goals
+
+**"Tracked via wallet" toggle**
+- Each non-CD portfolio position now has a **Tracked via wallet — exclude from net worth** checkbox at the bottom of its detail fields
+- When checked, the position's value and cost basis are excluded from the Net Worth pie, metrics row (net worth, total assets, portfolio G/L), and Portfolio Mix pie — removing the double-count for holdings tracked in both Portfolio and Wallet
+- The position still appears in the Portfolio list with full G/L and cost basis detail, and continues to feed the Performance chart
+- Unchecked by default; existing positions are unaffected
+
+---
+
 ## [2.3.0] — 2026-05-10
 
 ### New: Crypto wallet balance tracking
