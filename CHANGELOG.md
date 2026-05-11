@@ -4,6 +4,37 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
+## [2.4.0] — 2026-05-10
+
+### New: Wallet transaction import
+
+**Etherscan V2 integration**
+- Add an Etherscan API key (free at etherscan.io/apis) in the Wallet card to enable transaction history fetching across all enabled chains — Ethereum (1), Arbitrum (42161), Base (8453), and Polygon (137) — via a single key through the Etherscan V2 API
+- Tap **↺ Refresh** to pull balances and fetch the latest transactions in one step; transaction activity is fetched automatically after each balance refresh when a key is configured
+
+**Review queue (default)**
+- New transactions arrive in an **Import queue** inside the Wallet card, sorted newest first
+- Each pending item shows: direction arrow (↑ outgoing / ↓ incoming), date, chain, token amount, and a USD estimate based on the historical CoinGecko price at the time of the transaction
+- **Import** expands an inline form with editable fields: date, amount ($), vendor, note, and category — pre-filled from the transaction data; click **Log receipt** to confirm and add to the receipt list
+- **Dismiss** marks the transaction as skipped; dismissed entries are pruned after 90 days
+
+**Auto-import mode**
+- Toggle **Auto-import on sync** in the Wallet card to skip the review queue entirely — new transactions are immediately logged as uncategorized receipts; editable afterwards via the receipt list
+
+**Import options**
+- **Direction** — choose Outgoing (default), Incoming, or Both
+- **Include gas fees** — when enabled, an additional ETH Gas receipt is logged for each transaction's network fee (review queue shows a checkbox per transaction; auto-import always includes it)
+
+**Historical price lookup**
+- USD estimates use CoinGecko's historical `/history` endpoint for the transaction date — ETH and POL use on-chain price data; USDC, USDT, DAI fixed at $1.00; unknown tokens show $0 (editable before import)
+- Prices are cached in memory for the session to avoid redundant API calls
+- Transactions with `tokenAmt < 0.0001` and direction = outgoing are skipped automatically as dust/failed transactions
+
+**Payload persistence**
+- `walletPendingTxs` is now included in the shared sync payload — pending, imported, and dismissed entries sync across devices; entries older than 90 days with a resolved status are pruned on next activity fetch
+
+---
+
 ## [2.3.1] — 2026-05-10
 
 ### Den tab reorder and wallet double-count fix

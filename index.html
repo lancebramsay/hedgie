@@ -324,7 +324,7 @@ select{cursor:pointer}
       <ellipse cx="20" cy="48" rx="5" ry="3" fill="#c9a882"/>
       <ellipse cx="32" cy="49" rx="5" ry="3" fill="#c9a882"/>
     </svg>
-    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v2.3.1</div></div>
+    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v2.4.0</div></div>
   </div>
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('log')" id="tab-log">
@@ -593,7 +593,7 @@ select{cursor:pointer}
     </div>
   </div>
   <div class="hint">Use the gear icon &#x2699; to configure cloud sync, shared keys, and user settings</div>
-  <div class="hint" style="margin-top:4px">Open Hedgie · v2.3.1 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
+  <div class="hint" style="margin-top:4px">Open Hedgie · v2.4.0 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
   <div class="hint" style="margin-top:8px" id="donate-btn-planner"></div>
 </div><!-- /panel-planner -->
 
@@ -987,9 +987,12 @@ let investments=[]; // Den feature: investment positions (stocks, ETFs, crypto)
 let walletAddress=''; // Den wallet: public 0x address
 let walletChains=['ethereum','arbitrum','base','polygon']; // enabled chains
 let walletAssets=[]; // [{chain,symbol,balance,fiat,ts}] — latest on-chain balances
+let walletPendingTxs=[]; // [{id,chain,hash,date,ts,from,to,sym,tokenAmt,usdEst,direction,gasEth,gasUsdEst,status,cgId,importedReceiptId}]
+let walletImportingTxId=null; // which pending tx has inline import form open
+let walletHistPriceCache={}; // session cache: {cgId:date -> price}
 let denOpenItems=new Set(); // tracks which Den liability body IDs are expanded
 let currentRecurring='none';
-let settings={username:'',provider:'none',jsonbinId:'',jsonbinKey:'',gistId:'',gistToken:'',selfUrl:'',selfToken:'',selfPayloadKB:'',dropboxToken:'',sharedKey:'',encryptSync:false,darkMode:false,pwaInstalled:false,reminderDays:7,pruneYears:0,notifs:{bills:true,budget:true,yearly:true,sync:true,firstSync:true,localSave:true,nudge:true},customNotifs:[],denPreview:false,userColor:'',priceProvider:'none',priceApiKey:''};
+let settings={username:'',provider:'none',jsonbinId:'',jsonbinKey:'',gistId:'',gistToken:'',selfUrl:'',selfToken:'',selfPayloadKB:'',dropboxToken:'',sharedKey:'',encryptSync:false,darkMode:false,pwaInstalled:false,reminderDays:7,pruneYears:0,notifs:{bills:true,budget:true,yearly:true,sync:true,firstSync:true,localSave:true,nudge:true},customNotifs:[],denPreview:false,userColor:'',priceProvider:'none',priceApiKey:'',cgApiKey:'',etherscanApiKey:'',walletAutoImport:false,walletTxDir:'out',walletGasFees:false};
 let planFilterCat='all',planFilterPri='all',rcptFilterCat='all',rptFilterCat='all';
 let reportView='monthly';
 let pendingCloudData=null;
@@ -1568,7 +1571,7 @@ function triggerAutosave(source){
 
 // ── CLOUD PAYLOAD ─────────────────────────────
 async function buildPayload(){
-  const rawData={categories,income,expenses,receipts,vendors,archives,recurringBills,financing,savingsGoals,investments,darkMode:settings.darkMode,pwaInstalled:settings.pwaInstalled};
+  const rawData={categories,income,expenses,receipts,vendors,archives,recurringBills,financing,savingsGoals,investments,walletAddress,walletChains,walletAssets,walletPendingTxs,darkMode:settings.darkMode,pwaInstalled:settings.pwaInstalled};
   const base={_hedgie:true,version:(syncMeta.version||0)+1,lastEditedBy:settings.username||'Unknown',lastEditedAt:new Date().toISOString()};
   if(settings.encryptSync&&settings.sharedKey){
     try{
@@ -1644,6 +1647,7 @@ function _applyData(d,payload){
   if(d.walletAddress!==undefined)walletAddress=d.walletAddress;
   if(d.walletChains)walletChains=d.walletChains;
   if(d.walletAssets)walletAssets=d.walletAssets;
+  if(d.walletPendingTxs)walletPendingTxs=d.walletPendingTxs;
   // Restore preference flags from payload
   if(d.darkMode!==undefined&&settings.darkMode!==d.darkMode){settings.darkMode=d.darkMode;applyDarkMode();}
   if(d.pwaInstalled!==undefined)settings.pwaInstalled=d.pwaInstalled;
@@ -1699,7 +1703,7 @@ async function toPlainPayload(payload){
     }
   }
   // Ensure .data always exists even for a malformed/empty payload
-  if(!payload.data)return {...payload,data:{income:[],expenses:{},receipts:[],vendors:{},archives:{},recurringBills:[],categories:DEFAULT_CATS,financing:[],savingsGoals:[],investments:[],walletAddress:'',walletChains:['ethereum','arbitrum','base','polygon'],walletAssets:[]}};
+  if(!payload.data)return {...payload,data:{income:[],expenses:{},receipts:[],vendors:{},archives:{},recurringBills:[],categories:DEFAULT_CATS,financing:[],savingsGoals:[],investments:[],walletAddress:'',walletChains:['ethereum','arbitrum','base','polygon'],walletAssets:[],walletPendingTxs:[]}};
   return payload;
 }
 
@@ -3941,6 +3945,12 @@ async function refreshWalletBalances(){
     renderDenWallet();
     renderDenNetWorth();
     if(statusEl)statusEl.style.display='none';
+    if(settings.etherscanApiKey){
+      if(statusEl){statusEl.style.display='';statusEl.style.color='var(--text-soft)';statusEl.textContent='Fetching transaction history…';}
+      const newCount=await fetchWalletActivity(addr);
+      if(statusEl)statusEl.style.display='none';
+      if(newCount>0)renderDenWallet();
+    }
   }catch(e){
     if(statusEl){statusEl.style.color='var(--red)';statusEl.textContent='Error: '+e.message;}
   }finally{
@@ -3970,20 +3980,246 @@ function toggleWalletChain(chain,on){
   triggerAutosave('den');
 }
 
+const WALLET_CHAIN_IDS={ethereum:1,arbitrum:42161,base:8453,polygon:137};
+
+function cgIdForWalletSymbol(sym){
+  if(sym==='ETH')return 'ethereum';
+  if(sym==='POL'||sym==='MATIC')return 'matic-network';
+  return null;
+}
+
+async function getHistPrice(cgId,dateStr){
+  if(!cgId)return 0;
+  const cacheKey=cgId+':'+dateStr;
+  if(walletHistPriceCache[cacheKey]!==undefined)return walletHistPriceCache[cacheKey];
+  try{
+    const[y,m,d]=dateStr.split('-');
+    const ddmmyyyy=d+'-'+m+'-'+y;
+    const url=`https://api.coingecko.com/api/v3/coins/${cgId}/history?date=${ddmmyyyy}&localization=false${cgKeyParam()}`;
+    const res=await fetch(url,{signal:mkSignal(12000)});
+    if(!res.ok)throw new Error('CoinGecko '+res.status);
+    const data=await res.json();
+    const price=data.market_data?.current_price?.usd||0;
+    walletHistPriceCache[cacheKey]=price;
+    return price;
+  }catch(e){return 0;}
+}
+
+async function fetchWalletActivity(addr){
+  const key=settings.etherscanApiKey||'';
+  if(!key||!/^0x[0-9a-fA-F]{40}$/i.test(addr))return 0;
+  const seenHashes=new Set(walletPendingTxs.map(t=>t.chain+'|'+t.hash));
+  const newItems=[];
+  const dir=settings.walletTxDir||'out';
+  const enabledChains=walletChains.filter(c=>WALLET_CHAIN_IDS[c]);
+  const base='https://api.etherscan.io/v2/api';
+  const fetches=[];
+  enabledChains.forEach(chain=>{
+    const chainId=WALLET_CHAIN_IDS[chain];
+    const nativeSym=WALLET_CHAINS[chain]?.native||'ETH';
+    const commonParams=`chainid=${chainId}&address=${addr}&startblock=0&endblock=99999999&page=1&offset=50&sort=desc&apikey=${encodeURIComponent(key)}`;
+    fetches.push(fetch(`${base}?module=account&action=txlist&${commonParams}`,{signal:mkSignal(15000)})
+      .then(r=>r.json()).then(data=>{
+        if(data.status!=='1'||!Array.isArray(data.result))return;
+        data.result.forEach(tx=>{
+          const txDir=tx.from.toLowerCase()===addr.toLowerCase()?'out':'in';
+          if(dir!=='both'&&txDir!==dir)return;
+          if(seenHashes.has(chain+'|'+tx.hash))return;
+          const tokenAmt=Number(BigInt(tx.value||'0'))*1e-18;
+          if(tokenAmt<0.0001&&txDir==='out')return; // skip dust/failed
+          const gasEth=Number(BigInt(tx.gasUsed||'0')*BigInt(tx.gasPrice||'0'))*1e-18;
+          const ts=parseInt(tx.timeStamp)||0;
+          const date=new Date(ts*1000).toISOString().slice(0,10);
+          const cgId=cgIdForWalletSymbol(nativeSym);
+          const item={id:uid(),chain,hash:tx.hash,date,ts,from:tx.from,to:tx.to,sym:nativeSym,tokenAmt,usdEst:0,direction:txDir,gasEth,gasUsdEst:0,status:'pending',cgId,importedReceiptId:null};
+          seenHashes.add(chain+'|'+tx.hash);
+          newItems.push(item);
+        });
+      }).catch(()=>{}));
+    fetches.push(fetch(`${base}?module=account&action=tokentx&${commonParams}`,{signal:mkSignal(15000)})
+      .then(r=>r.json()).then(data=>{
+        if(data.status!=='1'||!Array.isArray(data.result))return;
+        data.result.forEach(tx=>{
+          const txDir=tx.from.toLowerCase()===addr.toLowerCase()?'out':'in';
+          if(dir!=='both'&&txDir!==dir)return;
+          if(seenHashes.has(chain+'|'+tx.hash))return;
+          const decimals=parseInt(tx.tokenDecimal)||18;
+          const tokenAmt=Number(BigInt(tx.value||'0'))/Math.pow(10,decimals);
+          if(tokenAmt<0.0001)return;
+          const sym=tx.tokenSymbol||'?';
+          const ts=parseInt(tx.timeStamp)||0;
+          const date=new Date(ts*1000).toISOString().slice(0,10);
+          const cgId=cgIdForWalletSymbol(sym);
+          const item={id:uid(),chain,hash:tx.hash,date,ts,from:tx.from,to:tx.to,sym,tokenAmt,usdEst:0,direction:txDir,gasEth:0,gasUsdEst:0,status:'pending',cgId,importedReceiptId:null};
+          seenHashes.add(chain+'|'+tx.hash);
+          newItems.push(item);
+        });
+      }).catch(()=>{}));
+  });
+  await Promise.allSettled(fetches);
+  if(!newItems.length)return 0;
+  // Look up historical prices (stablecoins get $1.00 from getHistPrice(null,...))
+  const distinctPairs=[...new Set(newItems.map(i=>i.cgId+':'+i.date))];
+  const priceMap={};
+  await Promise.allSettled(distinctPairs.map(async pair=>{
+    const[cgId,date]=pair.split(':');
+    priceMap[pair]=await getHistPrice(cgId==='null'?null:cgId,date);
+  }));
+  newItems.forEach(item=>{
+    const price=priceMap[(item.cgId||'null')+':'+item.date]||0;
+    item.usdEst=+(item.tokenAmt*(WALLET_STABLES.includes(item.sym)?1:price)).toFixed(2);
+    if(item.gasEth&&price)item.gasUsdEst=+(item.gasEth*price).toFixed(4);
+  });
+  // Prune old dismissed/imported entries (>90 days)
+  const cutoff=Math.floor(Date.now()/1000)-90*86400;
+  walletPendingTxs=walletPendingTxs.filter(t=>t.status==='pending'||t.ts>cutoff);
+  if(settings.walletAutoImport){
+    newItems.forEach(item=>{autoImportTx(item);walletPendingTxs.push(item);});
+  }else{
+    walletPendingTxs.push(...newItems);
+  }
+  triggerAutosave('den');
+  return newItems.length;
+}
+
+function autoImportTx(item){
+  const r={id:uid(),cat:'',amt:item.usdEst.toFixed(2),vendor:item.sym+' ('+item.chain+')',note:item.hash.slice(0,12)+'…',date:item.date,by:settings.username||''};
+  receipts.push(r);
+  item.status='imported';
+  item.importedReceiptId=r.id;
+  if(settings.walletGasFees&&item.gasUsdEst>0){
+    receipts.push({id:uid(),cat:'',amt:item.gasUsdEst.toFixed(4),vendor:'ETH Gas',note:'Gas: '+item.hash.slice(0,12)+'…',date:item.date,by:settings.username||''});
+  }
+}
+
+function openTxImport(id){
+  walletImportingTxId=walletImportingTxId===id?null:id;
+  renderDenWallet();
+}
+
+function dismissTx(id){
+  const tx=walletPendingTxs.find(t=>t.id===id);if(tx)tx.status='dismissed';
+  triggerAutosave('den');
+  renderDenWallet();
+}
+
+function confirmImportTx(id){
+  const tx=walletPendingTxs.find(t=>t.id===id);if(!tx)return;
+  const dateVal=document.getElementById('wti-date-'+id)?.value||tx.date;
+  const amtVal=parseFloat(document.getElementById('wti-amt-'+id)?.value)||tx.usdEst;
+  const vendVal=document.getElementById('wti-vend-'+id)?.value||(tx.sym+' ('+tx.chain+')');
+  const noteVal=document.getElementById('wti-note-'+id)?.value||'';
+  const catVal=document.getElementById('wti-cat-'+id)?.value||'';
+  const r={id:uid(),cat:catVal,amt:amtVal.toFixed(2),vendor:vendVal,note:noteVal,date:dateVal,by:settings.username||''};
+  receipts.push(r);
+  if(settings.walletGasFees&&tx.gasUsdEst>0){
+    const gasNote=document.getElementById('wti-gas-'+id)?.checked;
+    if(gasNote!==false)receipts.push({id:uid(),cat:'',amt:tx.gasUsdEst.toFixed(4),vendor:'ETH Gas',note:'Gas: '+tx.hash.slice(0,12)+'…',date:dateVal,by:settings.username||''});
+  }
+  tx.status='imported';tx.importedReceiptId=r.id;
+  walletImportingTxId=null;
+  triggerAutosave('den');
+  renderDenWallet();
+  renderLogMetrics();renderReceiptList();
+}
+
+function saveEtherscanKey(key){
+  settings.etherscanApiKey=key.trim();
+  saveSettings();
+}
+
+function saveWalletAutoImport(val){
+  settings.walletAutoImport=val;
+  saveSettings();
+}
+
+function saveWalletTxDir(val){
+  settings.walletTxDir=val;
+  saveSettings();
+}
+
+function saveWalletGasFees(val){
+  settings.walletGasFees=val;
+  saveSettings();
+}
+
 function renderDenWallet(){
   const el=document.getElementById('den-wallet');if(!el)return;
   const hasAddr=/^0x[0-9a-fA-F]{40}$/i.test((walletAddress||'').trim());
   const canConnect=typeof window!=='undefined'&&typeof window.ethereum!=='undefined';
+  const ethKey=settings.etherscanApiKey||'';
+  const autoImport=settings.walletAutoImport||false;
+  const txDir=settings.walletTxDir||'out';
+  const gasFees=settings.walletGasFees||false;
   let html=`<div style="display:flex;gap:6px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
     <input class="den-inp" type="text" value="${esc(walletAddress)}" placeholder="0x wallet address" style="flex:1;min-width:180px;font-family:monospace;font-size:12px" onblur="saveWalletAddress(this.value);renderDenWallet()">
     ${canConnect?`<button class="btn" style="font-size:12px" onclick="connectWallet()">Connect</button>`:''}
   </div>
-  <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:12px">
+  <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px">
     ${Object.entries(WALLET_CHAINS).map(([key,chain])=>`<label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-mid);cursor:pointer"><input type="checkbox" ${walletChains.includes(key)?'checked':''} onchange="toggleWalletChain('${key}',this.checked)" style="margin:0">${chain.name}</label>`).join('')}
+  </div>
+  <div style="border-top:1px solid var(--border-faint);padding-top:10px;margin-bottom:12px">
+    <div style="font-size:11px;font-weight:600;color:var(--text-soft);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px">Transaction import</div>
+    <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px">
+      <input class="den-inp" type="text" value="${esc(ethKey)}" placeholder="Etherscan API key (free at etherscan.io/apis)" style="flex:1;font-size:12px" onblur="saveEtherscanKey(this.value)">
+    </div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--text-mid)">
+      <label style="display:flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" style="margin:0" ${autoImport?'checked':''} onchange="saveWalletAutoImport(this.checked)">Auto-import on sync</label>
+      <span style="display:flex;align-items:center;gap:6px">Direction:
+        <select class="den-inp" style="font-size:12px;padding:2px 4px" onchange="saveWalletTxDir(this.value)">
+          <option value="out" ${txDir==='out'?'selected':''}>Outgoing</option>
+          <option value="in" ${txDir==='in'?'selected':''}>Incoming</option>
+          <option value="both" ${txDir==='both'?'selected':''}>Both</option>
+        </select>
+      </span>
+      <label style="display:flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" style="margin:0" ${gasFees?'checked':''} onchange="saveWalletGasFees(this.checked)">Include gas fees</label>
+    </div>
+    ${!ethKey?'<div style="font-size:11px;color:var(--text-faint);margin-top:6px">Add an Etherscan key to fetch transaction history. Tap ↺ Refresh to pull activity.</div>':''}
   </div>`;
   if(!hasAddr){
     html+='<div style="font-size:12px;color:var(--text-faint);text-align:center;padding:6px 0">Enter or connect a wallet address above, then tap Refresh.</div>';
     el.innerHTML=html;return;
+  }
+  // Pending transaction queue
+  const pending=walletPendingTxs.filter(t=>t.status==='pending');
+  if(pending.length){
+    const cats=CATS();
+    html+=`<div style="border-top:1px solid var(--border-faint);padding-top:10px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <span style="font-size:11px;font-weight:600;color:var(--text-soft);text-transform:uppercase;letter-spacing:.04em">Import queue</span>
+        <span style="font-size:11px;color:var(--text-faint)">${pending.length} pending</span>
+      </div>`;
+    pending.sort((a,b)=>b.ts-a.ts).forEach(tx=>{
+      const chainLabel=WALLET_CHAINS[tx.chain]?.name||tx.chain;
+      const dirArrow=tx.direction==='out'?'&#8593;':'&#8595;';
+      const dirColor=tx.direction==='out'?'var(--red)':'var(--green)';
+      const usdLabel=tx.usdEst>0?'~'+fmtDec(tx.usdEst):'USD unknown';
+      const isOpen=walletImportingTxId===tx.id;
+      html+=`<div style="border:1px solid var(--border-faint);border-radius:8px;padding:10px;margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="font-size:14px;color:${dirColor};font-weight:700">${dirArrow}</span>
+          <span style="font-size:12px;color:var(--text-soft)">${tx.date}</span>
+          <span style="font-size:12px;color:var(--text-faint)">${chainLabel}</span>
+          <span style="font-size:13px;font-weight:600;color:var(--text)">${tx.tokenAmt.toFixed(4)} ${esc(tx.sym)}</span>
+          <span style="font-size:12px;color:var(--text-soft)">${usdLabel}</span>
+          <div style="margin-left:auto;display:flex;gap:6px">
+            <button class="btn" style="font-size:11px;padding:3px 8px" onclick="openTxImport('${tx.id}')">${isOpen?'Cancel':'Import'}</button>
+            <button class="btn" style="font-size:11px;padding:3px 8px;color:var(--text-faint)" onclick="dismissTx('${tx.id}')">Dismiss</button>
+          </div>
+        </div>
+        ${tx.gasEth>0?`<div style="font-size:11px;color:var(--text-faint);margin-top:4px">Gas: ${tx.gasEth.toFixed(6)} ETH${tx.gasUsdEst>0?' (~'+fmtDec(tx.gasUsdEst)+')':''}</div>`:''}
+        ${isOpen?`<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border-faint);display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div><div style="font-size:11px;color:var(--text-soft);margin-bottom:3px">Date</div><input id="wti-date-${tx.id}" class="den-inp" type="date" value="${esc(tx.date)}" style="width:100%;font-size:12px"></div>
+          <div><div style="font-size:11px;color:var(--text-soft);margin-bottom:3px">Amount ($)</div><input id="wti-amt-${tx.id}" class="den-inp" type="number" step="0.01" value="${tx.usdEst.toFixed(2)}" style="width:100%;font-size:12px"></div>
+          <div><div style="font-size:11px;color:var(--text-soft);margin-bottom:3px">Vendor</div><input id="wti-vend-${tx.id}" class="den-inp" type="text" value="${esc(tx.sym+' ('+tx.chain+')')}" style="width:100%;font-size:12px"></div>
+          <div><div style="font-size:11px;color:var(--text-soft);margin-bottom:3px">Category</div><select id="wti-cat-${tx.id}" class="den-inp" style="width:100%;font-size:12px"><option value="">Uncategorized</option>${cats.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('')}</select></div>
+          <div style="grid-column:1/-1"><div style="font-size:11px;color:var(--text-soft);margin-bottom:3px">Note</div><input id="wti-note-${tx.id}" class="den-inp" type="text" placeholder="Optional note" style="width:100%;font-size:12px"></div>
+          ${gasFees&&tx.gasUsdEst>0?`<div style="grid-column:1/-1"><label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-mid);cursor:pointer"><input id="wti-gas-${tx.id}" type="checkbox" checked style="margin:0">Also log gas fee (${fmtDec(tx.gasUsdEst)}) as separate receipt</label></div>`:''}
+          <div style="grid-column:1/-1;margin-top:4px"><button class="btn primary" style="font-size:12px;width:100%" onclick="confirmImportTx('${tx.id}')">Log receipt</button></div>
+        </div>`:''}
+      </div>`;
+    });
+    html+=`</div>`;
   }
   if(!walletAssets.length){
     html+='<div style="font-size:12px;color:var(--text-faint);text-align:center;padding:6px 0">No balances yet — tap ↺ Refresh to load.</div>';
@@ -4545,7 +4781,7 @@ function resetBudgetAndReceipts(){
   bufferPct={};
   receipts=[];
   vendors={};
-  recurringBills=[];financing=[];savingsGoals=[];investments=[];walletAddress='';walletChains=['ethereum','arbitrum','base','polygon'];walletAssets=[];
+  recurringBills=[];financing=[];savingsGoals=[];investments=[];walletAddress='';walletChains=['ethereum','arbitrum','base','polygon'];walletAssets=[];walletPendingTxs=[];walletImportingTxId=null;
   archives={};
   syncMeta={version:0,lastEditedBy:'',lastEditedAt:'',lastPulledVersion:0,lastPushedAt:'',lastPulledAt:'',lastSyncedAt:''};
   localStorage.removeItem('hedgie_syncmeta');

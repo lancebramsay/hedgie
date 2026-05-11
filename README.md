@@ -4,7 +4,7 @@ A lightweight household budget planner that runs entirely from a single HTML fil
 
 **Stable:** [hedgie.pages.dev](https://hedgie.pages.dev) — Cloudflare Pages, fully tested releases<br>
 **Pilot:** [lancebramsay.github.io/hedgie](https://lancebramsay.github.io/hedgie) — GitHub Pages, latest updates<br>
-**Current stable:** v1.8.4 | **Pilot:** v2.3.1
+**Current stable:** v1.8.4 | **Pilot:** v2.4.0
 
 ---
 
@@ -56,6 +56,7 @@ Enable via **Settings → Den Preview** to unlock a fourth tab for tracking long
 - **Savings goals** — named targets with current saved amount, target, progress bar, and budget line link
 - **Live price feed** — four providers: CoinGecko (free, crypto only, no key), Finnhub, Twelve Data, Alpha Vantage; API keys stay on-device in localStorage and are never synced
 - **Wallet balances** — paste a public 0x address or click Connect (MetaMask / Brave / Coinbase Wallet); pulls ETH, POL, USDC, USDT, and DAI balances per chain across Ethereum, Arbitrum, Base, and Polygon; per-(chain, token) tracking so ETH on Arbitrum and ETH on Ethereum are shown separately; wallet crypto and stablecoins feed into the Net Worth pie chart automatically
+- **Transaction import** — add a free Etherscan API key in the Wallet card to fetch transaction history across all enabled chains; new transactions arrive in a review queue with editable date, amount, vendor, category, and note fields before being logged as receipts; optional auto-import mode skips the queue; historical USD prices from CoinGecko at the transaction date; gas fees can be logged as separate receipts
 
 ### App & device
 - Dark mode — toggle in tab bar, synced across devices via cloud payload
