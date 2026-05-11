@@ -4,6 +4,27 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
+## [2.5.0] — 2026-05-10
+
+### Settings reorganization, sync button accessibility, and appearance controls
+
+**Settings panel — 6 grouped sections**
+- Settings drawer reorganized from 5 scattered sections into 6 clearly grouped sections: **Identity**, **Sync**, **Den**, **Wallet**, **Notifications**, **Appearance**
+- **Sync** — merges the former "Cloud sync" and "Data" accordions; cloud provider, pull/push, data exports, retention, and danger zone are all in one place
+- **Den** — renamed from "Den Preview"; same Den toggle and price feed controls
+- **Wallet** (new) — Etherscan API key, auto-import toggle, direction (outgoing/incoming/both), and gas fees toggle moved here from the Den Wallet card, which was getting cluttered; the Wallet card now shows only the address input, chain toggles, import queue, and balances
+- **Appearance** (new) — dark mode toggle (mirrors the tab bar button, stays in sync); option to hide the ☾ dark mode button from the tab bar while still controlling dark mode from Settings
+
+**Sync button**
+- GSB sync button enlarged: `min-height: 28px`, more padding, brown fill with white text — more distinct and easier to tap on touch screens; reduces accidental presses near the notification bell
+- Increased gap between top bar icon buttons for better tap target separation
+
+**Dark mode button**
+- Dark mode toggle remains on the tab bar by default
+- New **Show dark mode button in tab bar** toggle in Settings → Appearance lets users hide it; dark mode is still fully controllable from Settings
+
+---
+
 ## [2.4.0] — 2026-05-10
 
 ### New: Wallet transaction import

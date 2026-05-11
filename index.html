@@ -324,7 +324,7 @@ select{cursor:pointer}
       <ellipse cx="20" cy="48" rx="5" ry="3" fill="#c9a882"/>
       <ellipse cx="32" cy="49" rx="5" ry="3" fill="#c9a882"/>
     </svg>
-    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v2.4.0</div></div>
+    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v2.5.0</div></div>
   </div>
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('log')" id="tab-log">
@@ -344,7 +344,7 @@ select{cursor:pointer}
       <span class="tab-lbl">Den</span>
     </button>
   </div>
-  <div class="notif-wrap" style="display:flex;align-items:center;align-self:center;margin-right:4px">
+  <div class="notif-wrap" style="display:flex;align-items:center;align-self:center;margin-right:4px;gap:4px">
     <button id="pwa-install-btn" onclick="triggerPwaInstall()" title="Add to home screen" style="display:none;background:none;border:none;cursor:pointer;padding:6px;color:var(--text-soft);font-size:18px;line-height:1">&#128242;</button>
     <button onclick="toggleDarkMode()" title="Toggle dark mode" style="background:none;border:none;cursor:pointer;padding:6px;color:var(--text-soft);font-size:16px;line-height:1" id="dark-mode-btn">&#9790;</button>
     <button class="notif-btn" onclick="toggleNotifPanel()" title="Notifications" id="notif-btn" style="margin-bottom:0">
@@ -368,8 +368,8 @@ select{cursor:pointer}
     <div id="gsb-dot" style="width:7px;height:7px;border-radius:50%;background:var(--text-faint);flex-shrink:0;transition:background 0.4s"></div>
     <span id="gsb-label" style="font-size:11px;color:var(--text-soft);flex:1;transition:color 0.4s"></span>
     <span id="gsb-right" style="font-size:11px;color:var(--text-faint);margin-right:6px"></span>
-    <button id="gsb-sync-btn" onclick="quickSync()" title="Sync with cloud" style="display:none;align-items:center;gap:4px;background:transparent;border:1px solid var(--border);border-radius:6px;padding:2px 8px;font-size:11px;color:var(--text-mid);cursor:pointer;font-family:inherit;height:20px;white-space:nowrap">
-      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+    <button id="gsb-sync-btn" onclick="quickSync()" title="Sync with cloud" style="display:none;align-items:center;gap:5px;background:var(--brown);border:1px solid var(--brown);border-radius:6px;padding:5px 16px;font-size:12px;color:#fff;cursor:pointer;font-family:inherit;min-height:28px;white-space:nowrap;font-weight:500">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       Sync
     </button>
   </div>
@@ -593,7 +593,7 @@ select{cursor:pointer}
     </div>
   </div>
   <div class="hint">Use the gear icon &#x2699; to configure cloud sync, shared keys, and user settings</div>
-  <div class="hint" style="margin-top:4px">Open Hedgie · v2.4.0 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
+  <div class="hint" style="margin-top:4px">Open Hedgie · v2.5.0 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
   <div class="hint" style="margin-top:8px" id="donate-btn-planner"></div>
 </div><!-- /panel-planner -->
 
@@ -679,7 +679,6 @@ select{cursor:pointer}
   <div class="drawer-body" style="padding:0 1.25rem 1.5rem">
 
     <!-- IDENTITY -->
-    <!-- WIKI LINK -->
     <a href="https://github.com/lancebramsay/hedgie/wiki" target="_blank"
        style="display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border-light);text-decoration:none;margin-bottom:8px">
       <span style="font-size:16px;flex-shrink:0">&#128214;</span>
@@ -697,12 +696,10 @@ select{cursor:pointer}
           <label>Display name <span style="color:var(--text-faint);font-weight:400">(stamps your receipts)</span></label>
           <input type="text" id="cfg-username" placeholder="e.g. Lance" oninput="settings.username=this.value;saveSettings()">
         </div>
-
         <div class="drawer-field">
           <label>Signature color <span style="color:var(--text-faint);font-weight:400">(your name next to receipts)</span></label>
           <input type="color" id="cfg-user-color" style="width:36px;height:36px;padding:2px;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;background:transparent" onchange="settings.userColor=this.value;saveSettings();renderReceiptList();buildNotifications()">
         </div>
-
         <div class="drawer-field">
           <label>Shared secret key <span style="color:var(--text-faint);font-weight:400">(signs sync payloads)</span></label>
           <div class="key-display" id="key-display">No key generated</div>
@@ -716,21 +713,19 @@ select{cursor:pointer}
         <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border-light)">
           <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
             <span style="flex:1;font-size:13px;color:var(--text)">&#128274; Encrypt sync payload</span>
-            <input type="checkbox" id="cfg-encrypt"
-              onchange="toggleEncryption(this.checked)"
-              style="width:16px;height:16px;cursor:pointer;accent-color:var(--brown)">
+            <input type="checkbox" id="cfg-encrypt" onchange="toggleEncryption(this.checked)" style="width:16px;height:16px;cursor:pointer;accent-color:var(--brown)">
           </label>
           <div id="encrypt-status" style="font-size:11px;color:var(--text-faint);margin-top:5px;line-height:1.5"></div>
         </div>
       </div>
     </div>
 
-    <!-- CLOUD -->
-    <div class="drawer-acc-hdr" onclick="toggleAcc('acc-cloud')">
-      <span class="drawer-acc-title">&#9729; Cloud sync</span>
-      <span class="drawer-acc-arrow" id="arr-acc-cloud">&#9656;</span>
+    <!-- SYNC -->
+    <div class="drawer-acc-hdr" onclick="toggleAcc('acc-sync')">
+      <span class="drawer-acc-title">&#9729; Sync</span>
+      <span class="drawer-acc-arrow" id="arr-acc-sync">&#9656;</span>
     </div>
-    <div class="drawer-acc-body" id="acc-cloud">
+    <div class="drawer-acc-body" id="acc-sync">
       <div class="drawer-acc-inner">
         <div class="sync-status" id="sync-status-row">
           <div class="sync-dot" id="sync-dot"></div>
@@ -747,80 +742,47 @@ select{cursor:pointer}
           </select>
         </div>
         <div id="provider-fields"></div>
-          <div id="sync-timestamps" style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border-light);font-size:11px;color:var(--text-faint);line-height:2.1"></div>
+        <div id="sync-timestamps" style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border-light);font-size:11px;color:var(--text-faint);line-height:2.1"></div>
         <div class="btn-row" style="margin-top:12px">
           <button class="btn" onclick="cloudPull()">&#8595; Pull</button>
           <button class="btn primary" onclick="cloudPush()">&#8593; Push</button>
         </div>
-      </div>
-    </div>
-
-    <!-- DATA -->
-    <div class="drawer-acc-hdr" onclick="toggleAcc('acc-data')">
-      <span class="drawer-acc-title">&#128202; Data</span>
-      <span class="drawer-acc-arrow" id="arr-acc-data">&#9656;</span>
-    </div>
-    <div class="drawer-acc-body" id="acc-data">
-      <div class="drawer-acc-inner">
-        <div id="health-panel"></div>
-        <div class="btn-row" style="margin-top:10px;flex-wrap:wrap">
-          <button class="btn" style="font-size:12px" onclick="exportArchiveCSV()">Export archived receipts</button>
-          <button class="btn" style="font-size:12px" onclick="exportDecryptedBackup()">Export decrypted backup</button>
-          <button class="btn" style="font-size:12px" onclick="forceRefresh()" title="Clears cached version and reloads the app">&#8635; Force refresh</button>
-        </div>
-        <div class="drawer-field" style="margin-top:12px">
-          <label>Receipt data retention</label>
-          <select id="cfg-prune-years" onchange="settings.pruneYears=parseInt(this.value);saveSettings();">
-            <option value="0">Keep forever</option>
-            <option value="1">1 year</option>
-            <option value="2">2 years</option>
-            <option value="3">3 years</option>
-            <option value="5">5 years</option>
-            <option value="7">7 years</option>
-            <option value="10">10 years</option>
-          </select>
-          <div style="font-size:11px;color:var(--text-faint);margin-top:5px;line-height:1.4">Archived data outside this window is permanently deleted on the next sync or app open.</div>
-        </div>
-        <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border-light)">
-          <div style="font-size:11px;font-weight:600;color:var(--text-faint);letter-spacing:0.3px;margin-bottom:8px">DANGER ZONE</div>
-          <div class="btn-row" style="flex-wrap:wrap;gap:6px">
-            <button class="btn danger" style="font-size:12px" onclick="resetIdentity()">Erase identity &amp; sync</button>
-            <button class="btn danger" style="font-size:12px" onclick="resetBudgetAndReceipts()">Erase budget &amp; receipts</button>
-            <button class="btn danger" style="font-size:12px;font-weight:700" onclick="resetAll()">Erase everything</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- NOTIFICATIONS -->
-    <div class="drawer-acc-hdr" onclick="toggleAcc('acc-notifs')">
-      <span class="drawer-acc-title">&#128276; Notifications</span>
-      <span class="drawer-acc-arrow" id="arr-acc-notifs">&#9656;</span>
-    </div>
-    <div class="drawer-acc-body" id="acc-notifs">
-      <div class="drawer-acc-inner">
-        <div style="font-size:11px;color:var(--text-soft);margin-bottom:10px;line-height:1.5">Choose which notifications appear in the bell menu.</div>
-        <div id="notif-toggles"></div>
-        <div class="drawer-field" style="margin-top:10px">
-          <label>Bill reminder window</label>
-          <select id="cfg-reminder-days-2" onchange="settings.reminderDays=parseInt(this.value);saveSettings();buildNotifications()">
-            <option value="7">1 week out</option>
-            <option value="14">2 weeks out</option>
-          </select>
-        </div>
         <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border-light)">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-            <span style="font-size:12px;font-weight:600;color:var(--text-mid)">Custom notifications</span>
-            <button class="btn" style="font-size:11px;padding:3px 10px" onclick="addCustomNotif()">+ Add</button>
+          <div style="font-size:11px;font-weight:600;color:var(--text-soft);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px">Data</div>
+          <div id="health-panel"></div>
+          <div class="btn-row" style="margin-top:10px;flex-wrap:wrap">
+            <button class="btn" style="font-size:12px" onclick="exportArchiveCSV()">Export archived receipts</button>
+            <button class="btn" style="font-size:12px" onclick="exportDecryptedBackup()">Export decrypted backup</button>
+            <button class="btn" style="font-size:12px" onclick="forceRefresh()" title="Clears cached version and reloads the app">&#8635; Force refresh</button>
           </div>
-          <div id="custom-notif-list"></div>
+          <div class="drawer-field" style="margin-top:12px">
+            <label>Receipt data retention</label>
+            <select id="cfg-prune-years" onchange="settings.pruneYears=parseInt(this.value);saveSettings();">
+              <option value="0">Keep forever</option>
+              <option value="1">1 year</option>
+              <option value="2">2 years</option>
+              <option value="3">3 years</option>
+              <option value="5">5 years</option>
+              <option value="7">7 years</option>
+              <option value="10">10 years</option>
+            </select>
+            <div style="font-size:11px;color:var(--text-faint);margin-top:5px;line-height:1.4">Archived data outside this window is permanently deleted on the next sync or app open.</div>
+          </div>
+          <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border-light)">
+            <div style="font-size:11px;font-weight:600;color:var(--text-faint);letter-spacing:0.3px;margin-bottom:8px">DANGER ZONE</div>
+            <div class="btn-row" style="flex-wrap:wrap;gap:6px">
+              <button class="btn danger" style="font-size:12px" onclick="resetIdentity()">Erase identity &amp; sync</button>
+              <button class="btn danger" style="font-size:12px" onclick="resetBudgetAndReceipts()">Erase budget &amp; receipts</button>
+              <button class="btn danger" style="font-size:12px;font-weight:700" onclick="resetAll()">Erase everything</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- DEN PREVIEW -->
+    <!-- DEN -->
     <div class="drawer-acc-hdr" onclick="toggleAcc('acc-den')">
-      <span class="drawer-acc-title">&#9672; Den Preview</span>
+      <span class="drawer-acc-title">&#9672; Den</span>
       <span class="drawer-acc-arrow" id="arr-acc-den">&#9656;</span>
     </div>
     <div class="drawer-acc-body" id="acc-den">
@@ -851,6 +813,89 @@ select{cursor:pointer}
             </div>
             <div id="cfg-price-notes" style="font-size:11px;color:var(--text-soft);line-height:1.5"></div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WALLET -->
+    <div class="drawer-acc-hdr" onclick="toggleAcc('acc-wallet')">
+      <span class="drawer-acc-title">&#128179; Wallet</span>
+      <span class="drawer-acc-arrow" id="arr-acc-wallet">&#9656;</span>
+    </div>
+    <div class="drawer-acc-body" id="acc-wallet">
+      <div class="drawer-acc-inner">
+        <div style="font-size:12px;color:var(--text-soft);margin-bottom:12px;line-height:1.5">Transaction import settings for the Den Wallet card. Requires Den Preview to be enabled.</div>
+        <div class="drawer-field">
+          <label>Etherscan API key <span style="color:var(--text-faint);font-weight:400">(free at etherscan.io/apis — covers all chains)</span></label>
+          <input type="text" id="cfg-etherscan-key" placeholder="Paste API key" onblur="settings.etherscanApiKey=this.value.trim();saveSettings()">
+        </div>
+        <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border-light)">
+          <div style="font-size:11px;font-weight:600;color:var(--text-soft);text-transform:uppercase;letter-spacing:.04em;margin-bottom:10px">Import options</div>
+          <div class="drawer-field">
+            <label>Direction</label>
+            <select id="cfg-wallet-dir" onchange="settings.walletTxDir=this.value;saveSettings()">
+              <option value="out">Outgoing only</option>
+              <option value="in">Incoming only</option>
+              <option value="both">Both</option>
+            </select>
+          </div>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-top:10px">
+            <span style="flex:1;font-size:13px;color:var(--text)">Auto-import on sync</span>
+            <input type="checkbox" id="cfg-wallet-autoimport" onchange="settings.walletAutoImport=this.checked;saveSettings()" style="width:16px;height:16px;cursor:pointer;accent-color:var(--brown)">
+          </label>
+          <div style="font-size:11px;color:var(--text-faint);margin-top:4px;line-height:1.4">When on, new transactions are logged as uncategorized receipts immediately. When off, they appear in the import queue for review.</div>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin-top:10px">
+            <span style="flex:1;font-size:13px;color:var(--text)">Include gas fees</span>
+            <input type="checkbox" id="cfg-wallet-gas" onchange="settings.walletGasFees=this.checked;saveSettings()" style="width:16px;height:16px;cursor:pointer;accent-color:var(--brown)">
+          </label>
+          <div style="font-size:11px;color:var(--text-faint);margin-top:4px;line-height:1.4">Logs a separate ETH Gas receipt for each transaction's network fee.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTIFICATIONS -->
+    <div class="drawer-acc-hdr" onclick="toggleAcc('acc-notifs')">
+      <span class="drawer-acc-title">&#128276; Notifications</span>
+      <span class="drawer-acc-arrow" id="arr-acc-notifs">&#9656;</span>
+    </div>
+    <div class="drawer-acc-body" id="acc-notifs">
+      <div class="drawer-acc-inner">
+        <div style="font-size:11px;color:var(--text-soft);margin-bottom:10px;line-height:1.5">Choose which notifications appear in the bell menu.</div>
+        <div id="notif-toggles"></div>
+        <div class="drawer-field" style="margin-top:10px">
+          <label>Bill reminder window</label>
+          <select id="cfg-reminder-days-2" onchange="settings.reminderDays=parseInt(this.value);saveSettings();buildNotifications()">
+            <option value="7">1 week out</option>
+            <option value="14">2 weeks out</option>
+          </select>
+        </div>
+        <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border-light)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <span style="font-size:12px;font-weight:600;color:var(--text-mid)">Custom notifications</span>
+            <button class="btn" style="font-size:11px;padding:3px 10px" onclick="addCustomNotif()">+ Add</button>
+          </div>
+          <div id="custom-notif-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- APPEARANCE -->
+    <div class="drawer-acc-hdr" onclick="toggleAcc('acc-appearance')">
+      <span class="drawer-acc-title">&#127775; Appearance</span>
+      <span class="drawer-acc-arrow" id="arr-acc-appearance">&#9656;</span>
+    </div>
+    <div class="drawer-acc-body" id="acc-appearance">
+      <div class="drawer-acc-inner">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+          <span style="flex:1;font-size:13px;color:var(--text)">Dark mode</span>
+          <input type="checkbox" id="cfg-dark-mode" onchange="toggleDarkMode()" style="width:16px;height:16px;cursor:pointer;accent-color:var(--brown)">
+        </label>
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border-light)">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+            <span style="flex:1;font-size:13px;color:var(--text)">Show dark mode button in tab bar</span>
+            <input type="checkbox" id="cfg-show-darkmode-btn" onchange="settings.showDarkModeBtn=this.checked;saveSettings();applyDarkModeBtn()" style="width:16px;height:16px;cursor:pointer;accent-color:var(--brown)">
+          </label>
+          <div style="font-size:11px;color:var(--text-faint);margin-top:4px;line-height:1.4">Hides the ☾ toggle from the tab bar. Dark mode can still be toggled here in Settings.</div>
         </div>
       </div>
     </div>
@@ -992,7 +1037,7 @@ let walletImportingTxId=null; // which pending tx has inline import form open
 let walletHistPriceCache={}; // session cache: {cgId:date -> price}
 let denOpenItems=new Set(); // tracks which Den liability body IDs are expanded
 let currentRecurring='none';
-let settings={username:'',provider:'none',jsonbinId:'',jsonbinKey:'',gistId:'',gistToken:'',selfUrl:'',selfToken:'',selfPayloadKB:'',dropboxToken:'',sharedKey:'',encryptSync:false,darkMode:false,pwaInstalled:false,reminderDays:7,pruneYears:0,notifs:{bills:true,budget:true,yearly:true,sync:true,firstSync:true,localSave:true,nudge:true},customNotifs:[],denPreview:false,userColor:'',priceProvider:'none',priceApiKey:'',cgApiKey:'',etherscanApiKey:'',walletAutoImport:false,walletTxDir:'out',walletGasFees:false};
+let settings={username:'',provider:'none',jsonbinId:'',jsonbinKey:'',gistId:'',gistToken:'',selfUrl:'',selfToken:'',selfPayloadKB:'',dropboxToken:'',sharedKey:'',encryptSync:false,darkMode:false,pwaInstalled:false,reminderDays:7,pruneYears:0,notifs:{bills:true,budget:true,yearly:true,sync:true,firstSync:true,localSave:true,nudge:true},customNotifs:[],denPreview:false,userColor:'',priceProvider:'none',priceApiKey:'',cgApiKey:'',etherscanApiKey:'',walletAutoImport:false,walletTxDir:'out',walletGasFees:false,showDarkModeBtn:true};
 let planFilterCat='all',planFilterPri='all',rcptFilterCat='all',rptFilterCat='all';
 let reportView='monthly';
 let pendingCloudData=null;
@@ -1237,7 +1282,7 @@ function toggleAcc(id){
   const arrow=document.getElementById('arr-'+id);
   if(!body)return;
   const opening=!body.classList.contains('open');
-  const ACC_IDS=['acc-identity','acc-cloud','acc-notifs','acc-data','acc-den'];
+  const ACC_IDS=['acc-identity','acc-sync','acc-den','acc-wallet','acc-notifs','acc-appearance'];
   ACC_IDS.forEach(aid=>{
     document.getElementById(aid)?.classList.remove('open');
     document.getElementById('arr-'+aid)?.classList.remove('open');
@@ -1301,11 +1346,17 @@ function openDrawer(){
   document.getElementById('drawer-overlay').classList.add('open');
   renderHealthPanel();renderNotifToggles();renderCustomNotifList();
   const cfgColor=document.getElementById('cfg-user-color');if(cfgColor)cfgColor.value=settings.userColor||USER_COLORS[0];
-  // Render encryption toggle state
-  const cb=document.getElementById('cfg-encrypt');
-  if(cb)cb.checked=!!settings.encryptSync;
+  const cbEnc=document.getElementById('cfg-encrypt');if(cbEnc)cbEnc.checked=!!settings.encryptSync;
   renderEncryptStatus();
   renderSyncTimestamps();
+  // Wallet section
+  const ethKey=document.getElementById('cfg-etherscan-key');if(ethKey)ethKey.value=settings.etherscanApiKey||'';
+  const walDir=document.getElementById('cfg-wallet-dir');if(walDir)walDir.value=settings.walletTxDir||'out';
+  const walAuto=document.getElementById('cfg-wallet-autoimport');if(walAuto)walAuto.checked=!!settings.walletAutoImport;
+  const walGas=document.getElementById('cfg-wallet-gas');if(walGas)walGas.checked=!!settings.walletGasFees;
+  // Appearance section
+  applyDarkMode();
+  applyDarkModeBtn();
 }
 function closeDrawer(){document.getElementById('drawer').classList.remove('open');document.getElementById('drawer-overlay').classList.remove('open');}
 
@@ -3337,6 +3388,15 @@ function applyDarkMode(){
   document.body.classList.toggle('dark',!!settings.darkMode);
   const btn=document.getElementById('dark-mode-btn');
   if(btn)btn.textContent=settings.darkMode?'\u2600':'\u263E'; // sun / crescent
+  const cb=document.getElementById('cfg-dark-mode');
+  if(cb)cb.checked=!!settings.darkMode;
+}
+function applyDarkModeBtn(){
+  const show=settings.showDarkModeBtn!==false;
+  const btn=document.getElementById('dark-mode-btn');
+  if(btn)btn.style.display=show?'':'none';
+  const cb=document.getElementById('cfg-show-darkmode-btn');
+  if(cb)cb.checked=show;
 }
 function toggleDarkMode(){
   settings.darkMode=!settings.darkMode;
@@ -4123,33 +4183,11 @@ function confirmImportTx(id){
   renderLogMetrics();renderReceiptList();
 }
 
-function saveEtherscanKey(key){
-  settings.etherscanApiKey=key.trim();
-  saveSettings();
-}
-
-function saveWalletAutoImport(val){
-  settings.walletAutoImport=val;
-  saveSettings();
-}
-
-function saveWalletTxDir(val){
-  settings.walletTxDir=val;
-  saveSettings();
-}
-
-function saveWalletGasFees(val){
-  settings.walletGasFees=val;
-  saveSettings();
-}
-
 function renderDenWallet(){
   const el=document.getElementById('den-wallet');if(!el)return;
   const hasAddr=/^0x[0-9a-fA-F]{40}$/i.test((walletAddress||'').trim());
   const canConnect=typeof window!=='undefined'&&typeof window.ethereum!=='undefined';
   const ethKey=settings.etherscanApiKey||'';
-  const autoImport=settings.walletAutoImport||false;
-  const txDir=settings.walletTxDir||'out';
   const gasFees=settings.walletGasFees||false;
   let html=`<div style="display:flex;gap:6px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
     <input class="den-inp" type="text" value="${esc(walletAddress)}" placeholder="0x wallet address" style="flex:1;min-width:180px;font-family:monospace;font-size:12px" onblur="saveWalletAddress(this.value);renderDenWallet()">
@@ -4158,24 +4196,8 @@ function renderDenWallet(){
   <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px">
     ${Object.entries(WALLET_CHAINS).map(([key,chain])=>`<label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-mid);cursor:pointer"><input type="checkbox" ${walletChains.includes(key)?'checked':''} onchange="toggleWalletChain('${key}',this.checked)" style="margin:0">${chain.name}</label>`).join('')}
   </div>
-  <div style="border-top:1px solid var(--border-faint);padding-top:10px;margin-bottom:12px">
-    <div style="font-size:11px;font-weight:600;color:var(--text-soft);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px">Transaction import</div>
-    <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px">
-      <input class="den-inp" type="text" value="${esc(ethKey)}" placeholder="Etherscan API key (free at etherscan.io/apis)" style="flex:1;font-size:12px" onblur="saveEtherscanKey(this.value)">
-    </div>
-    <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--text-mid)">
-      <label style="display:flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" style="margin:0" ${autoImport?'checked':''} onchange="saveWalletAutoImport(this.checked)">Auto-import on sync</label>
-      <span style="display:flex;align-items:center;gap:6px">Direction:
-        <select class="den-inp" style="font-size:12px;padding:2px 4px" onchange="saveWalletTxDir(this.value)">
-          <option value="out" ${txDir==='out'?'selected':''}>Outgoing</option>
-          <option value="in" ${txDir==='in'?'selected':''}>Incoming</option>
-          <option value="both" ${txDir==='both'?'selected':''}>Both</option>
-        </select>
-      </span>
-      <label style="display:flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" style="margin:0" ${gasFees?'checked':''} onchange="saveWalletGasFees(this.checked)">Include gas fees</label>
-    </div>
-    ${!ethKey?'<div style="font-size:11px;color:var(--text-faint);margin-top:6px">Add an Etherscan key to fetch transaction history. Tap ↺ Refresh to pull activity.</div>':''}
-  </div>`;
+  ${!ethKey?'<div style="font-size:11px;color:var(--text-faint);margin-bottom:10px">Transaction import: add an Etherscan API key in <strong>Settings → Wallet</strong>, then tap ↺ Refresh.</div>':''}
+`;
   if(!hasAddr){
     html+='<div style="font-size:12px;color:var(--text-faint);text-align:center;padding:6px 0">Enter or connect a wallet address above, then tap Refresh.</div>';
     el.innerHTML=html;return;
@@ -4805,6 +4827,7 @@ renderLogMetrics();
 renderReceiptList();
 checkWelcome();
 applyDarkMode(); // apply saved dark mode preference after settings loaded
+applyDarkModeBtn(); // apply tab bar dark mode button visibility
 applyDenPreview(); // apply Den Preview state after settings loaded
 checkIosInstallBanner(); // show iOS install banner if on iOS Safari without standalone mode
 loadSyncMeta();
