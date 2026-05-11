@@ -722,6 +722,23 @@ body.left-hand #gsb-sync-btn{border-radius:6px}
       </div>
     </div>
 
+    <!-- DATA -->
+    <div class="drawer-acc-hdr" onclick="toggleAcc('acc-data')">
+      <span class="drawer-acc-title">&#128190; Data</span>
+      <span class="drawer-acc-arrow" id="arr-acc-data">&#9656;</span>
+    </div>
+    <div class="drawer-acc-body" id="acc-data">
+      <div class="drawer-acc-inner">
+        <div style="font-size:12px;color:var(--text-soft);margin-bottom:10px;line-height:1.4">Save a local backup, restore from a file, or export your data for use in a spreadsheet.</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <button class="btn success" onclick="saveJSON()">Save local</button>
+          <button class="btn" onclick="document.getElementById('restore-inp').click()">Restore local</button>
+          <button class="btn" onclick="exportCSV()">Export CSV</button>
+          <button class="btn" id="copy-btn" onclick="copySheets()">Copy for Sheets</button>
+        </div>
+      </div>
+    </div>
+
     <!-- SYNC -->
     <div class="drawer-acc-hdr" onclick="toggleAcc('acc-sync')">
       <span class="drawer-acc-title">&#9729; Sync</span>
@@ -909,21 +926,7 @@ body.left-hand #gsb-sync-btn{border-radius:6px}
       </div>
     </div>
 
-    <div class="drawer-acc-hdr" onclick="toggleAcc('acc-data')">
-      <span class="drawer-acc-title">&#128190; Data</span>
-      <span class="drawer-acc-arrow" id="arr-acc-data">&#9656;</span>
-    </div>
-    <div class="drawer-acc-body" id="acc-data">
-      <div class="drawer-acc-inner">
-        <div style="font-size:12px;color:var(--text-soft);margin-bottom:10px;line-height:1.4">Save a local backup, restore from a file, or export your data for use in a spreadsheet.</div>
-        <div style="display:flex;flex-wrap:wrap;gap:8px">
-          <button class="btn success" onclick="saveJSON()">Save local</button>
-          <button class="btn" onclick="document.getElementById('restore-inp').click()">Restore local</button>
-          <button class="btn" onclick="exportCSV()">Export CSV</button>
-          <button class="btn" id="copy-btn" onclick="copySheets()">Copy for Sheets</button>
-        </div>
-      </div>
-    </div>
+
 
   </div>
 </div>
@@ -1307,7 +1310,7 @@ function toggleAcc(id){
   const arrow=document.getElementById('arr-'+id);
   if(!body)return;
   const opening=!body.classList.contains('open');
-  const ACC_IDS=['acc-identity','acc-sync','acc-den','acc-wallet','acc-notifs','acc-appearance','acc-data'];
+  const ACC_IDS=['acc-identity','acc-data','acc-sync','acc-den','acc-wallet','acc-notifs','acc-appearance'];
   ACC_IDS.forEach(aid=>{
     document.getElementById(aid)?.classList.remove('open');
     document.getElementById('arr-'+aid)?.classList.remove('open');
