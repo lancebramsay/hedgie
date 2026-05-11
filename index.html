@@ -329,7 +329,7 @@ body.left-hand #gsb-sync-btn{border-radius:6px}
       <ellipse cx="20" cy="48" rx="5" ry="3" fill="#c9a882"/>
       <ellipse cx="32" cy="49" rx="5" ry="3" fill="#c9a882"/>
     </svg>
-    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v2.5.5</div></div>
+    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v2.5.6</div></div>
   </div>
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('log')" id="tab-log">
@@ -680,7 +680,7 @@ body.left-hand #gsb-sync-btn{border-radius:6px}
 
     <!-- IDENTITY -->
     <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0 10px;border-bottom:1px solid var(--border-light);margin-bottom:8px">
-      <span style="font-size:12px;color:var(--text-faint)">Open Hedgie · v2.5.5</span>
+      <span style="font-size:12px;color:var(--text-faint)">Open Hedgie · v2.5.6</span>
       <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="font-size:12px;color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie &#8594;</a>
     </div>
     <a href="https://github.com/lancebramsay/hedgie/wiki" target="_blank"
@@ -788,14 +788,6 @@ body.left-hand #gsb-sync-btn{border-radius:6px}
               <option value="10">10 years</option>
             </select>
             <div style="font-size:11px;color:var(--text-faint);margin-top:5px;line-height:1.4">Archived data outside this window is permanently deleted on the next sync or app open.</div>
-          </div>
-          <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border-light)">
-            <div style="font-size:11px;font-weight:600;color:var(--text-faint);letter-spacing:0.3px;margin-bottom:8px">DANGER ZONE</div>
-            <div class="btn-row" style="flex-wrap:wrap;gap:6px">
-              <button class="btn danger" style="font-size:12px" onclick="resetIdentity()">Erase identity &amp; sync</button>
-              <button class="btn danger" style="font-size:12px" onclick="resetBudgetAndReceipts()">Erase budget &amp; receipts</button>
-              <button class="btn danger" style="font-size:12px;font-weight:700" onclick="resetAll()">Erase everything</button>
-            </div>
           </div>
         </div>
       </div>
@@ -928,7 +920,63 @@ body.left-hand #gsb-sync-btn{border-radius:6px}
       </div>
     </div>
 
-
+    <!-- DANGER ZONE -->
+    <div class="drawer-acc-hdr" onclick="toggleAcc('acc-danger')" style="border-top:1px solid var(--red-light);margin-top:8px">
+      <span class="drawer-acc-title" style="color:var(--red)">&#9888; Danger zone</span>
+      <span class="drawer-acc-arrow" id="arr-acc-danger">&#9656;</span>
+    </div>
+    <div class="drawer-acc-body" id="acc-danger">
+      <div class="drawer-acc-inner">
+        <div style="font-size:11px;font-weight:600;color:var(--text-faint);letter-spacing:0.3px;margin-bottom:10px">TARGETED</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="flex:1">
+              <div style="font-size:13px;color:var(--text)">Clear receipts &amp; archives</div>
+              <div style="font-size:11px;color:var(--text-faint);margin-top:2px;line-height:1.4">Removes all logged receipts and historical archives. Budget structure is kept.</div>
+            </div>
+            <button class="btn danger" style="font-size:12px;flex-shrink:0" onclick="clearReceiptsAndArchives()">Clear</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="flex:1">
+              <div style="font-size:13px;color:var(--text)">Clear vendor memory</div>
+              <div style="font-size:11px;color:var(--text-faint);margin-top:2px;line-height:1.4">Removes all saved vendor suggestions used for autofill.</div>
+            </div>
+            <button class="btn danger" style="font-size:12px;flex-shrink:0" onclick="clearVendorMemory()">Clear</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="flex:1">
+              <div style="font-size:13px;color:var(--text)">Clear Den data</div>
+              <div style="font-size:11px;color:var(--text-faint);margin-top:2px;line-height:1.4">Removes portfolio positions, liabilities, savings goals, and wallet data.</div>
+            </div>
+            <button class="btn danger" style="font-size:12px;flex-shrink:0" onclick="clearDenData()">Clear</button>
+          </div>
+        </div>
+        <div style="font-size:11px;font-weight:600;color:var(--text-faint);letter-spacing:0.3px;margin-top:16px;margin-bottom:10px;padding-top:12px;border-top:1px solid var(--border-light)">FULL RESET</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="flex:1">
+              <div style="font-size:13px;color:var(--text)">Erase identity &amp; sync</div>
+              <div style="font-size:11px;color:var(--text-faint);margin-top:2px;line-height:1.4">Clears display name, shared key, and all cloud sync credentials. Budget and receipts are untouched.</div>
+            </div>
+            <button class="btn danger" style="font-size:12px;flex-shrink:0" onclick="resetIdentity()">Erase</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="flex:1">
+              <div style="font-size:13px;color:var(--text)">Erase budget &amp; receipts</div>
+              <div style="font-size:11px;color:var(--text-faint);margin-top:2px;line-height:1.4">Clears income, categories, expense lines, and all receipts. Identity and sync settings are untouched.</div>
+            </div>
+            <button class="btn danger" style="font-size:12px;flex-shrink:0" onclick="resetBudgetAndReceipts()">Erase</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="flex:1">
+              <div style="font-size:13px;color:var(--text)">Erase everything</div>
+              <div style="font-size:11px;color:var(--text-faint);margin-top:2px;line-height:1.4">Removes all data including identity, sync, budget, and receipts. Cannot be undone.</div>
+            </div>
+            <button class="btn danger" style="font-size:12px;flex-shrink:0;font-weight:700" onclick="resetAll()">Erase</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
   </div>
 </div>
@@ -1312,7 +1360,7 @@ function toggleAcc(id){
   const arrow=document.getElementById('arr-'+id);
   if(!body)return;
   const opening=!body.classList.contains('open');
-  const ACC_IDS=['acc-identity','acc-data','acc-sync','acc-den','acc-wallet','acc-notifs','acc-appearance'];
+  const ACC_IDS=['acc-identity','acc-data','acc-sync','acc-den','acc-wallet','acc-notifs','acc-appearance','acc-danger'];
   ACC_IDS.forEach(aid=>{
     document.getElementById(aid)?.classList.remove('open');
     document.getElementById('arr-'+aid)?.classList.remove('open');
@@ -4813,6 +4861,25 @@ function exportArchiveCSV(){
   let csv='Date,Category,Vendor,Amount,Note,LoggedBy\n';
   allArc.forEach(r=>csv+=`${r.date},${r.cat},"${r.vendor||''}",${r.amt.toFixed(2)},"${r.note||''}","${r.by||''}"\n`);
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='hedgie-archived-receipts.csv';a.click();
+}
+function clearReceiptsAndArchives(){
+  if(!confirm('Remove all receipts and archived data? Budget structure is kept.'))return;
+  receipts=[];archives={};
+  syncMeta={...syncMeta,version:0,lastEditedBy:'',lastEditedAt:'',lastPulledVersion:0,lastPushedAt:'',lastPulledAt:'',lastSyncedAt:''};
+  localStorage.removeItem('hedgie_syncmeta');
+  refreshAll();
+  setGSB('info','Receipts and archives cleared','');
+}
+function clearVendorMemory(){
+  if(!confirm('Remove all saved vendor suggestions?'))return;
+  vendors={};
+  setGSB('info','Vendor memory cleared','');
+}
+function clearDenData(){
+  if(!confirm('Remove all Den data — portfolio positions, liabilities, savings goals, and wallet data?'))return;
+  financing=[];investments=[];savingsGoals=[];walletAddress='';walletChains=['ethereum','arbitrum','base','polygon'];walletAssets=[];walletPendingTxs=[];walletImportingTxId=null;
+  refreshAll();
+  setGSB('info','Den data cleared','');
 }
 function resetIdentity(){
   if(!confirm('Erase your display name, shared key, and all cloud sync credentials? Your budget and receipts are untouched.'))return;

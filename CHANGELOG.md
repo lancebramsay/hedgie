@@ -4,6 +4,20 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
+## [2.5.6] — 2026-05-10
+
+### Danger zone redesigned with granular options
+
+- Danger zone removed from the bottom of the Sync section and promoted to its own **⚠ Danger zone** accordion at the bottom of Settings, visually separated with a red header
+- Each action is now a labeled row with a description of exactly what is affected, rather than a row of unlabeled buttons
+- Added three targeted clear actions:
+  - **Clear receipts & archives** — removes all logged receipts and historical archives; budget structure is kept
+  - **Clear vendor memory** — removes saved vendor autofill suggestions
+  - **Clear Den data** — removes portfolio positions, liabilities, savings goals, and wallet data
+- Existing full reset actions (Erase identity & sync, Erase budget & receipts, Erase everything) retained under a separate Full reset heading
+
+---
+
 ## [2.5.5] — 2026-05-10
 
 ### Fix: Monthly report and Budget planner cut off when Den Preview disabled
