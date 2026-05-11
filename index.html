@@ -3549,8 +3549,9 @@ function applyDenPreview(){
   const hasDen=TAB_ORDER.includes('den');
   if(on&&!hasDen){TAB_ORDER.splice(1,0,'den');}
   else if(!on&&hasDen){
+    const wasCurrent=TAB_ORDER[currentTabIdx]==='den';
     TAB_ORDER.splice(TAB_ORDER.indexOf('den'),1);
-    if(currentTabIdx>=TAB_ORDER.length){currentTabIdx=0;switchTab('log');}
+    if(wasCurrent||currentTabIdx>=TAB_ORDER.length){currentTabIdx=0;switchTab('log');}
   }
   populateDenLogFields();
   applyPriceProvider();
