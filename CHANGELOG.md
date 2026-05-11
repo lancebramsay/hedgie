@@ -4,6 +4,15 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
+## [2.5.7] — 2026-05-11
+
+### Fix: left-hand mode logo separator on wrong side
+
+- In left-hand mode the tab logo moved to the right end of the bar but retained its `border-right`, placing the separator line on the outer edge instead of between the logo and the tabs
+- Fixed by flipping to `border-left` with mirrored padding and margin when `body.left-hand` is active
+
+---
+
 ## [2.5.6] — 2026-05-10
 
 ### Data section reorganized; Sync section tidied
