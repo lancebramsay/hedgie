@@ -4,6 +4,14 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
+## [2.5.1] — 2026-05-10
+
+### Fix: sync button flush with right edge of status bar
+
+- Removed right padding from the GSB inner row; sync button now stretches full height and sits flush against the right edge of the bar with `border-radius:0 0 var(--radius-md) 0` matching the bar's own bottom-right corner
+
+---
+
 ## [2.5.0] — 2026-05-10
 
 ### Settings reorganization, sync button accessibility, and appearance controls

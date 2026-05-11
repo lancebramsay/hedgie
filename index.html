@@ -324,7 +324,7 @@ select{cursor:pointer}
       <ellipse cx="20" cy="48" rx="5" ry="3" fill="#c9a882"/>
       <ellipse cx="32" cy="49" rx="5" ry="3" fill="#c9a882"/>
     </svg>
-    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v2.5.0</div></div>
+    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v2.5.1</div></div>
   </div>
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('log')" id="tab-log">
@@ -364,11 +364,11 @@ select{cursor:pointer}
 
 <!-- GLOBAL STATUS BAR -->
 <div id="global-status-bar" style="background:var(--parchment);border-bottom:1px solid var(--border-light);transition:background 0.4s;border-radius:0 0 var(--radius-md) var(--radius-md)">
-  <div style="display:flex;align-items:center;height:28px;padding:0 1.25rem;gap:8px;max-width:860px;margin:0 auto;box-sizing:border-box;width:100%">
+  <div style="display:flex;align-items:center;height:28px;padding:0 0 0 1.25rem;gap:8px;max-width:860px;margin:0 auto;box-sizing:border-box;width:100%">
     <div id="gsb-dot" style="width:7px;height:7px;border-radius:50%;background:var(--text-faint);flex-shrink:0;transition:background 0.4s"></div>
     <span id="gsb-label" style="font-size:11px;color:var(--text-soft);flex:1;transition:color 0.4s"></span>
     <span id="gsb-right" style="font-size:11px;color:var(--text-faint);margin-right:6px"></span>
-    <button id="gsb-sync-btn" onclick="quickSync()" title="Sync with cloud" style="display:none;align-items:center;gap:5px;background:var(--brown);border:1px solid var(--brown);border-radius:6px;padding:5px 16px;font-size:12px;color:#fff;cursor:pointer;font-family:inherit;min-height:28px;white-space:nowrap;font-weight:500">
+    <button id="gsb-sync-btn" onclick="quickSync()" title="Sync with cloud" style="display:none;align-items:center;gap:5px;background:var(--brown);border:none;border-radius:0 0 var(--radius-md) 0;padding:5px 18px;font-size:12px;color:#fff;cursor:pointer;font-family:inherit;align-self:stretch;white-space:nowrap;font-weight:500">
       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       Sync
     </button>
@@ -593,7 +593,7 @@ select{cursor:pointer}
     </div>
   </div>
   <div class="hint">Use the gear icon &#x2699; to configure cloud sync, shared keys, and user settings</div>
-  <div class="hint" style="margin-top:4px">Open Hedgie · v2.5.0 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
+  <div class="hint" style="margin-top:4px">Open Hedgie · v2.5.1 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
   <div class="hint" style="margin-top:8px" id="donate-btn-planner"></div>
 </div><!-- /panel-planner -->
 
