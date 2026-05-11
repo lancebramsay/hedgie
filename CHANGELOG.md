@@ -6,6 +6,13 @@ All notable changes to Open Hedgie are documented here.
 
 ## [2.5.6] — 2026-05-10
 
+### Data section reorganized; Sync section tidied
+
+- Export archived receipts, Export decrypted backup, and Receipt data retention moved from the Sync section into the Data accordion
+- Data accordion now has three sub-groups: Backup & restore (Save local, Restore local, Export decrypted backup), Export (Export CSV, Copy for Sheets, Export archived receipts), and Retention (receipt data retention window)
+- Force refresh moved to sit alongside the Pull and Push buttons in the Sync section
+- Health panel (payload size indicator) remains in Sync
+
 ### Danger zone redesigned with granular options
 
 - Danger zone removed from the bottom of the Sync section and promoted to its own **⚠ Danger zone** accordion at the bottom of Settings, visually separated with a red header

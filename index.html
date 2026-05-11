@@ -731,12 +731,31 @@ body.left-hand #gsb-sync-btn{border-radius:6px}
     </div>
     <div class="drawer-acc-body" id="acc-data">
       <div class="drawer-acc-inner">
-        <div style="font-size:12px;color:var(--text-soft);margin-bottom:10px;line-height:1.4">Save a local backup, restore from a file, or export your data for use in a spreadsheet.</div>
+        <div style="font-size:11px;font-weight:600;color:var(--text-faint);letter-spacing:0.3px;margin-bottom:8px">BACKUP &amp; RESTORE</div>
         <div style="display:flex;flex-wrap:wrap;gap:8px">
           <button class="btn success" onclick="saveJSON()">Save local</button>
           <button class="btn" onclick="document.getElementById('restore-inp').click()">Restore local</button>
+          <button class="btn" onclick="exportDecryptedBackup()">Export decrypted backup</button>
+        </div>
+        <div style="font-size:11px;font-weight:600;color:var(--text-faint);letter-spacing:0.3px;margin-top:16px;margin-bottom:8px;padding-top:12px;border-top:1px solid var(--border-light)">EXPORT</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
           <button class="btn" onclick="exportCSV()">Export CSV</button>
           <button class="btn" id="copy-btn" onclick="copySheets()">Copy for Sheets</button>
+          <button class="btn" onclick="exportArchiveCSV()">Export archived receipts</button>
+        </div>
+        <div style="font-size:11px;font-weight:600;color:var(--text-faint);letter-spacing:0.3px;margin-top:16px;margin-bottom:8px;padding-top:12px;border-top:1px solid var(--border-light)">RETENTION</div>
+        <div class="drawer-field" style="margin-top:0">
+          <label>Receipt data retention</label>
+          <select id="cfg-prune-years" onchange="settings.pruneYears=parseInt(this.value);saveSettings();">
+            <option value="0">Keep forever</option>
+            <option value="1">1 year</option>
+            <option value="2">2 years</option>
+            <option value="3">3 years</option>
+            <option value="5">5 years</option>
+            <option value="7">7 years</option>
+            <option value="10">10 years</option>
+          </select>
+          <div style="font-size:11px;color:var(--text-faint);margin-top:5px;line-height:1.4">Archived data outside this window is permanently deleted on the next sync or app open.</div>
         </div>
       </div>
     </div>
@@ -767,28 +786,10 @@ body.left-hand #gsb-sync-btn{border-radius:6px}
         <div class="btn-row" style="margin-top:12px">
           <button class="btn" onclick="cloudPull()">&#8595; Pull</button>
           <button class="btn primary" onclick="cloudPush()">&#8593; Push</button>
+          <button class="btn" style="font-size:12px" onclick="forceRefresh()" title="Clears cached version and reloads the app">&#8635; Force refresh</button>
         </div>
         <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border-light)">
-          <div style="font-size:11px;font-weight:600;color:var(--text-soft);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px">Data</div>
           <div id="health-panel"></div>
-          <div class="btn-row" style="margin-top:10px;flex-wrap:wrap">
-            <button class="btn" style="font-size:12px" onclick="exportArchiveCSV()">Export archived receipts</button>
-            <button class="btn" style="font-size:12px" onclick="exportDecryptedBackup()">Export decrypted backup</button>
-            <button class="btn" style="font-size:12px" onclick="forceRefresh()" title="Clears cached version and reloads the app">&#8635; Force refresh</button>
-          </div>
-          <div class="drawer-field" style="margin-top:12px">
-            <label>Receipt data retention</label>
-            <select id="cfg-prune-years" onchange="settings.pruneYears=parseInt(this.value);saveSettings();">
-              <option value="0">Keep forever</option>
-              <option value="1">1 year</option>
-              <option value="2">2 years</option>
-              <option value="3">3 years</option>
-              <option value="5">5 years</option>
-              <option value="7">7 years</option>
-              <option value="10">10 years</option>
-            </select>
-            <div style="font-size:11px;color:var(--text-faint);margin-top:5px;line-height:1.4">Archived data outside this window is permanently deleted on the next sync or app open.</div>
-          </div>
         </div>
       </div>
     </div>
