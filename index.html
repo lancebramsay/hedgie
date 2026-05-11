@@ -531,13 +531,7 @@ body.left-hand #gsb-sync-btn{border-radius:6px}
       <div style="font-size:18px;font-weight:700;color:var(--brown-dark)">Budget planner</div>
       <div style="font-size:12px;color:var(--text-soft)">Monthly targets · yearly items shown as monthly equivalent</div>
     </div>
-    <div class="btn-row">
-      <button class="btn success" onclick="saveJSON()">Save local</button>
-      <button class="btn" onclick="document.getElementById('restore-inp').click()">Restore local</button>
-      <input type="file" id="restore-inp" accept=".json" style="display:none" onchange="restoreJSON(this)">
-      <button class="btn" onclick="exportCSV()">Export CSV</button>
-      <button class="btn" id="copy-btn" onclick="copySheets()">Copy for Sheets</button>
-    </div>
+    <input type="file" id="restore-inp" accept=".json" style="display:none" onchange="restoreJSON(this)">
   </div>
   <div class="metrics-row" id="pl-metrics"></div>
   <div class="flow-bar-wrap">
@@ -598,7 +592,8 @@ body.left-hand #gsb-sync-btn{border-radius:6px}
     </div>
   </div>
   <div class="hint">Use the gear icon &#x2699; to configure cloud sync, shared keys, and user settings</div>
-  <div class="hint" style="margin-top:4px">Open Hedgie · v2.5.2 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
+  <div class="hint" style="margin-top:4px">Open Hedgie · v2.5.3 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
+  <div class="hint" style="margin-top:8px"><a href="#" onclick="openDrawer();setTimeout(()=>toggleAcc('acc-data'),120);return false" style="color:var(--brown-light);text-decoration:none">&#128190; Export &amp; backup &#8250;</a></div>
   <div class="hint" style="margin-top:8px" id="donate-btn-planner"></div>
 </div><!-- /panel-planner -->
 
@@ -908,6 +903,22 @@ body.left-hand #gsb-sync-btn{border-radius:6px}
             <input type="checkbox" id="cfg-left-hand" onchange="settings.leftHandMode=this.checked;saveSettings();applyLeftHandMode()" style="width:16px;height:16px;cursor:pointer;accent-color:var(--brown)">
           </label>
           <div style="font-size:11px;color:var(--text-faint);margin-top:4px;line-height:1.4">Mirrors the tab bar so the notification bell and controls sit on the left. The sync button and gear icon move left too.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="drawer-acc-hdr" onclick="toggleAcc('acc-data')">
+      <span class="drawer-acc-title">&#128190; Data</span>
+      <span class="drawer-acc-arrow" id="arr-acc-data">&#9656;</span>
+    </div>
+    <div class="drawer-acc-body" id="acc-data">
+      <div class="drawer-acc-inner">
+        <div style="font-size:12px;color:var(--text-soft);margin-bottom:10px;line-height:1.4">Save a local backup, restore from a file, or export your data for use in a spreadsheet.</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <button class="btn success" onclick="saveJSON()">Save local</button>
+          <button class="btn" onclick="document.getElementById('restore-inp').click()">Restore local</button>
+          <button class="btn" onclick="exportCSV()">Export CSV</button>
+          <button class="btn" id="copy-btn" onclick="copySheets()">Copy for Sheets</button>
         </div>
       </div>
     </div>
@@ -1294,7 +1305,7 @@ function toggleAcc(id){
   const arrow=document.getElementById('arr-'+id);
   if(!body)return;
   const opening=!body.classList.contains('open');
-  const ACC_IDS=['acc-identity','acc-sync','acc-den','acc-wallet','acc-notifs','acc-appearance'];
+  const ACC_IDS=['acc-identity','acc-sync','acc-den','acc-wallet','acc-notifs','acc-appearance','acc-data'];
   ACC_IDS.forEach(aid=>{
     document.getElementById(aid)?.classList.remove('open');
     document.getElementById('arr-'+aid)?.classList.remove('open');

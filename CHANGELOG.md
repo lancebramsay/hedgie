@@ -4,6 +4,16 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
+## [2.5.3] — 2026-05-10
+
+### Data management moved to Settings
+
+- Removed Save local, Restore local, Export CSV, and Copy for Sheets buttons from the Budget Planner header — they are app-level operations, not planning tools
+- Added a new **Data** accordion section in Settings (below Appearance) housing all four actions with a short description
+- Added an "Export & backup →" shortcut link at the bottom of the Budget Planner that opens Settings directly to the Data section
+
+---
+
 ## [2.5.2] — 2026-05-10
 
 ### Sync button outline and left-hand mode
