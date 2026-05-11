@@ -291,6 +291,11 @@ select{cursor:pointer}
 .den-field-lbl{font-size:11px;color:var(--text-soft);white-space:nowrap;min-width:90px;flex-shrink:0}
 .den-gain{color:var(--green)}.den-loss{color:var(--red)}
 .den-expand-arrow{font-size:11px;color:var(--text-faint);transition:transform 0.2s;flex-shrink:0;margin-left:auto}
+body.left-hand .tab-bar-inner{flex-direction:row-reverse}
+body.left-hand .notif-panel{right:auto;left:0}
+body.left-hand .gear-btn{right:auto;left:20px}
+body.left-hand #gsb-inner{flex-direction:row-reverse;padding:0 1.25rem 0 0}
+body.left-hand #gsb-sync-btn{border-right:2px solid var(--border);border-left:none;border-radius:0 6px 0 var(--radius-md)}
 </style>
 <script>
 // Strip ?v= cache-bust param from URL immediately on load (added by forceRefresh())
@@ -324,7 +329,7 @@ select{cursor:pointer}
       <ellipse cx="20" cy="48" rx="5" ry="3" fill="#c9a882"/>
       <ellipse cx="32" cy="49" rx="5" ry="3" fill="#c9a882"/>
     </svg>
-    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v2.5.1</div></div>
+    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v2.5.2</div></div>
   </div>
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('log')" id="tab-log">
@@ -364,11 +369,11 @@ select{cursor:pointer}
 
 <!-- GLOBAL STATUS BAR -->
 <div id="global-status-bar" style="background:var(--parchment);border-bottom:1px solid var(--border-light);transition:background 0.4s;border-radius:0 0 var(--radius-md) var(--radius-md)">
-  <div style="display:flex;align-items:center;height:28px;padding:0 0 0 1.25rem;gap:8px;max-width:860px;margin:0 auto;box-sizing:border-box;width:100%">
+  <div id="gsb-inner" style="display:flex;align-items:center;height:28px;padding:0 0 0 1.25rem;gap:8px;max-width:860px;margin:0 auto;box-sizing:border-box;width:100%">
     <div id="gsb-dot" style="width:7px;height:7px;border-radius:50%;background:var(--text-faint);flex-shrink:0;transition:background 0.4s"></div>
     <span id="gsb-label" style="font-size:11px;color:var(--text-soft);flex:1;transition:color 0.4s"></span>
     <span id="gsb-right" style="font-size:11px;color:var(--text-faint);margin-right:6px"></span>
-    <button id="gsb-sync-btn" onclick="quickSync()" title="Sync with cloud" style="display:none;align-items:center;gap:5px;background:none;border:none;border-left:1px solid var(--border-light);border-radius:0 0 var(--radius-md) 0;padding:5px 18px;font-size:12px;color:var(--text-soft);cursor:pointer;font-family:inherit;align-self:stretch;white-space:nowrap;font-weight:500">
+    <button id="gsb-sync-btn" onclick="quickSync()" title="Sync with cloud" style="display:none;align-items:center;gap:5px;background:none;border:2px solid var(--border);border-right:none;border-radius:6px 0 var(--radius-md) 0;padding:0 22px;font-size:13px;color:var(--text-soft);cursor:pointer;font-family:inherit;align-self:stretch;white-space:nowrap;font-weight:500">
       <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
       Sync
     </button>
@@ -593,7 +598,7 @@ select{cursor:pointer}
     </div>
   </div>
   <div class="hint">Use the gear icon &#x2699; to configure cloud sync, shared keys, and user settings</div>
-  <div class="hint" style="margin-top:4px">Open Hedgie · v2.5.1 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
+  <div class="hint" style="margin-top:4px">Open Hedgie · v2.5.2 · <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie</a></div>
   <div class="hint" style="margin-top:8px" id="donate-btn-planner"></div>
 </div><!-- /panel-planner -->
 
@@ -897,6 +902,13 @@ select{cursor:pointer}
           </label>
           <div style="font-size:11px;color:var(--text-faint);margin-top:4px;line-height:1.4">Hides the ☾ toggle from the tab bar. Dark mode can still be toggled here in Settings.</div>
         </div>
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border-light)">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+            <span style="flex:1;font-size:13px;color:var(--text)">Left-hand mode</span>
+            <input type="checkbox" id="cfg-left-hand" onchange="settings.leftHandMode=this.checked;saveSettings();applyLeftHandMode()" style="width:16px;height:16px;cursor:pointer;accent-color:var(--brown)">
+          </label>
+          <div style="font-size:11px;color:var(--text-faint);margin-top:4px;line-height:1.4">Mirrors the tab bar so the notification bell and controls sit on the left. The sync button and gear icon move left too.</div>
+        </div>
       </div>
     </div>
 
@@ -1037,7 +1049,7 @@ let walletImportingTxId=null; // which pending tx has inline import form open
 let walletHistPriceCache={}; // session cache: {cgId:date -> price}
 let denOpenItems=new Set(); // tracks which Den liability body IDs are expanded
 let currentRecurring='none';
-let settings={username:'',provider:'none',jsonbinId:'',jsonbinKey:'',gistId:'',gistToken:'',selfUrl:'',selfToken:'',selfPayloadKB:'',dropboxToken:'',sharedKey:'',encryptSync:false,darkMode:false,pwaInstalled:false,reminderDays:7,pruneYears:0,notifs:{bills:true,budget:true,yearly:true,sync:true,firstSync:true,localSave:true,nudge:true},customNotifs:[],denPreview:false,userColor:'',priceProvider:'none',priceApiKey:'',cgApiKey:'',etherscanApiKey:'',walletAutoImport:false,walletTxDir:'out',walletGasFees:false,showDarkModeBtn:true};
+let settings={username:'',provider:'none',jsonbinId:'',jsonbinKey:'',gistId:'',gistToken:'',selfUrl:'',selfToken:'',selfPayloadKB:'',dropboxToken:'',sharedKey:'',encryptSync:false,darkMode:false,pwaInstalled:false,reminderDays:7,pruneYears:0,notifs:{bills:true,budget:true,yearly:true,sync:true,firstSync:true,localSave:true,nudge:true},customNotifs:[],denPreview:false,userColor:'',priceProvider:'none',priceApiKey:'',cgApiKey:'',etherscanApiKey:'',walletAutoImport:false,walletTxDir:'out',walletGasFees:false,showDarkModeBtn:true,leftHandMode:false};
 let planFilterCat='all',planFilterPri='all',rcptFilterCat='all',rptFilterCat='all';
 let reportView='monthly';
 let pendingCloudData=null;
@@ -1357,6 +1369,7 @@ function openDrawer(){
   // Appearance section
   applyDarkMode();
   applyDarkModeBtn();
+  applyLeftHandMode();
 }
 function closeDrawer(){document.getElementById('drawer').classList.remove('open');document.getElementById('drawer-overlay').classList.remove('open');}
 
@@ -3398,6 +3411,11 @@ function applyDarkModeBtn(){
   const cb=document.getElementById('cfg-show-darkmode-btn');
   if(cb)cb.checked=show;
 }
+function applyLeftHandMode(){
+  document.body.classList.toggle('left-hand',!!settings.leftHandMode);
+  const cb=document.getElementById('cfg-left-hand');
+  if(cb)cb.checked=!!settings.leftHandMode;
+}
 function toggleDarkMode(){
   settings.darkMode=!settings.darkMode;
   saveSettings();
@@ -4828,6 +4846,7 @@ renderReceiptList();
 checkWelcome();
 applyDarkMode(); // apply saved dark mode preference after settings loaded
 applyDarkModeBtn(); // apply tab bar dark mode button visibility
+applyLeftHandMode(); // apply left-hand mode layout if enabled
 applyDenPreview(); // apply Den Preview state after settings loaded
 checkIosInstallBanner(); // show iOS install banner if on iOS Safari without standalone mode
 loadSyncMeta();

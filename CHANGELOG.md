@@ -4,6 +4,22 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
+## [2.5.2] — 2026-05-10
+
+### Sync button outline and left-hand mode
+
+**Sync button**
+- Enlarged and given a visible outline: `border:2px solid var(--border)` on three sides (top, left, bottom with radius), open on the flush-right edge — stays within the ghost color scheme but is clearly distinguished from the status text
+
+**Left-hand mode** (Settings → Appearance)
+- New toggle mirrors the entire top bar layout: notification bell, dark mode button, and PWA icon move to the left; the logo moves to the right
+- GSB sync button shifts to the left edge of the status bar with matching border and radius adjustments
+- Gear icon moves from bottom-right to bottom-left
+- Notification panel drops from the left edge of the notif-wrap instead of the right
+- State persists in settings across sessions
+
+---
+
 ## [2.5.1] — 2026-05-10
 
 ### Fix: sync button layout and color
