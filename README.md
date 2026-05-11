@@ -10,9 +10,11 @@ A lightweight household budget planner that runs entirely from a single HTML fil
 
 ## What it is
 
-Open Hedgie is a self-contained budgeting app. No accounts, no backend, no build step, no dependencies. Download one file and open it in a browser.
+**Hedgie is a household budget planner that belongs entirely to you.**
 
-Optional cloud sync lets multiple household members share data with signed and optionally encrypted payloads across any device.
+No account. No subscription. No company holding your data. Just a single file you open in a browser — on any device, any time, fully offline if you want it to be.
+
+When you're ready for more, Hedgie connects to free services you already trust: GitHub, Dropbox, and others for cloud sync; CoinGecko, Finnhub, and more for live prices. Nothing proprietary, nothing locked in. Every feature is built on open tools that stay free.
 
 ---
 
