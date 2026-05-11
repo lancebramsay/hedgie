@@ -4,6 +4,15 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
+## [2.5.5] — 2026-05-10
+
+### Fix: Monthly report and Budget planner cut off when Den Preview disabled
+
+- When Den Preview was toggled off, the Den panel remained in the flex layout even though it was removed from TAB_ORDER — shifting Monthly report and Budget planner one slot to the right so they displayed the wrong content
+- Fix: `panel-den` is now hidden from the DOM layout (`display:none`) when Den Preview is off, keeping panel positions aligned with TAB_ORDER indices
+
+---
+
 ## [2.5.4] — 2026-05-10
 
 ### Den tab repositioned; settings icon updated

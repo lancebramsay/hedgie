@@ -329,7 +329,7 @@ body.left-hand #gsb-sync-btn{border-radius:6px}
       <ellipse cx="20" cy="48" rx="5" ry="3" fill="#c9a882"/>
       <ellipse cx="32" cy="49" rx="5" ry="3" fill="#c9a882"/>
     </svg>
-    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v2.5.4</div></div>
+    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v2.5.5</div></div>
   </div>
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('log')" id="tab-log">
@@ -680,7 +680,7 @@ body.left-hand #gsb-sync-btn{border-radius:6px}
 
     <!-- IDENTITY -->
     <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0 10px;border-bottom:1px solid var(--border-light);margin-bottom:8px">
-      <span style="font-size:12px;color:var(--text-faint)">Open Hedgie · v2.5.4</span>
+      <span style="font-size:12px;color:var(--text-faint)">Open Hedgie · v2.5.5</span>
       <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="font-size:12px;color:var(--brown-light);text-decoration:none">github.com/lancebramsay/hedgie &#8594;</a>
     </div>
     <a href="https://github.com/lancebramsay/hedgie/wiki" target="_blank"
@@ -3545,6 +3545,7 @@ function applyDenPreview(){
   updateDenLogFieldVisibility();
   const content=document.getElementById('den-preview-content');if(content)content.style.display=on?'block':'none';
   const tabBtn=document.getElementById('tab-den');if(tabBtn)tabBtn.style.display=on?'':'none';
+  const panelDen=document.getElementById('panel-den');if(panelDen)panelDen.style.display=on?'block':'none';
   const hasDen=TAB_ORDER.includes('den');
   if(on&&!hasDen){TAB_ORDER.splice(1,0,'den');}
   else if(!on&&hasDen){
