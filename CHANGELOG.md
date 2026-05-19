@@ -4,6 +4,22 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
+## [2.5.8] — 2026-05-18
+
+### Fix: first-sync guard — local data can no longer overwrite cloud
+
+Entering a receipt before the first sync could silently overwrite all cloud data. Five
+code paths are now protected:
+
+- **`quickSync` Guard 2** — Cancel now aborts entirely (previously Cancel meant "push local to cloud and overwrite"). OK pulls cloud as authoritative and merges local entries in before pushing.
+- **`firstSyncMerge` (new helper)** — Cloud-first merge used in all neverSynced paths. Cloud is authoritative for all fields (recurringBills, financing, savingsGoals, investments, budget). Only local receipts and vendors not already in cloud are added.
+- **`quickSync` main merge path** — Falls back to `firstSyncMerge` if the Guard 2 cloud prefetch failed but the second fetch succeeds with real data.
+- **`cloudPush`** — Uses `firstSyncMerge` instead of the local-first `mergePayloads` when neverSynced.
+- **`cloudPull` first sync** — Rescues local receipts entered before first pull instead of replacing all local data with cloud.
+- **Autosave** — Now shows "Saved locally — sync first to back up to cloud" instead of the misleading "cloud unreachable" message when push is intentionally blocked.
+
+---
+
 ## [2.5.7] — 2026-05-11
 
 ### Accessibility options in Settings → Appearance

@@ -8,7 +8,7 @@ When you're ready for more, Hedgie connects to free services you already trust: 
 
 **Stable:** [hedgie.pages.dev](https://hedgie.pages.dev) — Cloudflare Pages, fully tested releases<br>
 **Pilot:** [lancebramsay.github.io/hedgie](https://lancebramsay.github.io/hedgie) — GitHub Pages, latest updates<br>
-**Current stable:** v2.5.7 | **Pilot:** v2.5.7
+**Current stable:** v2.5.8 | **Pilot:** v2.5.8
 
 ---
 

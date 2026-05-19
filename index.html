@@ -358,7 +358,7 @@ body.dark.high-contrast{
       <ellipse cx="20" cy="48" rx="5" ry="3" fill="#c9a882"/>
       <ellipse cx="32" cy="49" rx="5" ry="3" fill="#c9a882"/>
     </svg>
-    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v2.5.7</div></div>
+    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v2.5.8</div></div>
   </div>
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('log')" id="tab-log">
@@ -709,7 +709,7 @@ body.dark.high-contrast{
 
     <!-- IDENTITY -->
     <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0 10px;border-bottom:1px solid var(--border-light);margin-bottom:8px">
-      <span style="font-size:12px;color:var(--text-faint)">Open Hedgie · v2.5.7</span>
+      <span style="font-size:12px;color:var(--text-faint)">Open Hedgie · v2.5.8</span>
       <div style="display:flex;align-items:center;gap:12px">
         <a href="https://github.com/lancebramsay/hedgie/wiki" target="_blank" style="font-size:12px;color:var(--brown-light);text-decoration:none">&#128214; Wiki &#8594;</a>
         <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="font-size:12px;color:var(--brown-light);text-decoration:none">GitHub &#8594;</a>
@@ -1624,25 +1624,42 @@ async function quickSync(){
     return;
   }
 
-  // ── Guard 2: if we have local data but have never pulled, confirm before pushing ──
+  // ── Guard 2: if we have local data but have never pulled, always merge-pull first ──
+  // Never allow a plain push here — an empty local session would silently overwrite cloud's
+  // recurringBills, financing, savingsGoals, investments, and budget. Instead pull cloud as
+  // authoritative and merge only new local receipts in. Cancel aborts entirely.
   const neverSynced=syncMeta.lastPulledVersion===0&&syncMeta.version===0;
   if(neverSynced){
     let cloudCheck=null;
     try{cloudCheck=await fetchFromCloud();}catch(e){}
     if(cloudCheck&&(cloudCheck._hedgie||cloudCheck.data)&&(cloudCheck.version||0)>0){
-      const pullInstead=confirm(
-        'Cloud has existing data (v'+(cloudCheck.version||'?')+' by '+(cloudCheck.lastEditedBy||'someone')+').\n\n'+
-        'OK = Pull from cloud (your local data will be replaced)\n'+
-        'Cancel = Push local to cloud (cloud data will be overwritten)'
+      const doSync=confirm(
+        'Cloud already has data (v'+(cloudCheck.version||'?')+' by '+(cloudCheck.lastEditedBy||'someone')+').\n\n'+
+        'Hedgie will pull from cloud and add your new local entries to it.\n\n'+
+        'OK to sync — Cancel to abort (nothing will be changed)'
       );
-      if(pullInstead){
-        const vr=await verifyPayload(cloudCheck);
-        if(vr.ok){await applyPayloadAsync(cloudCheck);syncMeta.lastPulledAt=new Date().toISOString();saveSyncMeta();setGSB('cloud','Pulled from cloud','v'+(cloudCheck.version||'?'));}
-        else{setGSB('err','Signature mismatch — check shared key','',false);}
+      if(!doSync){
+        setGSB('warn','Sync cancelled — pull from cloud before adding new data','',false);
         if(btn){btn.style.opacity='1';btn.style.pointerEvents='';}
         return;
       }
-      // User chose to push local — fall through
+      const vr=await verifyPayload(cloudCheck);
+      if(!vr.ok){setGSB('err','Signature mismatch — check shared key','',false);if(btn){btn.style.opacity='1';btn.style.pointerEvents='';}return;}
+      let plainCloud;try{plainCloud=await toPlainPayload(cloudCheck);}catch(e){setGSB('err',e.message,'',false);if(btn){btn.style.opacity='1';btn.style.pointerEvents='';}return;}
+      const localSnap={version:syncMeta.version,data:{categories,income,expenses,receipts,vendors,archives,recurringBills,financing,savingsGoals,investments}};
+      if(budgetChanged(localSnap,plainCloud)){
+        pendingCloudData=plainCloud;showConflictModal(plainCloud);updateSyncStatus('conflict');
+        if(btn){btn.style.opacity='1';btn.style.pointerEvents='';}
+        return;
+      }
+      const merged=firstSyncMerge(localSnap,plainCloud);
+      merged.signature=await signPayload(merged);
+      await pushToCloud(merged);
+      await applyPayloadAsync(merged);
+      syncMeta.lastPushedAt=new Date().toISOString();syncMeta.lastSyncedAt=new Date().toISOString();saveSyncMeta();
+      setGSB('cloud','First sync — cloud merged with local entries','just now');renderSyncTimestamps();
+      if(btn){btn.style.opacity='1';btn.style.pointerEvents='';}
+      return;
     }
   }
 
@@ -1683,8 +1700,10 @@ async function quickSync(){
       if(btn){btn.style.opacity='1';btn.style.pointerEvents='';}
       return;
     } else if(cloudAhead){
-      // Cloud ahead, no budget conflict — merge receipts
-      resolved=mergePayloads(localPayload,cloud);
+      // Cloud ahead, no budget conflict — merge receipts.
+      // Use cloud-first merge if we've never pulled, to protect cloud's recurringBills,
+      // financing, savingsGoals, and investments from being overwritten by empty local state.
+      resolved=neverSynced?firstSyncMerge(localPayload,cloud):mergePayloads(localPayload,cloud);
     } else {
       // Local same or ahead — push local
       resolved=await buildPayload();
@@ -1754,6 +1773,12 @@ function triggerAutosave(source){
       const localHasData=totalIncome()>0||receipts.length>0||totalExpMo()>0;
       if(!localHasData){
         setGSB('idle','',''); // no data, nothing to save
+        return;
+      }
+      // Block autosave push until we've established what's in cloud — pushing first would
+      // overwrite cloud data with an empty local session.
+      if(syncMeta.lastPulledVersion===0&&syncMeta.version===0){
+        setGSB('warn','Saved locally — sync first to back up to cloud','');
         return;
       }
       try{
@@ -1880,6 +1905,26 @@ function mergePayloads(local,cloud){
   return {...local,version:Math.max(local.version,cloud.version)+1,lastEditedBy:settings.username||'Unknown',lastEditedAt:new Date().toISOString(),data:{...local.data,receipts:merged,vendors:{...(cd.vendors||{}),...(local.data.vendors||{})},archives:mergedArc,categories:mergedCats}};
 }
 
+function firstSyncMerge(local,cloud){
+  // Cloud-first merge for neverSynced state: cloud is authoritative for ALL fields.
+  // Only local receipts/vendors not already in cloud are added. This prevents an empty
+  // local session from overwriting cloud's recurringBills, financing, savingsGoals,
+  // investments, and budget with blank values.
+  const cd=cloud.data||{};
+  const allIds=new Set([...(cd.receipts||[]).map(r=>r.id),...(local.data.receipts||[]).map(r=>r.id)]);
+  const cb=Object.fromEntries((cd.receipts||[]).map(r=>[r.id,r]));
+  const lb=Object.fromEntries((local.data.receipts||[]).map(r=>[r.id,r]));
+  const merged=Array.from(allIds).map(id=>cb[id]||lb[id]);
+  merged.sort((a,b)=>b.date.localeCompare(a.date));
+  return {
+    ...cloud,
+    version:(cloud.version||0)+1,
+    lastEditedBy:settings.username||'Unknown',
+    lastEditedAt:new Date().toISOString(),
+    data:{...cd,receipts:merged,vendors:{...(cd.vendors||{}),...(local.data.vendors||{})}}
+  };
+}
+
 function budgetChanged(local,cloud){
   const cd=cloud.data||{};
   return JSON.stringify({i:local.data.income,e:local.data.expenses,cat:local.data.categories})!==JSON.stringify({i:cd.income,e:cd.expenses,cat:cd.categories});
@@ -1958,8 +2003,11 @@ async function cloudPull(){
     const isFirstSync=syncMeta.lastPulledVersion===0&&syncMeta.version===0;
     if(cloudVer>(syncMeta.lastPulledVersion||0)){
       if(isFirstSync){
-        // First ever sync — just take cloud, no conflict needed
-        await applyPayloadAsync(plainCloud);
+        // First pull — cloud is authoritative, but rescue any local receipts entered
+        // before this pull so they aren't silently dropped.
+        const localSnap={version:syncMeta.version,data:{categories,income,expenses,receipts,vendors,archives,recurringBills,financing,savingsGoals,investments}};
+        const payloadToApply=(receipts&&receipts.length>0)?firstSyncMerge(localSnap,plainCloud):plainCloud;
+        await applyPayloadAsync(payloadToApply);
         updateSyncStatus('ok','First sync complete · '+fmtAgo(cloud.lastEditedAt));
         syncMeta.lastPulledAt=new Date().toISOString();saveSyncMeta();setGSB('cloud','First sync complete','by '+(cloud.lastEditedBy||'someone'));renderSyncTimestamps();
       } else if(budgetChanged(localPayload,plainCloud)){
@@ -1986,7 +2034,8 @@ async function cloudPush(){
         const localPayload={version:syncMeta.version,data:{categories,income,expenses,receipts,vendors,archives,recurringBills,financing,savingsGoals,investments}};
         let plainCloud2;try{plainCloud2=await toPlainPayload(cloud);}catch(e){updateSyncStatus('err',e.message);setGSB('err',e.message,'',true);return;}
         if(budgetChanged(localPayload,plainCloud2)){pendingCloudData=plainCloud2;showConflictModal(plainCloud2);updateSyncStatus('conflict');return;}
-        const merged=mergePayloads(localPayload,plainCloud2);
+        const neverSyncedPush=syncMeta.lastPulledVersion===0&&syncMeta.version===0;
+        const merged=neverSyncedPush?firstSyncMerge(localPayload,plainCloud2):mergePayloads(localPayload,plainCloud2);
         await pushToCloud(merged);await applyPayloadAsync(merged);updateSyncStatus('ok','Merged and pushed');setGSB('cloud','Synced to cloud — receipts merged','');return;
       }
     }
