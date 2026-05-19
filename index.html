@@ -1705,7 +1705,13 @@ async function quickSync(){
       // financing, savingsGoals, and investments from being overwritten by empty local state.
       resolved=neverSynced?firstSyncMerge(localPayload,cloud):mergePayloads(localPayload,cloud);
     } else {
-      // Local same or ahead — push local
+      // Local same or ahead — push local, but block if session looks blank to avoid
+      // overwriting real cloud data with an accidentally-empty local state.
+      if(localLooksBlank()){
+        setGSB('warn','No budget data — pull from cloud to verify before pushing','',false);
+        if(btn){btn.style.opacity='1';btn.style.pointerEvents='';}
+        return;
+      }
       resolved=await buildPayload();
     }
 
@@ -1779,6 +1785,12 @@ function triggerAutosave(source){
       // overwrite cloud data with an empty local session.
       if(syncMeta.lastPulledVersion===0&&syncMeta.version===0){
         setGSB('warn','Saved locally — sync first to back up to cloud','');
+        return;
+      }
+      // Also block if local has no budget data and very few receipts — this session looks
+      // blank and could overwrite real cloud data even when syncMeta shows a prior sync.
+      if(localLooksBlank()){
+        setGSB('warn','Saved locally — no budget data, sync manually to verify','');
         return;
       }
       try{
@@ -1905,6 +1917,14 @@ function mergePayloads(local,cloud){
   return {...local,version:Math.max(local.version,cloud.version)+1,lastEditedBy:settings.username||'Unknown',lastEditedAt:new Date().toISOString(),data:{...local.data,receipts:merged,vendors:{...(cd.vendors||{}),...(local.data.vendors||{})},archives:mergedArc,categories:mergedCats}};
 }
 
+function localLooksBlank(){
+  // No income + no expense budget + very few receipts = essentially a fresh/empty session.
+  // Used to block pushes that would silently overwrite real cloud data with a blank slate,
+  // even when the neverSynced flag is clear (e.g. syncMeta persisted from a previous session
+  // but local data did not).
+  return totalIncome()===0 && totalExpMo()===0 && receipts.length < 5;
+}
+
 function firstSyncMerge(local,cloud){
   // Cloud-first merge for neverSynced state: cloud is authoritative for ALL fields.
   // Only local receipts/vendors not already in cloud are added. This prevents an empty
@@ -1979,6 +1999,11 @@ async function cloudPushSilent(){
     // Never synced this session — skip autosave push to avoid overwriting real cloud data
     throw new Error('No pull yet this session — use manual Push after reviewing data');
   }
+  // Block if local has no budget and very few receipts — looks like a blank session that
+  // could overwrite real cloud data even when syncMeta shows a prior sync.
+  if(localLooksBlank()){
+    throw new Error('Local data looks blank — sync manually to verify before pushing');
+  }
   const payload=await buildPayload();
   await pushToCloud(payload);
   syncMeta.version=payload.version;syncMeta.lastEditedBy=payload.lastEditedBy;syncMeta.lastEditedAt=payload.lastEditedAt;syncMeta.lastPulledVersion=payload.version;
@@ -2038,6 +2063,13 @@ async function cloudPush(){
         const merged=neverSyncedPush?firstSyncMerge(localPayload,plainCloud2):mergePayloads(localPayload,plainCloud2);
         await pushToCloud(merged);await applyPayloadAsync(merged);updateSyncStatus('ok','Merged and pushed');setGSB('cloud','Synced to cloud — receipts merged','');return;
       }
+    }
+    // Block plain push if local looks blank and cloud had a real hedgie payload — local
+    // may be an accidentally-empty session that would overwrite real cloud data.
+    if(cloud&&cloud._hedgie&&localLooksBlank()){
+      updateSyncStatus('warn','Local data looks blank');
+      setGSB('warn','No budget data — pull from cloud to verify before pushing','',false);
+      return;
     }
     const payload=await buildPayload();
     await pushToCloud(payload);
