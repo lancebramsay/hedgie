@@ -18,6 +18,18 @@ code paths are now protected:
 - **`cloudPull` first sync** — Rescues local receipts entered before first pull instead of replacing all local data with cloud.
 - **Autosave** — Now shows "Saved locally — sync first to back up to cloud" instead of the misleading "cloud unreachable" message when push is intentionally blocked.
 
+### Fix: blank-session guard — no budget data can never overwrite cloud
+
+A session with no income, no expense budget, and fewer than 5 receipts is now treated
+as blank and blocked from pushing to cloud across all paths — even when syncMeta shows
+a prior sync (e.g. metadata persisted from a previous session but local data did not):
+
+- **`localLooksBlank` (new helper)** — `totalIncome()===0 && totalExpMo()===0 && receipts.length < 5`
+- **Autosave** — blocked with "no budget data, sync manually to verify"
+- **`cloudPushSilent`** — throws as a second line of defence
+- **`quickSync` local-ahead path** — blocked before building payload
+- **`cloudPush` plain-push path** — blocked when cloud has a real hedgie payload
+
 ---
 
 ## [2.5.7] — 2026-05-11
