@@ -4,6 +4,35 @@ All notable changes to Open Hedgie are documented here.
 
 ---
 
+## [2.5.9] — 2026-05-19
+
+### Feature: auto-pull on startup when session is blank
+
+If a sync provider is configured and the local session contains no budget data, the app
+now silently pulls from cloud on startup — no button press required:
+
+- **`autoStartupSync` (new IIFE)** — runs after `loadSyncMeta` at init time; fires only
+  when `budgetWeight() === 0` and a provider is configured
+- Signature mismatch and decrypt failures surface as sync-bar warnings rather than silent
+  skips, so the user knows to check their shared key
+- Network failures produce a soft "Could not reach cloud on startup" warning and do not
+  interrupt the session
+
+### Improvement: holistic budget weight replaces binary blank check
+
+`localLooksBlank` previously used a coarse AND gate (`totalIncome===0 && totalExpMo===0 &&
+receipts<5`) that ignored Den data. All sync guards now use a numeric scorer:
+
+- **`budgetWeight` (new helper)** — income sources ×20, expense lines ×5, receipts ×1
+  (capped at 50), plus recurringBills/financing/savingsGoals ×3 and investments ×2
+- **`localLooksBlank`** — now returns `budgetWeight() < 15`, requiring at least one income
+  source, three expense lines, or fifteen receipts before a push is allowed
+- **`localHasData`** (inline in `triggerAutosave`, `cloudPushSilent`, `quickSync`) — unified
+  to `budgetWeight() > 0`; eliminates three duplicated inline OR expressions
+- **`beforeunload` guard** — updated to `budgetWeight()` for consistency
+
+---
+
 ## [2.5.8] — 2026-05-18
 
 ### Fix: first-sync guard — local data can no longer overwrite cloud

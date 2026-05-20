@@ -358,7 +358,7 @@ body.dark.high-contrast{
       <ellipse cx="20" cy="48" rx="5" ry="3" fill="#c9a882"/>
       <ellipse cx="32" cy="49" rx="5" ry="3" fill="#c9a882"/>
     </svg>
-    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v2.5.8</div></div>
+    <div><div class="tab-logo-text">Hedgie</div><div class="tab-logo-sub">Open · v2.5.9</div></div>
   </div>
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('log')" id="tab-log">
@@ -709,7 +709,7 @@ body.dark.high-contrast{
 
     <!-- IDENTITY -->
     <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0 10px;border-bottom:1px solid var(--border-light);margin-bottom:8px">
-      <span style="font-size:12px;color:var(--text-faint)">Open Hedgie · v2.5.8</span>
+      <span style="font-size:12px;color:var(--text-faint)">Open Hedgie · v2.5.9</span>
       <div style="display:flex;align-items:center;gap:12px">
         <a href="https://github.com/lancebramsay/hedgie/wiki" target="_blank" style="font-size:12px;color:var(--brown-light);text-decoration:none">&#128214; Wiki &#8594;</a>
         <a href="https://github.com/lancebramsay/hedgie" target="_blank" style="font-size:12px;color:var(--brown-light);text-decoration:none">GitHub &#8594;</a>
@@ -1610,7 +1610,7 @@ async function quickSync(){
   setGSB('saving','Syncing…','');
 
   // ── Guard 1: never push if local data is empty ──
-  const localHasData=totalIncome()>0||receipts.length>0||totalExpMo()>0;
+  const localHasData=budgetWeight()>0;
   if(!localHasData){
     try{
       const cloud=await fetchFromCloud();
@@ -1776,7 +1776,7 @@ function triggerAutosave(source){
     if(settings.provider!=='none'){
       // Never push to cloud if there is no real data — protects against preference-only
       // changes (dark mode, PWA install) overwriting a real cloud payload on a blank session
-      const localHasData=totalIncome()>0||receipts.length>0||totalExpMo()>0;
+      const localHasData=budgetWeight()>0;
       if(!localHasData){
         setGSB('idle','',''); // no data, nothing to save
         return;
@@ -1917,12 +1917,26 @@ function mergePayloads(local,cloud){
   return {...local,version:Math.max(local.version,cloud.version)+1,lastEditedBy:settings.username||'Unknown',lastEditedAt:new Date().toISOString(),data:{...local.data,receipts:merged,vendors:{...(cd.vendors||{}),...(local.data.vendors||{})},archives:mergedArc,categories:mergedCats}};
 }
 
+function budgetWeight(){
+  // Numeric measure of how populated the local session is across all data collections.
+  // Income/expense lines (intentional setup) carry the most weight; receipts and Den
+  // features are secondary signals. Used by localLooksBlank and the startup auto-pull.
+  const incomeItems=income.filter(i=>(i.a||0)>0).length;
+  const expItems=Object.values(expenses).reduce((s,arr)=>s+arr.filter(e=>(e.a||0)>0).length,0);
+  return(
+    incomeItems*20+
+    expItems*5+
+    Math.min(receipts.length,50)+
+    recurringBills.length*3+
+    financing.length*3+
+    savingsGoals.length*3+
+    investments.length*2
+  );
+}
+
 function localLooksBlank(){
-  // No income + no expense budget + very few receipts = essentially a fresh/empty session.
-  // Used to block pushes that would silently overwrite real cloud data with a blank slate,
-  // even when the neverSynced flag is clear (e.g. syncMeta persisted from a previous session
-  // but local data did not).
-  return totalIncome()===0 && totalExpMo()===0 && receipts.length < 5;
+  // A session scoring below 15 has no meaningful budget setup and must not push to cloud.
+  return budgetWeight()<15;
 }
 
 function firstSyncMerge(local,cloud){
@@ -1992,7 +2006,7 @@ async function pushToCloud(payload){
 
 async function cloudPushSilent(){
   // Hard guard: never push if local data is empty — would overwrite real cloud data
-  const localHasData=totalIncome()>0||receipts.length>0||totalExpMo()>0;
+  const localHasData=budgetWeight()>0;
   if(!localHasData)throw new Error('No local data — push skipped to protect cloud');
   // Safety check — if cloud is ahead of what we last pulled, don't silently overwrite
   if(syncMeta.lastPulledVersion===0&&syncMeta.version===0){
@@ -5103,6 +5117,25 @@ applyHighContrast();
 applyDenPreview();
 checkIosInstallBanner(); // show iOS install banner if on iOS Safari without standalone mode
 loadSyncMeta();
+(async function autoStartupSync(){
+  if(settings.provider==='none')return;
+  if(budgetWeight()>0)return;
+  try{
+    const cloud=await fetchFromCloud();
+    if(!cloud||!cloud._hedgie)return;
+    const vr=await verifyPayload(cloud);
+    if(!vr.ok){setGSB('warn','Cloud signature mismatch — check shared key in Settings','',false);return;}
+    let plain;try{plain=await toPlainPayload(cloud);}catch(e){setGSB('warn','Could not decrypt cloud data on startup','',false);return;}
+    await applyPayloadAsync(plain);
+    syncMeta.lastPulledAt=new Date().toISOString();
+    syncMeta.lastPulledVersion=plain.version||0;
+    saveSyncMeta();
+    setGSB('cloud','Restored from cloud','v'+(plain.version||'?'));
+    renderSyncTimestamps();
+  }catch(e){
+    setGSB('warn','Could not reach cloud on startup','');
+  }
+})();
 processRecurringBills();
 updateSyncStatus('idle'); // seed GSB with correct local/cloud state
 buildNotifications(); // runs after settings and syncMeta loaded
@@ -5111,7 +5144,7 @@ renderDonateBtns();
 setInterval(()=>{buildNotifications();if(notifPanelOpen)renderNotifList();}, 5*60*1000);
 window.addEventListener('beforeunload',e=>{
   if(settings.provider!=='none')return;
-  if(!(receipts.length>0||totalIncome()>0||totalExpMo()>0))return;
+  if(!budgetWeight())return;
   e.preventDefault();
   return e.returnValue='';
 });
