@@ -1,6 +1,6 @@
 ﻿# 🦔 Open Hedgie — User Guide
 
-> Version 2.5.0 · A single-file household budget planner. No server, no install, no dependencies.
+> Version 2.5.9 · A single-file household budget planner. No server, no install, no dependencies.
 
 Full documentation is available on the [GitHub Wiki](https://github.com/lancebramsay/hedgie/wiki).
 
